@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ZIVR — Close Faster. Sell Smarter.</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06070A;--bg2:#0A0C10;--card:#0F1115;--card2:#141719;
+  --b:rgba(255,255,255,0.07);--b2:rgba(255,255,255,0.13);
+  --t:#EFF2F7;--t2:#7A8290;--t3:#3E4550;
+  --g:#00E676;--g2:#00C853;--gbg:rgba(0,230,118,0.08);--gglow:rgba(0,230,118,0.18);
+  --red:#FF4757;--rbg:rgba(255,71,87,0.1);
+  --blue:#29B6F6;--bbg:rgba(41,182,246,0.1);
+  --orange:#FFA726;--obg:rgba(255,167,38,0.1);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;overflow-x:hidden;font-size:14px}
+
+/* ── PREMIUM EFFECTS */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.55}
+
+/* Scan line effect */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9998}
+
+/* Animated green top border on hover cards */
+.how-item,.feat-item,.price-item,.testi-item{position:relative;overflow:hidden}
+.how-item::after,.feat-item::after,.price-item::after,.testi-item::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,230,118,.03) 0%,transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}
+.how-item:hover::after,.feat-item:hover::after,.price-item:hover::after,.testi-item:hover::after{opacity:1}
+
+/* Glowing green line on top of hot cards */
+.script-box.hot,.price-item.hot,.call-banner{position:relative}
+.price-item.hot::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g),transparent);animation:glowline 3s ease infinite}
+@keyframes glowline{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* Floating orb animation */
+.hero-orb{animation:orbpulse 6s ease-in-out infinite}
+.hero-orb2{animation:orbpulse 8s ease-in-out infinite reverse}
+@keyframes orbpulse{0%,100%{transform:translateX(-50%) scale(1);opacity:.7}50%{transform:translateX(-50%) scale(1.12);opacity:1}}
+
+/* Green glow on active/focused inputs */
+.finput:focus,.sinput:focus,.ai-in:focus,.cf-inp:focus,.cf-ta:focus{box-shadow:0 0 0 2px rgba(0,230,118,.12)}
+
+/* Animated underline on nav links */
+.nav-lnk{position:relative}
+.nav-lnk::after{content:'';position:absolute;left:0;bottom:-2px;width:0;height:1px;background:var(--g);transition:width .25s ease}
+.nav-lnk:hover::after{width:100%}
+
+/* Shimmer on primary buttons */
+.btn-g,.btn-green,.sadd,.pbtn.solid,.la-btn.g{position:relative;overflow:hidden}
+.btn-g::before,.btn-green::before,.sadd::before,.pbtn.solid::before,.la-btn.g::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transition:left .5s ease;pointer-events:none}
+.btn-g:hover::before,.btn-green:hover::before,.sadd:hover::before,.pbtn.solid:hover::before,.la-btn.g:hover::before{left:140%}
+
+/* Stat cards glow on hover */
+.stat-c.g:hover{box-shadow:inset 0 0 24px rgba(0,230,118,.06)}
+.stat-c.b:hover{box-shadow:inset 0 0 24px rgba(41,182,246,.06)}
+.stat-c.o:hover{box-shadow:inset 0 0 24px rgba(255,167,38,.06)}
+
+/* Lead card left border on hover */
+.lcard:hover{border-left:2px solid var(--g);padding-left:12px}
+
+/* Pulse ring on live call dot */
+.cb-dot::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid var(--g);animation:ring 1.5s ease infinite;opacity:0}
+.call-banner .cb-dot{position:relative}
+@keyframes ring{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.2);opacity:0}}
+
+/* Hero stat number count-up glow */
+.hero-stat-n{text-shadow:0 0 30px rgba(0,230,118,.3)}
+
+/* Section eyebrow bar animation */
+.sec-ey-bar{position:relative;overflow:hidden}
+.sec-ey-bar::after{content:'';position:absolute;left:-100%;top:0;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:barshine 3s ease infinite}
+@keyframes barshine{0%{left:-100%}50%,100%{left:100%}}
+
+/* Logo mark pulse */
+.nav-logo-mark,.app-logo-mark,.footer-logo-mark,.auth-logo-mark,.ob-logo-mark{transition:box-shadow .3s}
+.nav-logo-mark:hover,.app-logo-mark:hover{box-shadow:0 0 28px var(--gglow),0 0 56px rgba(0,230,118,.1)}
+
+/* Grid lines animation */
+.hero-grid-lines{animation:gridfade 4s ease-in forwards}
+@keyframes gridfade{from{opacity:0}to{opacity:1}}
+
+/* Smooth card entrance */
+@keyframes cardin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.lcard,.gen-lead,.rlog,.card,.admin-row{animation:cardin .3s ease both}
+
+/* ── LOADING */
+#loading{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.ld-mark{display:flex;align-items:center;gap:10px}
+.ld-icon{width:38px;height:38px;background:var(--g);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.ld-icon svg{width:20px;height:20px;fill:#000}
+.ld-name{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:.04em}
+.ld-bar{width:80px;height:1px;background:var(--b2);overflow:hidden;margin-top:4px}
+.ld-fill{height:100%;background:var(--g);animation:ldf 1.6s ease forwards}
+@keyframes ldf{from{width:0}to{width:100%}}
+
+/* ── LANDING */
+#landing{display:none}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:500;padding:20px 48px;display:flex;align-items:center;justify-content:space-between;transition:all .3s}
+.nav.stuck{background:rgba(6,7,10,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--b);padding:14px 48px}
+.nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none}
+.nav-logo-mark{width:32px;height:32px;background:var(--g);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px var(--gglow)}
+.nav-logo-mark svg{width:17px;height:17px;fill:#000}
+.nav-logo-name{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:.04em}
+.nav-center{display:flex;align-items:center;gap:32px}
+.nav-lnk{color:var(--t2);font-size:13px;text-decoration:none;transition:color .2s;cursor:pointer}
+.nav-lnk:hover{color:var(--t)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.lang-sw{display:flex;gap:1px;background:var(--b);border-radius:4px;overflow:hidden;margin-right:8px}
+.lang-sw button{padding:5px 10px;border:none;background:var(--bg2);color:var(--t3);font-size:10px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.08em;transition:all .2s}
+.lang-sw button.on{background:var(--card2);color:var(--g)}
+.nav-login{padding:8px 18px;background:none;color:var(--t2);border:1px solid var(--b2);border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.nav-login:hover{color:var(--t);border-color:rgba(255,255,255,.2)}
+.nav-cta{padding:8px 18px;background:var(--g);color:#000;border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;box-shadow:0 0 20px var(--gglow)}
+.nav-cta:hover{background:var(--g2);box-shadow:0 0 32px var(--gglow)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 20px 80px;position:relative;overflow:hidden}
+.hero-orb{position:absolute;top:10%;left:50%;transform:translateX(-50%);width:700px;height:700px;background:radial-gradient(ellipse,rgba(0,230,118,.06) 0%,transparent 65%);pointer-events:none}
+.hero-orb2{position:absolute;bottom:-100px;left:10%;width:400px;height:400px;background:radial-gradient(ellipse,rgba(0,200,83,.04) 0%,transparent 65%);pointer-events:none}
+.hero-grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(0,230,118,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,230,118,.025) 1px,transparent 1px);background-size:80px 80px;pointer-events:none}
+.hero-inner{position:relative;z-index:1;max-width:860px}
+.hero-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.18);border-radius:20px;padding:6px 16px;font-size:11px;font-weight:700;color:var(--g);letter-spacing:.1em;margin-bottom:30px;text-transform:uppercase}
+.hero-pill-dot{width:5px;height:5px;background:var(--g);border-radius:50%;animation:gdot 1.5s infinite}
+@keyframes gdot{0%,100%{opacity:1}50%{opacity:.2}}
+.hero-h1{font-family:'Syne',sans-serif;font-size:clamp(48px,8.5vw,90px);font-weight:800;line-height:1;letter-spacing:-.025em;margin-bottom:22px}
+.hero-h1 .line1{display:block;color:var(--t)}
+.hero-h1 .line2{display:block;color:var(--g);position:relative}
+.hero-h1 .line2::after{content:'';position:absolute;left:0;right:0;bottom:-6px;height:1px;background:linear-gradient(90deg,transparent,var(--g),transparent)}
+.hero-sub{font-size:clamp(16px,2.2vw,19px);color:var(--t2);max-width:580px;margin:0 auto 44px;line-height:1.75;font-weight:300}
+.hero-sub strong{color:var(--t);font-weight:500}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:64px}
+.btn-g{padding:15px 36px;background:var(--g);color:#000;border:none;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .25s;box-shadow:0 0 32px rgba(0,230,118,.25)}
+.btn-g:hover{background:var(--g2);box-shadow:0 0 48px rgba(0,230,118,.4);transform:translateY(-1px)}
+.btn-out{padding:15px 36px;background:none;color:var(--t2);border:1px solid var(--b2);border-radius:4px;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .25s}
+.btn-out:hover{color:var(--t);border-color:rgba(255,255,255,.22)}
+.hero-stats{display:flex;gap:52px;justify-content:center;border-top:1px solid var(--b);padding-top:44px;flex-wrap:wrap}
+.hero-stat-n{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--g);line-height:1;margin-bottom:5px}
+.hero-stat-l{font-size:10px;color:var(--t3);letter-spacing:.12em;text-transform:uppercase}
+
+/* SECTIONS */
+section{padding:96px 48px}
+.sec-wrap{max-width:1140px;margin:0 auto}
+.sec-ey{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.sec-ey-bar{width:24px;height:1px;background:var(--g)}
+.sec-ey-txt{font-size:10px;font-weight:700;color:var(--g);letter-spacing:.2em;text-transform:uppercase}
+.sec-h2{font-family:'Syne',sans-serif;font-size:clamp(30px,4vw,50px);font-weight:800;line-height:1.08;letter-spacing:-.02em;margin-bottom:14px}
+.sec-sub{font-size:15px;color:var(--t2);font-weight:300;line-height:1.75;max-width:500px}
+
+/* HOW */
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b);margin-top:56px}
+.how-item{background:var(--bg);padding:40px 32px;position:relative;overflow:hidden;transition:background .25s}
+.how-item:hover{background:var(--bg2)}
+.how-item::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:0;transition:opacity .3s}
+.how-item:hover::before{opacity:1}
+.how-num{font-family:'Syne',sans-serif;font-size:60px;font-weight:800;color:rgba(0,230,118,.06);line-height:1;margin-bottom:20px}
+.how-title{font-size:16px;font-weight:700;margin-bottom:10px;color:var(--t)}
+.how-desc{font-size:13px;color:var(--t2);line-height:1.8;font-weight:300}
+
+/* FEATURES */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b);margin-top:56px}
+.feat-item{background:var(--bg);padding:36px 28px;transition:background .25s;position:relative;overflow:hidden}
+.feat-item:hover{background:var(--bg2)}
+.feat-item.wide{grid-column:span 2}
+.feat-icon{width:46px;height:46px;background:var(--gbg);border:1px solid rgba(0,230,118,.18);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:18px}
+.feat-label{font-size:10px;color:var(--t3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.feat-title{font-size:16px;font-weight:700;margin-bottom:9px;color:var(--t);line-height:1.3}
+.feat-desc{font-size:13px;color:var(--t2);line-height:1.8;font-weight:300}
+.feat-tag{display:inline-block;margin-top:14px;padding:3px 10px;border:1px solid var(--b2);font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+
+/* PRICING */
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b);margin-top:56px}
+.price-item{background:var(--bg);padding:44px 36px;transition:background .25s}
+.price-item:hover{background:var(--bg2)}
+.price-item.hot{background:var(--card);border:1px solid rgba(0,230,118,.2)}
+.price-plan{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+.price-name{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:24px;color:var(--t)}
+.price-amount{font-family:'Syne',sans-serif;font-size:50px;font-weight:800;color:var(--g);line-height:1;margin-bottom:4px}
+.price-per{font-size:12px;color:var(--t3);margin-bottom:30px}
+.price-feats{list-style:none;margin-bottom:30px}
+.price-feats li{font-size:13px;color:var(--t2);padding:8px 0;border-bottom:1px solid var(--b);display:flex;gap:10px;font-weight:300}
+.price-feats li:last-child{border:none}
+.price-feats li::before{content:'—';color:var(--g);flex-shrink:0}
+.price-feats li.off{opacity:.3}
+.price-feats li.off::before{color:var(--t3)}
+.pbtn{width:100%;padding:13px;background:none;color:var(--t2);border:1px solid var(--b2);border-radius:2px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.pbtn:hover{border-color:var(--g);color:var(--g)}
+.pbtn.solid{background:var(--g);color:#000;border-color:var(--g)}
+.pbtn.solid:hover{background:var(--g2);border-color:var(--g2)}
+
+/* TESTI */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b);margin-top:56px}
+.testi-item{background:var(--bg);padding:34px 28px;transition:background .25s}
+.testi-item:hover{background:var(--bg2)}
+.testi-stars{color:var(--g);font-size:13px;margin-bottom:16px;letter-spacing:2px}
+.testi-text{font-size:14px;color:var(--t2);line-height:1.8;margin-bottom:22px;font-style:italic}
+.testi-name{font-size:13px;font-weight:700;color:var(--t);margin-bottom:3px}
+.testi-role{font-size:11px;color:var(--t3)}
+
+/* CTA */
+.cta-sec{border-top:1px solid var(--b);border-bottom:1px solid var(--b);padding:100px 48px;text-align:center;position:relative;overflow:hidden}
+.cta-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(0,230,118,.05) 0%,transparent 65%);pointer-events:none}
+
+/* FOOTER */
+.site-footer{padding:32px 48px;border-top:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.footer-logo{display:flex;align-items:center;gap:8px;cursor:pointer}
+.footer-logo-mark{width:22px;height:22px;background:var(--g);border-radius:5px;display:flex;align-items:center;justify-content:center}
+.footer-logo-mark svg{width:12px;height:12px;fill:#000}
+.footer-logo-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:800}
+.footer-links{display:flex;gap:20px}
+.footer-lnk{font-size:12px;color:var(--t3);cursor:pointer;transition:color .2s}
+.footer-lnk:hover{color:var(--t)}
+.footer-copy{font-size:12px;color:var(--t3)}
+
+/* ── STATIC PAGES */
+#staticPage{display:none;position:fixed;inset:0;background:var(--bg);z-index:700;overflow-y:auto}
+.sp-nav{position:sticky;top:0;background:rgba(6,7,10,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--b);padding:14px 48px;display:flex;align-items:center;justify-content:space-between}
+.sp-logo{display:flex;align-items:center;gap:8px;cursor:pointer}
+.sp-logo-mark{width:24px;height:24px;background:var(--g);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.sp-logo-mark svg{width:13px;height:13px;fill:#000}
+.sp-logo-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:800}
+.sp-back{padding:7px 14px;background:none;color:var(--t2);border:1px solid var(--b2);border-radius:3px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.sp-back:hover{color:var(--t)}
+.sp-body{max-width:720px;margin:0 auto;padding:60px 48px 100px;font-family:'DM Sans',sans-serif}
+.sp-h1{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--t);margin-bottom:8px}
+.sp-updated{font-size:12px;color:var(--t3);margin-bottom:44px}
+.sp-body h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--t);margin:32px 0 10px}
+.sp-body p{font-size:14px;color:var(--t2);line-height:1.85;font-weight:300;margin-bottom:14px}
+.sp-body ul{list-style:none;margin-bottom:14px}
+.sp-body ul li{font-size:14px;color:var(--t2);line-height:1.85;font-weight:300;padding:4px 0 4px 18px;position:relative}
+.sp-body ul li::before{content:'—';position:absolute;left:0;color:var(--g)}
+.cf-row{margin-bottom:14px}
+.cf-lbl{display:block;font-size:10px;font-weight:700;color:var(--t3);margin-bottom:5px;letter-spacing:.12em;text-transform:uppercase}
+.cf-inp{width:100%;padding:12px 14px;background:var(--card);border:1px solid var(--b2);border-radius:3px;color:var(--t);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+.cf-inp:focus{border-color:var(--g)}
+.cf-inp::placeholder{color:var(--t3)}
+.cf-ta{width:100%;padding:12px 14px;background:var(--card);border:1px solid var(--b2);border-radius:3px;color:var(--t);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:130px;transition:border-color .2s}
+.cf-ta:focus{border-color:var(--g)}
+.cf-sub{padding:13px 28px;background:var(--g);color:#000;border:none;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.cf-sub:hover{background:var(--g2)}
+.cf-ok{display:none;background:var(--gbg);border:1px solid rgba(0,230,118,.2);border-radius:3px;padding:12px 14px;font-size:13px;color:var(--g);margin-top:14px}
+
+/* ── AUTH */
+#authScreen{display:none;position:fixed;inset:0;background:rgba(6,7,10,.92);z-index:800;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
+#authScreen.on{display:flex}
+.auth-wrap{width:100%;max-width:380px;position:relative;background:var(--card);border:1px solid var(--b2);padding:32px 28px;border-radius:4px}
+.auth-close{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer;padding:6px;transition:color .2s;line-height:1;z-index:1}
+.auth-close:hover{color:var(--t)}
+.auth-logo-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px}
+.auth-logo-mark{width:36px;height:36px;background:var(--g);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px var(--gglow)}
+.auth-logo-mark svg{width:20px;height:20px;fill:#000}
+.auth-logo-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:800}
+.auth-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:5px}
+.auth-sub{color:var(--t2);font-size:13px;margin-bottom:22px;font-weight:300}
+.auth-err{background:var(--rbg);border:1px solid rgba(255,71,87,.2);border-radius:3px;padding:10px 12px;font-size:12px;color:var(--red);margin-bottom:12px;display:none}
+.auth-ok{background:var(--gbg);border:1px solid rgba(0,230,118,.2);border-radius:3px;padding:10px 12px;font-size:12px;color:var(--g);margin-bottom:12px;display:none}
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:10px;font-weight:700;color:var(--t3);margin-bottom:5px;letter-spacing:.12em;text-transform:uppercase}
+.fld input{width:100%;padding:12px 13px;background:var(--bg2);border:1px solid var(--b2);border-radius:3px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.fld input:focus{border-color:var(--g)}
+.fld input::placeholder{color:var(--t3)}
+.btn-green{width:100%;padding:13px;background:var(--g);color:#000;border:none;border-radius:3px;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;box-shadow:0 0 20px var(--gglow)}
+.btn-green:hover{background:var(--g2)}
+.btn-green:disabled{opacity:.5;cursor:not-allowed}
+.auth-switch{text-align:center;margin-top:14px;font-size:12px;color:var(--t3)}
+.auth-switch a{color:var(--g);cursor:pointer}
+
+/* ── ONBOARDING */
+#onboarding{display:none;position:fixed;inset:0;background:var(--bg);z-index:850;overflow-y:auto}
+.ob-wrap{max-width:560px;margin:0 auto;padding:60px 20px 100px}
+.ob-logo{display:flex;align-items:center;gap:10px;margin-bottom:44px}
+.ob-logo-mark{width:28px;height:28px;background:var(--g);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.ob-logo-mark svg{width:15px;height:15px;fill:#000}
+.ob-logo-name{font-family:'Syne',sans-serif;font-size:18px;font-weight:800}
+.ob-prog{display:flex;gap:4px;margin-bottom:48px}
+.ob-prog-dot{height:2px;flex:1;background:var(--b2);transition:background .3s}
+.ob-prog-dot.done{background:var(--g)}
+.ob-q{font-size:10px;font-weight:700;color:var(--g);letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px}
+.ob-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px;line-height:1.2;color:var(--t)}
+.ob-sub{color:var(--t2);font-size:14px;font-weight:300;margin-bottom:28px;line-height:1.6}
+.ob-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px}
+.ob-opt{padding:16px;background:var(--card);border:1px solid var(--b);border-radius:3px;cursor:pointer;transition:all .2s;text-align:left}
+.ob-opt:hover{border-color:var(--b2)}
+.ob-opt.on{border-color:var(--g);background:var(--gbg)}
+.ob-opt-icon{font-size:20px;margin-bottom:7px}
+.ob-opt-name{font-size:13px;font-weight:700;margin-bottom:2px;color:var(--t)}
+.ob-opt-desc{font-size:11px;color:var(--t3)}
+.ob-next{width:100%;padding:13px;background:var(--g);color:#000;border:none;border-radius:3px;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;box-shadow:0 0 18px var(--gglow)}
+.ob-next:hover{background:var(--g2)}
+.ob-skip{width:100%;padding:9px;background:none;color:var(--t3);border:none;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;transition:color .2s}
+.ob-skip:hover{color:var(--t2)}
+
+/* ── APP */
+#appScreen{display:none;flex-direction:column;min-height:100vh;position:fixed;inset:0;z-index:700;background:var(--bg);overflow-y:auto}
+#appScreen.on{display:flex}
+.app-top{background:rgba(6,7,10,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--b);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:300;flex-shrink:0}
+.app-logo{display:flex;align-items:center;gap:8px;cursor:pointer}
+.app-logo-mark{width:26px;height:26px;background:var(--g);border-radius:6px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--gglow)}
+.app-logo-mark svg{width:14px;height:14px;fill:#000}
+.app-logo-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:800}
+.app-right{display:flex;align-items:center;gap:8px}
+.plan-bdg{padding:3px 8px;border-radius:2px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.bdg-free{background:rgba(255,255,255,.05);color:var(--t3)}
+.bdg-pro{background:var(--bbg);color:var(--blue)}
+.bdg-agence{background:var(--gbg);color:var(--g)}
+.bdg-admin{background:rgba(168,85,247,.1);color:#A855F7}
+.app-av{width:28px;height:28px;border-radius:50%;background:var(--g);color:#000;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:'Syne',sans-serif;cursor:pointer;box-shadow:0 0 10px var(--gglow)}
+.app-out{padding:4px 10px;background:none;border:1px solid var(--b2);border-radius:2px;color:var(--t3);font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.app-out:hover{border-color:var(--red);color:var(--red)}
+.app-body{flex:1;padding:18px 14px 80px;max-width:700px;margin:0 auto;width:100%}
+.app-bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(6,7,10,.96);backdrop-filter:blur(18px);border-top:1px solid var(--b);display:flex;z-index:300;padding-bottom:env(safe-area-inset-bottom)}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px;border:none;background:none;cursor:pointer;gap:3px;font-family:'DM Sans',sans-serif;transition:all .2s;position:relative}
+.bni-icon{font-size:18px;transition:transform .2s}
+.bni-lbl{font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+.bni.on .bni-lbl{color:var(--g)}
+.bni.on .bni-icon{transform:translateY(-2px)}
+.bni.on::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--g)}
+.scr{display:none;animation:scrin .3s ease both}
+.scr.on{display:block}
+@keyframes scrin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ph{margin-bottom:16px}
+.ph-t{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:3px}
+.ph-s{color:var(--t2);font-size:13px;font-weight:300}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b);margin-bottom:16px}
+.stat-c{background:var(--card);padding:14px 12px}
+.stat-v{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1}
+.stat-c.g .stat-v{color:var(--g)}.stat-c.b .stat-v{color:var(--blue)}.stat-c.o .stat-v{color:var(--orange)}
+.stat-l{font-size:9px;color:var(--t3);margin-top:3px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.card{background:var(--card);border:1px solid var(--b);padding:15px;margin-bottom:9px;border-radius:2px}
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:2px;letter-spacing:.06em;text-transform:uppercase}
+.bdg-g{background:var(--gbg);color:var(--g)}.bdg-r{background:var(--rbg);color:var(--red)}
+.bdg-b{background:var(--bbg);color:var(--blue)}.bdg-o{background:var(--obg);color:var(--orange)}
+.bdg-gray{background:rgba(255,255,255,.05);color:var(--t2)}
+.slbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.slbl::after{content:'';flex:1;height:1px;background:var(--b)}
+.sbar{display:flex;gap:6px;margin-bottom:12px}
+.sinput{flex:1;padding:10px 13px;background:var(--card);border:1px solid var(--b2);border-radius:3px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+.sinput:focus{border-color:var(--g)}
+.sinput::placeholder{color:var(--t3)}
+.sadd{padding:10px 14px;background:var(--g);color:#000;border:none;border-radius:3px;cursor:pointer;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;transition:all .2s;box-shadow:0 0 12px var(--gglow)}
+.sadd:hover{background:var(--g2)}
+.fpills{display:flex;gap:5px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.fpills::-webkit-scrollbar{display:none}
+.fpill{padding:5px 12px;border:1px solid var(--b2);background:none;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;font-family:'DM Sans',sans-serif;color:var(--t2);transition:all .2s;border-radius:2px}
+.fpill.on{background:var(--g);color:#000;border-color:var(--g)}
+.lcard{background:var(--card);border:1px solid var(--b);padding:13px;margin-bottom:1px;transition:all .2s;cursor:pointer}
+.lcard:hover{background:var(--card2);border-color:var(--b2)}
+.lcard-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px}
+.lcard-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700}
+.lcard-biz{font-size:11px;color:var(--t2);margin-bottom:5px;font-weight:300}
+.lcard-note{font-size:11px;color:var(--t3);margin-bottom:7px;padding:5px 9px;background:var(--bg2);border-left:2px solid var(--b2)}
+.lcard-actions{display:flex;gap:5px}
+.la-btn{flex:1;padding:8px 5px;border:1px solid var(--b2);background:none;cursor:pointer;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--t2);transition:all .2s;border-radius:2px}
+.la-btn:hover{border-color:var(--g);color:var(--g)}
+.la-btn.g{background:var(--g);color:#000;border:none;box-shadow:0 0 10px var(--gglow)}
+.la-btn.g:hover{background:var(--g2)}
+.countdown{display:inline-flex;align-items:center;gap:5px;background:var(--obg);border:1px solid rgba(255,167,38,.2);color:var(--orange);padding:4px 10px;font-size:10px;font-weight:600}
+.rlog{display:flex;align-items:center;gap:9px;padding:10px;background:var(--card2);border:1px solid var(--b);margin-bottom:1px}
+.rlog-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.rlog-dot.booked{background:var(--g)}.rlog-dot.callback{background:var(--orange)}.rlog-dot.no{background:var(--red)}.rlog-dot.pending{background:var(--blue)}
+.rlog-info{flex:1}.rlog-name{font-size:12px;font-weight:600}.rlog-det{font-size:10px;color:var(--t3);font-weight:300}.rlog-date{font-size:10px;color:var(--t3)}
+.empty{text-align:center;padding:32px 14px;color:var(--t3)}
+.empty-icon{font-size:34px;margin-bottom:8px;opacity:.3}
+.empty-t{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:3px}.empty-s{font-size:11px;font-weight:300}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);z-index:600;display:none;align-items:flex-end;justify-content:center}
+.overlay.on{display:flex}
+.modal{background:var(--card);border:1px solid var(--b2);border-radius:0;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;padding:18px 15px 40px;animation:mup .3s ease}
+@keyframes mup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mhandle{width:32px;height:3px;background:var(--b2);margin:0 auto 16px;border-radius:1px}
+.mtitle{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:3px}
+.msub{color:var(--t2);font-size:12px;font-weight:300;margin-bottom:16px}
+.divider{height:1px;background:var(--b);margin:12px 0}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.frow.one{grid-template-columns:1fr}
+.flbl{font-size:10px;font-weight:700;color:var(--t3);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.1em}
+.finput{width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--b2);border-radius:2px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+.finput:focus{border-color:var(--g)}
+.finput::placeholder{color:var(--t3)}
+.fselect{width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--b2);border-radius:2px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;appearance:none;cursor:pointer}
+.fselect option{background:var(--card)}
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:13px}
+.prod-c{background:var(--card2);border:1px solid var(--b);padding:12px;cursor:pointer;transition:all .2s;border-radius:2px}
+.prod-c.on,.prod-c:hover{border-color:var(--g)}
+.prod-c.on{background:var(--gbg)}
+.prod-icon{font-size:18px;margin-bottom:5px}
+.prod-name{font-size:11px;font-weight:700;margin-bottom:2px}
+.prod-desc{font-size:10px;color:var(--t3)}
+.call-banner{background:var(--card2);border:1px solid var(--b2);padding:13px;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+.cb-dot{width:7px;height:7px;border-radius:50%;background:var(--g);animation:blink 1s infinite;flex-shrink:0;box-shadow:0 0 6px var(--g)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.cb-inf{flex:1}.cb-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}.cb-sub{font-size:10px;color:var(--t3);font-weight:300}
+.cb-btn{padding:6px 11px;background:var(--gbg);border:1px solid rgba(0,230,118,.2);color:var(--g);font-size:10px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;border-radius:2px}
+.script-box{background:var(--card2);border:1px solid var(--b2);padding:16px;margin-bottom:12px;position:relative;border-radius:2px}
+.script-box.hot{border-left:2px solid var(--g)}
+.script-lbl{font-size:9px;font-weight:700;color:var(--g);letter-spacing:.18em;text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.pulse-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:pd 2s infinite;flex-shrink:0;box-shadow:0 0 4px var(--g)}
+@keyframes pd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.script-text{font-size:14px;line-height:1.85;color:var(--t);font-weight:300}
+.script-text strong{color:var(--g);font-weight:600}
+.script-text em{color:var(--t3);font-style:italic}
+.ai-auto{background:var(--gbg);border:1px solid rgba(0,230,118,.18);padding:13px;margin-bottom:12px;display:none;border-radius:2px}
+.ai-auto.on{display:block;animation:scrin .3s ease}
+.ai-auto-lbl{font-size:9px;font-weight:700;color:var(--g);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.ai-auto-txt{font-size:13px;color:var(--t);line-height:1.75}
+.ai-auto-txt.thinking{color:var(--t3);font-style:italic;font-size:12px}
+.resp-grid{display:flex;flex-direction:column;gap:6px}
+.resp-btn{padding:11px 13px;border:1px solid var(--b2);background:var(--card2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;gap:10px;text-align:left;width:100%;border-radius:2px}
+.resp-btn.yes:hover{border-color:var(--g);background:var(--gbg)}
+.resp-btn.no:hover{border-color:var(--red);background:var(--rbg)}
+.resp-btn.maybe:hover{border-color:var(--orange);background:var(--obg)}
+.resp-btn.obj:hover{border-color:var(--blue);background:var(--bbg)}
+.resp-emoji{font-size:17px;flex-shrink:0}
+.resp-title{font-weight:700;font-size:12px;margin-bottom:2px}
+.resp-btn.yes .resp-title{color:var(--g)}.resp-btn.no .resp-title{color:var(--red)}
+.resp-btn.maybe .resp-title{color:var(--orange)}.resp-btn.obj .resp-title{color:var(--blue)}
+.resp-sub{font-size:10px;color:var(--t3);font-weight:300}
+.obj-list{display:flex;flex-direction:column;gap:4px}
+.obj-item{padding:10px 12px;background:var(--card2);border:1px solid var(--b2);cursor:pointer;font-size:12px;color:var(--t2);font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;gap:8px;text-align:left;width:100%;border-radius:2px}
+.obj-item:hover{border-color:var(--g);color:var(--t);transform:translateX(2px)}
+.tip{background:rgba(41,182,246,.04);border:1px solid rgba(41,182,246,.15);padding:9px 12px;display:flex;gap:8px;margin-bottom:12px;border-radius:2px}
+.tip-icon{font-size:12px;flex-shrink:0;margin-top:1px}
+.tip-text{font-size:11px;color:rgba(41,182,246,.8);line-height:1.6;font-weight:300}
+.back-lnk{display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--t3);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:8px 0;margin-bottom:10px;transition:color .2s}
+.back-lnk:hover{color:var(--t2)}
+.ai-box{background:var(--bg2);border:1px solid var(--b);padding:12px;margin-bottom:9px;min-height:70px;max-height:180px;overflow-y:auto;border-radius:2px}
+.ai-msg{font-size:13px;line-height:1.75;color:var(--t2)}
+.ai-client{margin-top:8px;padding:7px 9px;background:var(--gbg);border:1px solid rgba(0,230,118,.12);font-size:12px;color:var(--g);border-radius:2px}
+.ai-reply{margin-top:5px;padding:9px 11px;background:var(--card2);border:1px solid var(--b);font-size:13px;line-height:1.7;color:var(--t);border-radius:2px}
+.ai-reply strong{color:var(--g)}
+.ai-irow{display:flex;gap:6px;margin-bottom:9px}
+.ai-in{flex:1;padding:10px 12px;background:var(--bg2);border:1px solid var(--b2);border-radius:2px;color:var(--t);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:none;transition:border-color .2s}
+.ai-in:focus{border-color:var(--g)}
+.ai-in::placeholder{color:var(--t3)}
+.ai-send{padding:10px 14px;background:var(--g);color:#000;border:none;border-radius:2px;cursor:pointer;font-size:14px;font-weight:700;transition:all .2s;box-shadow:0 0 10px var(--gglow)}
+.ai-send:hover{background:var(--g2)}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px}
+.rbtn{padding:10px 6px;border:1px solid var(--b2);background:none;cursor:pointer;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--t2);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:4px;border-radius:2px}
+.rbtn.on.booked{background:var(--gbg);border-color:var(--g);color:var(--g)}
+.rbtn.on.callback{background:var(--obg);border-color:var(--orange);color:var(--orange)}
+.rbtn.on.no{background:var(--rbg);border-color:var(--red);color:var(--red)}
+.rbtn.on.pending{background:var(--bbg);border-color:var(--blue);color:var(--blue)}
+.src-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:12px}
+.src-bdg{padding:6px 4px;background:var(--card2);border:1px solid var(--b);font-size:10px;color:var(--t3);font-weight:600;text-align:center;transition:all .3s;border-radius:2px}
+.src-bdg.on{background:var(--gbg);border-color:rgba(0,230,118,.2);color:var(--g)}
+.load-bar{height:1px;background:var(--b);margin-bottom:12px;overflow:hidden}
+.load-fill{height:100%;background:var(--g);width:0%;transition:width .3s}
+.gen-lead{background:var(--card2);border:1px solid var(--b);padding:12px;margin-bottom:1px;transition:all .2s}
+.gen-lead:hover{background:var(--card)}
+.gl-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px;gap:8px}
+.gl-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}.gl-biz{font-size:11px;color:var(--t3);font-weight:300}
+.gl-info{font-size:11px;color:var(--t2);line-height:1.9;font-weight:300}
+.add-btn{padding:5px 10px;background:var(--g);color:#000;border:none;font-size:10px;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all .2s;flex-shrink:0;box-shadow:0 0 8px var(--gglow);border-radius:2px}
+.add-btn:hover{background:var(--g2)}
+.add-btn.done{background:var(--gbg);color:var(--g);border:1px solid rgba(0,230,118,.2);box-shadow:none}
+.upgrade-wall{background:var(--card2);border:1px solid var(--b2);padding:28px 20px;text-align:center;margin:20px 0;border-radius:2px}
+.upgrade-icon{font-size:32px;margin-bottom:10px}
+.upgrade-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:7px}
+.upgrade-sub{color:var(--t2);font-size:13px;font-weight:300;margin-bottom:18px;line-height:1.6}
+.ld-header{background:var(--card2);border:1px solid var(--b);padding:18px;margin-bottom:10px}
+.ld-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px}
+.ld-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:13px}
+.ld-item{background:var(--bg2);padding:10px 12px;border-radius:2px}
+.ld-item-lbl{font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.ld-item-val{font-size:13px;font-weight:500;word-break:break-all}
+.ld-hist{background:var(--card2);border:1px solid var(--b);padding:15px;margin-bottom:10px}
+.hist-item{padding:9px 0;border-bottom:1px solid var(--b)}
+.hist-item:last-child{border:none}
+.hist-result{font-size:11px;font-weight:700;margin-bottom:2px}
+.hist-notes{font-size:12px;color:var(--t2);font-weight:300}
+.hist-date{font-size:10px;color:var(--t3);margin-top:2px}
+.admin-row{display:flex;align-items:center;gap:9px;padding:10px;background:var(--card2);border:1px solid var(--b);margin-bottom:1px}
+.admin-av{width:30px;height:30px;border-radius:50%;background:var(--g);color:#000;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:'Syne',sans-serif;flex-shrink:0;box-shadow:0 0 8px var(--gglow)}
+.admin-info{flex:1}.admin-name{font-size:12px;font-weight:600}.admin-email{font-size:10px;color:var(--t3)}
+.admin-btn{padding:4px 9px;border:1px solid var(--b2);background:none;color:var(--t2);font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;border-radius:2px}
+.admin-btn:hover{border-color:var(--g);color:var(--g)}
+
+@media(max-width:768px){
+  .nav{padding:14px 20px}.nav.stuck{padding:12px 20px}.nav-center{display:none}
+  section{padding:64px 20px}
+  .how-grid,.feat-grid,.price-grid,.testi-grid{grid-template-columns:1fr}
+  .feat-item.wide{grid-column:span 1}
+  .cta-sec{padding:64px 20px}
+  .site-footer{padding:24px 20px;flex-direction:column;text-align:center}
+  .sp-body{padding:40px 20px 80px}.sp-nav{padding:12px 20px}
+}
+@media(max-width:400px){.stats-row{grid-template-columns:1fr 1fr}.frow{grid-template-columns:1fr}.prod-grid{grid-template-columns:1fr}.src-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- ZIVR LOGO MARK SVG -->
+<svg style="display:none">
+  <!-- Bolt icon for small sizes -->
+  <symbol id="bolt" viewBox="0 0 24 24">
+    <polygon points="14,2 8,13 13,13 10,22 16,11 11,11" fill="currentColor"/>
+  </symbol>
+  <!-- Full ZIVR logo mark (Z with bolt) -->
+  <symbol id="zivrmark" viewBox="0 0 40 40">
+    <rect width="40" height="40" rx="10" fill="#00E676"/>
+    <polygon points="26,8 14,20 20,20 14,32 26,20 20,20" fill="#000"/>
+    <line x1="11" y1="11" x2="29" y2="11" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="11" y1="29" x2="29" y2="29" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="ld-mark">
+    <div class="ld-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="14,3 8,13 13,13 10,21 16,11 11,11" fill="#000"/></svg></div>
+    <div class="ld-name">ZIVR</div>
+  </div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+</div>
+
+<!-- ══════ LANDING ══════ -->
+<div id="landing">
+  <nav class="nav" id="mainNav">
+    <div class="nav-logo">
+      <div class="nav-logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <polygon points="14,3 8,13 13,13 10,21 16,11 11,11" fill="#000"/>
+        </svg>
+      </div>
+      <div class="nav-logo-name">ZIVR</div>
+    </div>
+    <div class="nav-center">
+      <span class="nav-lnk" onclick="scrollTo(0,600)" id="nl1">How it works</span>
+      <span class="nav-lnk" onclick="document.getElementById('lFeat').scrollIntoView({behavior:'smooth'})" id="nl2">Features</span>
+      <span class="nav-lnk" onclick="document.getElementById('lPrice').scrollIntoView({behavior:'smooth'})" id="nl3">Pricing</span>
+      <span class="nav-lnk" onclick="showStaticPage('contact')" id="nl4">Contact</span>
+    </div>
+    <div class="nav-right">
+      <div class="lang-sw">
+        <button id="llen" class="on" onclick="setLang('en',this)">EN</button>
+        <button id="llfr" onclick="setLang('fr',this)">FR</button>
+        <button id="lles" onclick="setLang('es',this)">ES</button>
+      </div>
+      <button class="nav-login" onclick="openAuth(false)" id="nlLogin">Log In</button>
+      <button class="nav-cta" onclick="openAuth(true)" id="nlCta">Start Free</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-orb"></div><div class="hero-orb2"></div><div class="hero-grid-lines"></div>
+    <div class="hero-inner">
+      <div class="hero-pill"><div class="hero-pill-dot"></div><span id="h-pill">AI-Powered Sales Platform</span></div>
+      <h1 class="hero-h1">
+        <span class="line1" id="h-l1">Close Faster.</span>
+        <span class="line2" id="h-l2">Sell Smarter.</span>
+      </h1>
+      <p class="hero-sub" id="h-sub">ZIVR gives every salesperson a <strong>real-time AI coach</strong> during calls, an intelligent lead generator, and a complete CRM — all in one platform.</p>
+      <div class="hero-btns">
+        <button class="btn-g" onclick="openAuth(true)" id="h-cta1">Start for Free →</button>
+        <button class="btn-out" onclick="document.getElementById('lFeat').scrollIntoView({behavior:'smooth'})" id="h-cta2">See Features</button>
+      </div>
+      <div class="hero-stats">
+        <div><div class="hero-stat-n" id="cnt1">0</div><div class="hero-stat-l" id="cnt1l">Active Users</div></div>
+        <div><div class="hero-stat-n" id="cnt2">0</div><div class="hero-stat-l" id="cnt2l">Leads Generated</div></div>
+        <div><div class="hero-stat-n" id="cnt3">0</div><div class="hero-stat-l" id="cnt3l">Demos Booked</div></div>
+        <div><div class="hero-stat-n">3</div><div class="hero-stat-l" id="cnt4l">Languages</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section>
+    <div class="sec-wrap">
+      <div class="sec-ey"><div class="sec-ey-bar"></div><div class="sec-ey-txt" id="s-how-ey">How it works</div></div>
+      <h2 class="sec-h2" id="s-how-h">From cold call<br>to closed deal.</h2>
+      <div class="how-grid">
+        <div class="how-item"><div class="how-num">01</div><div class="how-title" id="h1t">Generate Real Leads</div><div class="how-desc" id="h1d">Our AI instantly finds qualified prospects with real phone numbers, emails, and addresses — ready to call in seconds.</div></div>
+        <div class="how-item"><div class="how-num">02</div><div class="how-title" id="h2t">Call with AI Support</div><div class="how-desc" id="h2d">At every step, ZIVR automatically suggests the perfect response. Type what the prospect says for instant AI coaching in real time.</div></div>
+        <div class="how-item"><div class="how-num">03</div><div class="how-title" id="h3t">Close &amp; Track</div><div class="how-desc" id="h3d">Log every call, track every outcome. ZIVR manages follow-up timing automatically. Full history on every contact.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="lFeat" style="background:rgba(255,255,255,0.015);border-top:1px solid var(--b);border-bottom:1px solid var(--b)">
+    <div class="sec-wrap">
+      <div class="sec-ey"><div class="sec-ey-bar"></div><div class="sec-ey-txt" id="s-feat-ey">Features</div></div>
+      <h2 class="sec-h2" id="s-feat-h">Everything you need<br>to dominate sales.</h2>
+      <div class="feat-grid">
+        <div class="feat-item wide">
+          <div class="feat-icon">🤖</div>
+          <div class="feat-label" id="f1l">Core Feature</div>
+          <div class="feat-title" id="f1t">Real-Time AI Coach + Auto-Suggest</div>
+          <div class="feat-desc" id="f1d">ZIVR automatically suggests what to say at every single step of the script — no prompting needed. You can also type what the prospect says mid-call for instant AI coaching. Handle every objection like a pro, every time.</div>
+          <span class="feat-tag">Live during calls</span>
+        </div>
+        <div class="feat-item">
+          <div class="feat-icon">🔍</div>
+          <div class="feat-label" id="f2l">Lead Generation</div>
+          <div class="feat-title" id="f2t">AI-Powered Lead Generator</div>
+          <div class="feat-desc" id="f2d">Generate qualified leads with real contact info — name, phone, email, address, and business details — in seconds. No manual research needed.</div>
+          <span class="feat-tag">AI-Powered</span>
+        </div>
+        <div class="feat-item">
+          <div class="feat-icon">📋</div>
+          <div class="feat-label" id="f3l">Scripts</div>
+          <div class="feat-title" id="f3t">Adaptive Call Scripts</div>
+          <div class="feat-desc" id="f3d">Scripts adapt to every response. Yes, No, Hesitating, Objecting — ZIVR guides you through every path for your specific niche and product.</div>
+          <span class="feat-tag">6 Niches</span>
+        </div>
+        <div class="feat-item">
+          <div class="feat-icon">📊</div>
+          <div class="feat-label" id="f4l">CRM</div>
+          <div class="feat-title" id="f4t">Full Lead Management</div>
+          <div class="feat-desc" id="f4d">Complete lead profiles with call history, notes, follow-up scheduling, and status tracking. Never lose a prospect again.</div>
+          <span class="feat-tag">Real-Time</span>
+        </div>
+        <div class="feat-item">
+          <div class="feat-icon">🛡️</div>
+          <div class="feat-label" id="f5l">Agency Plan</div>
+          <div class="feat-title" id="f5t">Team Admin Panel</div>
+          <div class="feat-desc" id="f5d">See your entire team's leads, calls, and demos in real time. Manage plans and access. Available on the Agency plan only — by invitation.</div>
+          <span class="feat-tag">Agency Only</span>
+        </div>
+        <div class="feat-item">
+          <div class="feat-icon">🌍</div>
+          <div class="feat-label" id="f6l">International</div>
+          <div class="feat-title" id="f6t">Trilingual Platform</div>
+          <div class="feat-desc" id="f6d">Full support for English, French, and Spanish. Change language in your account settings — the entire platform adapts instantly.</div>
+          <span class="feat-tag">EN · FR · ES</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section>
+    <div class="sec-wrap">
+      <div class="sec-ey"><div class="sec-ey-bar"></div><div class="sec-ey-txt" id="s-testi-ey">Results</div></div>
+      <h2 class="sec-h2" id="s-testi-h">Teams closing more<br>with ZIVR.</h2>
+      <div class="testi-grid">
+        <div class="testi-item"><div class="testi-stars">★★★★★</div><div class="testi-text" id="t1">"ZIVR completely changed how my team handles objections. The AI coach is like having a top closer whispering the right answer on every single call."</div><div class="testi-name">Marc T.</div><div class="testi-role">AI Agency Owner, Montreal</div></div>
+        <div class="testi-item"><div class="testi-stars">★★★★★</div><div class="testi-text" id="t2">"We went from 3 demos a week to 14. The lead generator paid for itself on day one. The ROI is unlike anything I've seen in sales software."</div><div class="testi-name">Sophie L.</div><div class="testi-role">Sales Director, Quebec City</div></div>
+        <div class="testi-item"><div class="testi-stars">★★★★★</div><div class="testi-text" id="t3">"Finally a sales tool that works in French. My team was struggling with English-only software. ZIVR is built for how we actually work."</div><div class="testi-name">Jean-François B.</div><div class="testi-role">STR Manager, Laurentides</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="lPrice" style="background:rgba(255,255,255,0.015);border-top:1px solid var(--b);border-bottom:1px solid var(--b)">
+    <div class="sec-wrap">
+      <div class="sec-ey"><div class="sec-ey-bar"></div><div class="sec-ey-txt" id="s-price-ey">Pricing</div></div>
+      <h2 class="sec-h2" id="s-price-h">Simple pricing.<br>Serious results.</h2>
+      <div class="price-grid">
+        <div class="price-item">
+          <div class="price-plan" id="pp1l">Plan 01</div>
+          <div class="price-name" id="pp1n">Free</div>
+          <div class="price-amount">$0</div>
+          <div class="price-per" id="pp1p">Forever free · Ad-supported</div>
+          <ul class="price-feats">
+            <li id="pf1a">Basic call scripts</li>
+            <li id="pf1b">5 AI leads / month</li>
+            <li id="pf1c">Call logging</li>
+            <li class="off" id="pf1d">Real-time AI coach</li>
+            <li class="off" id="pf1e">Admin panel</li>
+          </ul>
+          <button class="pbtn" onclick="openAuth(true)" id="pb1">Get Started Free</button>
+        </div>
+        <div class="price-item hot">
+          <div class="price-plan" id="pp2l">Plan 02 — Most Popular</div>
+          <div class="price-name" id="pp2n">Pro</div>
+          <div class="price-amount">$47</div>
+          <div class="price-per" id="pp2p">Per month · 7-day free trial</div>
+          <ul class="price-feats">
+            <li id="pf2a">Full scripts + AI coach</li>
+            <li id="pf2b">50 AI leads / month</li>
+            <li id="pf2c">Real-time AI + auto-suggest</li>
+            <li id="pf2d">Full call history</li>
+            <li class="off" id="pf2e">Admin panel</li>
+          </ul>
+          <button class="pbtn solid" onclick="openAuth(true)" id="pb2">Start Free Trial →</button>
+        </div>
+        <div class="price-item">
+          <div class="price-plan" id="pp3l">Plan 03</div>
+          <div class="price-name" id="pp3n">Agency</div>
+          <div class="price-amount">$97</div>
+          <div class="price-per" id="pp3p">Per month · 7-day free trial</div>
+          <ul class="price-feats">
+            <li id="pf3a">Everything in Pro</li>
+            <li id="pf3b">Unlimited AI leads</li>
+            <li id="pf3c">Team admin panel</li>
+            <li id="pf3d">Multi-user access</li>
+            <li id="pf3e">CSV export + priority support</li>
+          </ul>
+          <button class="pbtn" onclick="openAuth(true)" id="pb3">Start Free Trial →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-sec">
+    <div class="cta-orb"></div>
+    <div style="position:relative;z-index:1">
+      <h2 class="sec-h2" id="cta-h" style="margin-bottom:14px">Ready to close faster?</h2>
+      <p style="color:var(--t2);font-size:16px;font-weight:300;margin-bottom:36px" id="cta-sub">Join thousands of sales professionals using ZIVR.</p>
+      <button class="btn-g" style="font-size:15px;padding:16px 44px" onclick="openAuth(true)" id="cta-btn">Start for Free — No Credit Card →</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="site-footer">
+    <div class="footer-logo">
+      <div class="footer-logo-mark"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><polygon points="14,3 8,13 13,13 10,21 16,11 11,11" fill="#000"/></svg></div>
+      <div class="footer-logo-name">ZIVR</div>
+    </div>
+    <div class="footer-links">
+      <span class="footer-lnk" onclick="showStaticPage('privacy')" id="fl1">Privacy Policy</span>
+      <span class="footer-lnk" onclick="showStaticPage('terms')" id="fl2">Terms of Service</span>
+      <span class="footer-lnk" onclick="showStaticPage('contact')" id="fl3">Contact</span>
+    </div>
+    <div class="footer-copy" id="fl-copy">© 2026 ZIVR.AI — All rights reserved.</div>
+  </div>
+</div>
+
+<!-- ══════ STATIC PAGES ══════ -->
+<div id="staticPage">
+  <div class="sp-nav">
+    <div class="sp-logo" onclick="closeStaticPage()">
+      <div class="sp-logo-mark"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polygon points="14,3 8,13 13,13 10,21 16,11 11,11" fill="#000"/></svg></div>
+      <div class="sp-logo-name">ZIVR</div>
+    </div>
+    <button class="sp-back" onclick="closeStaticPage()" id="sp-back-btn">← Back</button>
+  </div>
+  <div class="sp-body" id="spBody"></div>
+</div>
+
+<!-- ══════ AUTH ══════ -->
+<div id="authScreen" style="display:none">
+  <div class="auth-wrap">
+    <button class="auth-close" onclick="closeAuth()">✕</button>
+    <div class="auth-logo-row">
+      <div class="auth-logo-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="14,3 8,13 13,13 10,21 16,11 11,11" fill="#000"/></svg></div>
+      <div class="auth-logo-name">ZIVR</div>
+    </div>
+    <div class="auth-title" id="aTitle">Welcome back</div>
+    <div class="auth-sub" id="aSub">Sign in to your ZIVR account</div>
+    <div class="auth-err" id="authErr"></div>
+    <div class="auth-ok" id="authOk"></div>
+    <div class="fld" id="aNameFld" style="display:none"><label id="aNameLbl">Full Name</label><input type="text" id="aName" placeholder="Your name"></div>
+    <div class="fld"><label id="aEmailLbl">Email</label><input type="email" id="aEmail" placeholder="you@company.com"></div>
+    <div class="fld"><label id="aPassLbl">Password</label><input type="password" id="aPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAuth()"></div>
+    <button class="btn-green" id="aBtn" onclick="doAuth()">Sign In →</button>
+    <div class="auth-switch" id="aSwitch">No account? <a onclick="toggleReg()">Create one free</a></div>
+    <div id="demoBanner" style="margin-top:18px;padding:13px;background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.14);border-radius:3px">
+      <div style="font-size:10px;font-weight:700;color:var(--g);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px">🎯 Demo Accounts</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div onclick="fillDemo('demo.free@zivr.ai','ZivrDemo2026!')" style="cursor:pointer;padding:8px 10px;background:rgba(255,255,255,.04);border:1px solid var(--b2);border-radius:2px;transition:all .2s" onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.13)'">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:11px;font-weight:700;color:var(--t)">Free Plan</div><div style="font-size:10px;color:var(--t3)">demo.free@zivr.ai</div></div>
+            <span style="font-size:9px;padding:2px 7px;background:rgba(255,255,255,.05);color:var(--t3);font-weight:700;letter-spacing:.06em">FREE</span>
+          </div>
+        </div>
+        <div onclick="fillDemo('demo.pro@zivr.ai','ZivrDemo2026!')" style="cursor:pointer;padding:8px 10px;background:rgba(41,182,246,.04);border:1px solid rgba(41,182,246,.15);border-radius:2px;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='rgba(41,182,246,0.15)'">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:11px;font-weight:700;color:var(--t)">Pro Plan</div><div style="font-size:10px;color:var(--t3)">demo.pro@zivr.ai</div></div>
+            <span style="font-size:9px;padding:2px 7px;background:var(--bbg);color:var(--blue);font-weight:700;letter-spacing:.06em">PRO</span>
+          </div>
+        </div>
+        <div onclick="fillDemo('demo.agency@zivr.ai','ZivrDemo2026!')" style="cursor:pointer;padding:8px 10px;background:var(--gbg);border:1px solid rgba(0,230,118,.2);border-radius:2px;transition:all .2s" onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='rgba(0,230,118,0.2)'">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:11px;font-weight:700;color:var(--g)">Agency Plan</div><div style="font-size:10px;color:var(--t3)">demo.agency@zivr.ai</div></div>
+            <span style="font-size:9px;padding:2px 7px;background:var(--gbg);color:var(--g);font-weight:700;letter-spacing:.06em">AGENCY</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-top:8px;text-align:center">Password: <span style="color:var(--t2);font-weight:600">ZivrDemo2026!</span> · Click to auto-fill</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ ONBOARDING ══════ -->
+<div id="onboarding">
+  <div class="ob-wrap">
+    <div class="ob-logo">
+      <div class="ob-logo-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><polygon points="14,3 8,13 13,13 10,21 16,11 11,11" fill="#000"/></svg></div>
+      <div class="ob-logo-name">ZIVR</div>
+    </div>
+    <div class="ob-prog">
+      <div class="ob-prog-dot done" id="obp1"></div>
+      <div class="ob-prog-dot" id="obp2"></div>
+      <div class="ob-prog-dot" id="obp3"></div>
+      <div class="ob-prog-dot" id="obp4"></div>
+    </div>
+    <div id="obContent"></div>
+  </div>
+</div>
+
+<!-- ══════ APP ══════ -->
+<div id="appScreen">
+  <div class="app-top">
+    <div class="app-logo">
+      <div class="app-logo-mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polygon points="14,3 8,13 13,13 10,21 16,11 11,11" fill="#000"/></svg></div>
+      <div class="app-logo-name">ZIVR</div>
+    </div>
+    <div class="app-right">
+      <span class="plan-bdg bdg-free" id="planBadge">Free</span>
+      <div class="app-av" id="appAvatar">U</div>
+      <button class="app-out" onclick="doLogout()">↩</button>
+    </div>
+  </div>
+  <div class="app-body">
+    <!-- DASHBOARD -->
+    <div class="scr on" id="scrDash">
+      <div class="ph"><div class="ph-t" id="app-dash-t">Dashboard</div><div class="ph-s">Welcome, <span id="dUser">...</span></div></div>
+      <div class="stats-row">
+        <div class="stat-c g"><div class="stat-v" id="stBooked">0</div><div class="stat-l" id="st1l">Demos</div></div>
+        <div class="stat-c b"><div class="stat-v" id="stCalls">0</div><div class="stat-l" id="st2l">Calls</div></div>
+        <div class="stat-c o"><div class="stat-v" id="stLeads">0</div><div class="stat-l" id="st3l">Leads</div></div>
+      </div>
+      <div class="slbl" id="sl-recent">Recent Activity</div>
+      <div id="dRecent"></div>
+    </div>
+    <!-- LEADS -->
+    <div class="scr" id="scrLeads">
+      <div class="ph"><div class="ph-t" id="app-leads-t">My Leads</div><div class="ph-s" id="app-leads-s">Manage and call your prospects</div></div>
+      <div class="sbar"><input class="sinput" id="lSearch" oninput="renderLeads()"><button class="sadd" onclick="openAddModal()">+</button></div>
+      <div class="fpills" id="filterPills">
+        <button class="fpill on" onclick="setFilter('all',this)" id="fp-all">All</button>
+        <button class="fpill" onclick="setFilter('pending',this)" id="fp-pending">To Call</button>
+        <button class="fpill" onclick="setFilter('booked',this)" id="fp-booked">Demo</button>
+        <button class="fpill" onclick="setFilter('callback',this)" id="fp-callback">Callback</button>
+        <button class="fpill" onclick="setFilter('no',this)" id="fp-no">No</button>
+      </div>
+      <div id="leadsList"></div>
+    </div>
+    <!-- DETAIL -->
+    <div class="scr" id="scrDetail"><div id="detailContent"></div></div>
+    <!-- CALL -->
+    <div class="scr" id="scrCall"><div id="callContent"></div></div>
+    <!-- GENERATOR -->
+    <div class="scr" id="scrGen">
+      <div class="ph"><div class="ph-t" id="app-gen-t">Lead Generator</div><div class="ph-s" id="app-gen-s">AI-powered prospect finder</div></div>
+      <div id="genGate"></div>
+      <div id="genContent" style="display:none">
+        <div class="card">
+          <div class="slbl" id="sl-saletype">Sale Type</div>
+          <div class="prod-grid">
+            <div class="prod-c on" onclick="selGenProd('ai',this)"><div class="prod-icon">🤖</div><div class="prod-name" id="pg-ai">AI Agency</div></div>
+            <div class="prod-c" onclick="selGenProd('web',this)"><div class="prod-icon">🌐</div><div class="prod-name" id="pg-web">Website</div></div>
+            <div class="prod-c" onclick="selGenProd('chalet',this)"><div class="prod-icon">🏔️</div><div class="prod-name" id="pg-chalet">STR / Airbnb</div></div>
+            <div class="prod-c" onclick="selGenProd('other',this)"><div class="prod-icon">✨</div><div class="prod-name" id="pg-other">Other</div></div>
+          </div>
+          <div class="frow">
+            <div><label class="flbl" id="gl-city">City / Region</label><input class="finput" id="gCity" placeholder="Montreal, QC"></div>
+            <div><label class="flbl" id="gl-qty">Quantity</label><select class="fselect" id="gQty"><option>5</option><option>10</option><option selected>15</option><option>25</option></select></div>
+          </div>
+          <div class="frow one"><div><label class="flbl" id="gl-btype">Business Type (optional)</label><input class="finput" id="gBizType" placeholder="e.g. dentist, gym, realtor"></div></div>
+          <button class="btn-green" onclick="generateLeads()" id="gBtn" style="box-shadow:0 0 20px var(--gglow)">🔍 Generate Leads</button>
+        </div>
+        <div id="genSrc" style="display:none">
+          <div class="slbl" style="margin-top:6px" id="sl-sources">Sources</div>
+          <div class="src-grid">
+            <div class="src-bdg" id="s1">🤖 AI Engine</div><div class="src-bdg" id="s2">📊 Business DB</div>
+            <div class="src-bdg" id="s3">🌐 Web Data</div><div class="src-bdg" id="s4">📱 Social</div>
+            <div class="src-bdg" id="s5">📋 Directories</div><div class="src-bdg" id="s6">+195 more</div>
+          </div>
+          <div class="load-bar"><div class="load-fill" id="gFill"></div></div>
+          <div id="genStatus" style="font-size:11px;color:var(--t3);text-align:center;margin-bottom:8px"></div>
+        </div>
+        <div id="genResults"></div>
+      </div>
+    </div>
+    <!-- ACCOUNT -->
+    <div class="scr" id="scrAccount">
+      <div class="ph"><div class="ph-t" id="app-acc-t">My Account</div></div>
+      <div class="card">
+        <div class="slbl" id="sl-profile">Profile</div>
+        <div class="frow one"><div><label class="flbl" id="lbl-name">Name</label><input class="finput" id="sName"></div></div>
+        <div class="frow one"><div><label class="flbl" id="lbl-agency">Agency Name</label><input class="finput" id="sAgency" placeholder="My Agency"></div></div>
+        <div class="frow one"><div>
+          <label class="flbl">Language / Langue / Idioma</label>
+          <select class="fselect" id="sLang" onchange="setLangFromApp(this.value)">
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+          </select>
+        </div></div>
+        <button class="btn-green" style="margin-top:8px;box-shadow:0 0 14px var(--gglow)" onclick="saveProfile()" id="sSaveBtn">Save Profile</button>
+      </div>
+      <div class="slbl" style="margin-top:16px" id="sl-plan">Current Plan</div>
+      <div id="curPlanCard"></div>
+      <div class="slbl" style="margin-top:16px" id="sl-upgrade">Upgrade</div>
+      <div id="plansGrid"></div>
+    </div>
+    <!-- ADMIN — hidden, agency only -->
+    <div class="scr" id="scrAdmin">
+      <div class="ph"><div class="ph-t" id="app-admin-t">Admin Panel</div><div class="ph-s" id="app-admin-s">Agency plan · Restricted access</div></div>
+      <div class="stats-row">
+        <div class="stat-c g"><div class="stat-v" id="admU">0</div><div class="stat-l" id="adm1l">Users</div></div>
+        <div class="stat-c b"><div class="stat-v" id="admL">0</div><div class="stat-l" id="adm2l">Total Leads</div></div>
+        <div class="stat-c o"><div class="stat-v" id="admB">0</div><div class="stat-l" id="adm3l">Total Demos</div></div>
+      </div>
+      <div class="slbl" id="sl-allusers">All Users</div>
+      <div id="adminList"></div>
+    </div>
+  </div>
+  <div class="app-bnav">
+    <button class="bni on" onclick="showScr('Dash',this)" id="navDash"><div class="bni-icon">📊</div><div class="bni-lbl" id="bnav1">Dashboard</div></button>
+    <button class="bni" onclick="showScr('Leads',this)" id="navLeads"><div class="bni-icon">👥</div><div class="bni-lbl" id="bnav2">Leads</div></button>
+    <button class="bni" onclick="showScr('Gen',this)" id="navGen"><div class="bni-icon">🔍</div><div class="bni-lbl" id="bnav3">Generate</div></button>
+    <button class="bni" onclick="showScr('Account',this)" id="navAccount"><div class="bni-icon">⚙️</div><div class="bni-lbl" id="bnav4">Account</div></button>
+    <button class="bni" onclick="showScr('Admin',this)" id="navAdmin" style="display:none"><div class="bni-icon">🛡️</div><div class="bni-lbl" id="bnav5">Admin</div></button>
+  </div>
+</div>
+
+<!-- ADD LEAD MODAL -->
+<div class="overlay" id="addModal" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="modal-add-t">Add Lead</div>
+    <div class="msub" id="modal-add-s">Manual entry or AI Quick Fill</div>
+    <button style="width:100%;padding:11px;background:var(--gbg);border:1px solid rgba(0,230,118,.2);color:var(--g);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:13px;border-radius:2px;transition:all .2s" onclick="quickFill()" id="qfBtn">⚡ Quick Fill — Paste name / URL, AI fills everything</button>
+    <div class="prod-grid" style="margin-bottom:13px">
+      <div class="prod-c on" onclick="selLP('ai',this)"><div class="prod-icon">🤖</div><div class="prod-name">AI Agency</div></div>
+      <div class="prod-c" onclick="selLP('web',this)"><div class="prod-icon">🌐</div><div class="prod-name">Website</div></div>
+      <div class="prod-c" onclick="selLP('chalet',this)"><div class="prod-icon">🏔️</div><div class="prod-name">STR / Airbnb</div></div>
+      <div class="prod-c" onclick="selLP('other',this)"><div class="prod-icon">✨</div><div class="prod-name">Other</div></div>
+    </div>
+    <div id="noSiteWarn" style="display:none;margin-bottom:11px">
+      <div class="tip"><div class="tip-icon">💡</div><div class="tip-text">No website — perfect angle: "I'll build you a pro site with all AI systems included in under 2 weeks."</div></div>
+    </div>
+    <div class="frow"><div><label class="flbl" id="lbl-fn">First Name</label><input class="finput" id="mFn" placeholder="John"></div><div><label class="flbl" id="lbl-ln">Last Name</label><input class="finput" id="mLn" placeholder="Smith"></div></div>
+    <div class="frow one"><div><label class="flbl" id="lbl-biz">Business</label><input class="finput" id="mBiz" placeholder="Smith Consulting"></div></div>
+    <div class="frow"><div><label class="flbl" id="lbl-ph">Phone</label><input class="finput" id="mPh" placeholder="+1 514-555-0000" type="tel"></div><div><label class="flbl" id="lbl-em">Email</label><input class="finput" id="mEm" placeholder="john@co.com" type="email"></div></div>
+    <div class="frow one"><div><label class="flbl" id="lbl-addr">Address</label><input class="finput" id="mAddr" placeholder="123 Main St, Montreal"></div></div>
+    <div class="frow one"><div><label class="flbl" id="lbl-web">Website</label><input class="finput" id="mWeb" placeholder="https://company.com"></div></div>
+    <div class="frow one"><div><label class="flbl" id="lbl-niche">Niche</label>
+      <select class="fselect" id="mNi">
+        <option value="chalet">🏔️ Chalets / STR</option>
+        <option value="clinique">🦷 Clinic</option>
+        <option value="auto">🚗 Car Dealer</option>
+        <option value="gym">💪 Gym / Studio</option>
+        <option value="resto">🍽️ Restaurant</option>
+        <option value="courtier">🏠 Real Estate</option>
+        <option value="autre">🏢 Other</option>
+      </select>
+    </div></div>
+    <div id="hasSiteField" style="display:none;margin-bottom:11px">
+      <label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13px;color:var(--t2)">
+        <input type="checkbox" id="hasSite" onchange="toggleNSW()" style="width:15px;height:15px;accent-color:var(--g);cursor:pointer">
+        <span id="lbl-hassite">Prospect already has a website</span>
+      </label>
+    </div>
+    <div class="frow"><div><label class="flbl" id="lbl-rating">Google Rating</label><input class="finput" id="mRating" placeholder="4.5 ★"></div><div><label class="flbl" id="lbl-notes">Notes</label><input class="finput" id="mNo" placeholder="Key info..."></div></div>
+    <button class="btn-green" onclick="saveLead()" id="lbl-addbtn" style="box-shadow:0 0 14px var(--gglow)">Add Lead</button>
+  </div>
+</div>
+
+<!-- LOG MODAL -->
+<div class="overlay" id="logModal" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="modal-log-t">Log Call</div>
+    <div id="logLeadInfo" style="margin-bottom:13px"></div>
+    <div class="slbl" id="sl-ai">AI Assistant — Real Time</div>
+    <div class="ai-box" id="aiBox"><div class="ai-msg" id="aiWelcome">💬 Type what your prospect says and I'll suggest what to reply instantly.</div></div>
+    <div class="ai-irow">
+      <textarea class="ai-in" id="aiIn" rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI()}"></textarea>
+      <button class="ai-send" onclick="sendAI()">→</button>
+    </div>
+    <div class="divider"></div>
+    <div class="slbl" id="sl-result">Call Result</div>
+    <div class="res-grid">
+      <button class="rbtn booked" onclick="setRes('booked')" id="rBooked">📅 <span id="rb1">Demo Booked</span></button>
+      <button class="rbtn callback" onclick="setRes('callback')" id="rCallback">📞 <span id="rb2">Callback</span></button>
+      <button class="rbtn no" onclick="setRes('no')" id="rNo">❌ <span id="rb3">Not Interested</span></button>
+      <button class="rbtn pending" onclick="setRes('pending')" id="rPending">⏳ <span id="rb4">In Progress</span></button>
+    </div>
+    <div id="cbDateWrap" style="display:none;margin-bottom:9px"><label class="flbl" id="lbl-cbdate">Callback Date</label><input class="finput" type="date" id="cbDate"></div>
+    <div class="frow one" style="margin-bottom:9px"><div><label class="flbl" id="lbl-callnotes">Notes</label><input class="finput" id="callNotes" placeholder="Call summary..."></div></div>
+    <button class="btn-green" onclick="saveLog()" id="lbl-savecall" style="box-shadow:0 0 14px var(--gglow)">Save Call</button>
+  </div>
+</div>
+
+<script>
+// ── SUPABASE
+const SURL='https://hmhpmaznhylcabwpbtde.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtaHBtYXpuaHlsY2Fid3BidGRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTI5MzksImV4cCI6MjA5MjE4ODkzOX0.ogDk7Wg58cEBZwsJHae-_V4q9bN5rLLG7Eman478XY8';
+const GKEY='AIzaSyDkhFF5Y1hMlHy-HYlH5pUPDjYX0kfjmc4';
+const HKEY='f9b931df57a7ed9feb65b8fc1fea900df16abaf7';
+const {createClient}=supabase;
+const db=createClient(SURL,SKEY);
+
+// ── STATE
+let lang='en',user=null,profile=null,leads=[],logs=[],activeLead=null,selResult=null,genProd='ai',leadProd='ai',filterSt='all',obData={},obStep=1;
+
+// ── TRANSLATIONS
+const TR={
+  en:{
+    // Landing
+    pill:'AI-Powered Sales Platform',h1a:'Close Faster.',h1b:'Sell Smarter.',
+    hsub:'ZIVR gives every salesperson a <strong>real-time AI coach</strong> during calls, an intelligent lead generator, and a complete CRM — all in one platform.',
+    hcta1:'Start for Free →',hcta2:'See Features',cnt1l:'Active Users',cnt2l:'Leads Generated',cnt3l:'Demos Booked',cnt4l:'Languages',
+    howey:'How it works',howh:'From cold call<br>to closed deal.',
+    h1t:'Generate Real Leads',h1d:'Our AI instantly finds qualified prospects with real phone numbers, emails, and addresses — ready to call in seconds.',
+    h2t:'Call with AI Support',h2d:'At every step, ZIVR automatically suggests the perfect response. Type what the prospect says for instant AI coaching.',
+    h3t:'Close & Track',h3d:'Log every call, track every outcome. ZIVR manages follow-up timing automatically. Full history on every contact.',
+    featy:'Features',feath:'Everything you need<br>to dominate sales.',
+    f1l:'Core Feature',f1t:'Real-Time AI Coach + Auto-Suggest',f1d:'ZIVR automatically suggests what to say at every step of the script. You can also type what the prospect says mid-call for instant AI coaching. Handle every objection like a pro, every time.',
+    f2l:'Lead Generation',f2t:'AI-Powered Lead Generator',f2d:'Generate qualified leads with real contact info — name, phone, email, address, and business details — in seconds.',
+    f3l:'Scripts',f3t:'Adaptive Call Scripts',f3d:'Scripts adapt to every response. Yes, No, Hesitating, Objecting — ZIVR guides you through every path for your specific niche.',
+    f4l:'CRM',f4t:'Full Lead Management',f4d:'Complete lead profiles with call history, notes, follow-up scheduling, and status tracking. Never lose a prospect again.',
+    f5l:'Agency Plan',f5t:'Team Admin Panel',f5d:'See your entire team\'s leads, calls, and demos in real time. Manage plans and access. Agency plan only — by invitation.',
+    f6l:'International',f6t:'Trilingual Platform',f6d:'Full support for English, French, and Spanish. Change language in your account settings — the entire platform adapts.',
+    testiy:'Results',testih:'Teams closing more<br>with ZIVR.',
+    t1:'"ZIVR completely changed how my team handles objections. The AI coach is like having a top closer whispering the right answer on every single call."',
+    t2:'"We went from 3 demos a week to 14. The lead generator paid for itself on day one."',
+    t3:'"Finally a sales tool that works in French. My team was struggling with English-only software."',
+    pricey:'Pricing',priceh:'Simple pricing.<br>Serious results.',
+    pp1l:'Plan 01',pp1n:'Free',pp1p:'Forever free · Ad-supported',
+    pf1a:'Basic call scripts',pf1b:'5 AI leads / month',pf1c:'Call logging',pf1d:'Real-time AI coach',pf1e:'Admin panel',pb1:'Get Started Free',
+    pp2l:'Plan 02 — Most Popular',pp2n:'Pro',pp2p:'Per month · 7-day free trial',
+    pf2a:'Full scripts + AI coach',pf2b:'50 AI leads / month',pf2c:'Real-time AI + auto-suggest',pf2d:'Full call history',pf2e:'Admin panel',pb2:'Start Free Trial →',
+    pp3l:'Plan 03',pp3n:'Agency',pp3p:'Per month · 7-day free trial',
+    pf3a:'Everything in Pro',pf3b:'Unlimited AI leads',pf3c:'Team admin panel',pf3d:'Multi-user access',pf3e:'CSV export + priority support',pb3:'Start Free Trial →',
+    ctah:'Ready to close faster?',ctas:'Join thousands of sales professionals using ZIVR.',ctabtn:'Start for Free — No Credit Card →',
+    fl1:'Privacy Policy',fl2:'Terms of Service',fl3:'Contact',flcopy:'© 2026 ZIVR.AI — All rights reserved.',
+    nl1:'How it works',nl2:'Features',nl3:'Pricing',nl4:'Contact',nlLogin:'Log In',nlCta:'Start Free',
+    // Auth
+    loginTitle:'Welcome back',loginSub:'Sign in to your ZIVR account',regTitle:'Create your account',regSub:'Start free — no credit card needed',
+    nameLabel:'Full Name',emailLabel:'Email',passLabel:'Password',loginBtn:'Sign In →',regBtn:'Create Account →',
+    noAcc:'No account?',createAcc:'Create one free',hasAcc:'Already have an account?',signin:'Sign in',
+    // App
+    dashT:'Dashboard',leadsT:'My Leads',leadsS:'Manage and call your prospects',genT:'Lead Generator',genS:'AI-powered prospect finder',accT:'My Account',adminT:'Admin Panel',adminS:'Agency plan · Restricted access',
+    st1:'Demos',st2:'Calls',st3:'Leads',
+    slRecent:'Recent Activity',slProfile:'Profile',slPlan:'Current Plan',slUpgrade:'Upgrade',slAI:'AI Assistant — Real Time',slResult:'Call Result',slSaleType:'Sale Type',slSources:'Sources',slAllUsers:'All Users',
+    lblName:'Name',lblAgency:'Agency Name',lblCity:'City / Region',lblQty:'Quantity',lblBtype:'Business Type (optional)',
+    lbl_fn:'First Name',lbl_ln:'Last Name',lbl_biz:'Business',lbl_ph:'Phone',lbl_em:'Email',lbl_addr:'Address',lbl_web:'Website',lbl_niche:'Niche',lbl_rating:'Google Rating',lbl_notes:'Notes',lbl_hassite:'Prospect already has a website',
+    modalAddT:'Add Lead',modalAddS:'Manual entry or AI Quick Fill',modalLogT:'Log Call',
+    lbl_addbtn:'Add Lead',lbl_savecall:'Save Call',lbl_cbdate:'Callback Date',
+    qfBtn:'⚡ Quick Fill — Paste name / URL, AI fills everything',
+    rb1:'Demo Booked',rb2:'Callback',rb3:'Not Interested',rb4:'In Progress',
+    bnav1:'Dashboard',bnav2:'Leads',bnav3:'Generate',bnav4:'Account',bnav5:'Admin',
+    fp_all:'All',fp_pending:'To Call',fp_booked:'Demo',fp_callback:'Callback',fp_no:'No',
+    searchPh:'Search leads...',genBtn:'🔍 Generate Leads',gBtn:'🔍 Generate Leads',
+    callBtn:'📞 Call',logBtn:'📋 Log',saveProfile:'Save Profile',
+    aiWelcome:"💬 Type what your prospect says and I’ll suggest what to reply instantly.",
+    savedOk:'✓ Saved',emptyLeads:'No leads yet',emptyLeadsSub:'Add leads manually or generate them with AI',
+    emptyRecent:'No calls yet',emptyRecentSub:'Go to Leads to start calling',
+    upgradeTitle:'Lead Generator',upgradeSub:'Upgrade to Pro or Agency to access AI-powered lead generation.',upgradeCta:'See Plans →',
+    adm1:'Users',adm2:'Total Leads',adm3:'Total Demos',
+    pgAi:'AI Agency',pgWeb:'Website',pgChalet:'STR / Airbnb',pgOther:'Other',
+    // Onboarding
+    ob1q:'Question 1 of 4',ob1t:"What are you selling?",ob1s:'Personalizes your scripts and lead generation.',
+    ob2q:'Question 2 of 4',ob2t:'How big is your team?',ob2s:"We’ll set up the right plan for your size.",
+    ob3q:'Question 3 of 4',ob3t:"What’s your main goal?",ob3s:"We’ll prioritize the features that matter most.",
+    ob4q:'Question 4 of 4',ob4t:'How did you find ZIVR?',ob4s:'Helps us understand what works.',
+    obNext:'Continue →',obSkip:'Skip for now',obFinish:'Enter ZIVR →',
+    // Static pages
+    spBack:'← Back',privacyTitle:'Privacy Policy',termsTitle:'Terms of Service',contactTitle:'Contact Us',
+  },
+  fr:{
+    pill:'Plateforme de Vente IA',h1a:'Closez Plus Vite.',h1b:'Vendez Plus Fort.',
+    hsub:'ZIVR donne à chaque vendeur un <strong>coach IA en temps réel</strong> pendant les appels, un générateur de leads intelligent, et un CRM complet — tout en une seule plateforme.',
+    hcta1:'Commencer Gratuitement →',hcta2:'Voir les Fonctionnalités',cnt1l:'Utilisateurs Actifs',cnt2l:'Leads Générés',cnt3l:'Démos Bookées',cnt4l:'Langues',
+    howey:'Comment ça marche',howh:'Du premier appel<br>au deal fermé.',
+    h1t:'Générer de Vrais Leads',h1d:"Notre IA trouve instantanément des prospects qualifiés avec de vrais numéros de téléphone, emails et adresses — prêts à appeler en quelques secondes.",
+    h2t:'Appeler avec le Support IA',h2d:"À chaque étape, ZIVR suggère automatiquement la réponse parfaite. Tape ce que dit le prospect pour un coaching IA instantané.",
+    h3t:'Closer & Suivre',h3d:"Logue chaque appel, suis chaque résultat. ZIVR gère automatiquement les relances. Historique complet sur chaque contact.",
+    featy:'Fonctionnalités',feath:'Tout ce qu\'il vous faut<br>pour dominer les ventes.',
+    f1l:'Fonctionnalité Principale',f1t:'Coach IA Temps Réel + Auto-Suggestion',f1d:"ZIVR suggère automatiquement quoi dire à chaque étape du script. Tu peux aussi taper ce que dit le prospect pour un coaching instantané. Gérez chaque objection comme un pro, à chaque fois.",
+    f2l:'Génération de Leads',f2t:'Générateur de Leads IA',f2d:"Générez des leads qualifiés avec de vraies coordonnées — nom, téléphone, email, adresse — en quelques secondes.",
+    f3l:'Scripts',f3t:'Scripts d\'Appel Adaptatifs',f3d:"Scripts qui s’adaptent à chaque réponse. Oui, Non, Hésitation, Objection — ZIVR vous guide dans chaque chemin pour votre niche.",
+    f4l:'CRM',f4t:'Gestion Complète des Leads',f4d:"Fiches leads complètes avec historique d’appels, notes, planification de relances et suivi du statut.",
+    f5l:'Plan Agence',f5t:'Panel Admin Équipe',f5d:"Voyez les leads, appels et démos de toute votre équipe en temps réel. Gérez les plans et les accès. Plan Agence uniquement — sur invitation.",
+    f6l:'International',f6t:'Plateforme Trilingue',f6d:"Support complet pour le français, l’anglais et l’espagnol. Changez la langue dans vos paramètres — toute la plateforme s’adapte.",
+    testiy:'Résultats',testih:'Des équipes qui closent plus<br>avec ZIVR.',
+    t1:'"ZIVR a complètement changé la façon dont mon équipe gère les objections. Le coach IA c\'est comme avoir un top closer qui chuchote la bonne réponse à chaque appel."',
+    t2:'"On est passé de 3 démos par semaine à 14. Le générateur de leads s\'est payé tout seul le premier jour."',
+    t3:'"Enfin un outil de vente qui marche vraiment en français. Mon équipe galèrait avec des logiciels en anglais seulement."',
+    pricey:'Tarifs',priceh:'Tarifs simples.<br>Résultats sérieux.',
+    pp1l:'Plan 01',pp1n:'Gratuit',pp1p:'Gratuit pour toujours · Avec publicités',
+    pf1a:'Scripts d\'appel basiques',pf1b:'5 leads IA / mois',pf1c:'Journal des appels',pf1d:'Coach IA temps réel',pf1e:'Panel admin',pb1:'Commencer Gratuitement',
+    pp2l:'Plan 02 — Le Plus Populaire',pp2n:'Pro',pp2p:'Par mois · Essai gratuit 7 jours',
+    pf2a:'Scripts complets + Coach IA',pf2b:'50 leads IA / mois',pf2c:'IA temps réel + auto-suggestion',pf2d:'Historique complet',pf2e:'Panel admin',pb2:'Commencer l\'Essai →',
+    pp3l:'Plan 03',pp3n:'Agence',pp3p:'Par mois · Essai gratuit 7 jours',
+    pf3a:'Tout ce qui est inclus dans Pro',pf3b:'Leads IA illimités',pf3c:'Panel admin équipe',pf3d:'Accès multi-utilisateurs',pf3e:'Export CSV + support prioritaire',pb3:'Commencer l\'Essai →',
+    ctah:'Prêt à closer plus vite?',ctas:'Rejoignez des milliers de professionnels de la vente qui utilisent ZIVR.',ctabtn:'Commencer Gratuitement — Sans Carte de Crédit →',
+    fl1:'Politique de Confidentialité',fl2:'Conditions d\'Utilisation',fl3:'Contact',flcopy:'© 2026 ZIVR.AI — Tous droits réservés.',
+    nl1:'Comment ça marche',nl2:'Fonctionnalités',nl3:'Tarifs',nl4:'Contact',nlLogin:'Connexion',nlCta:'Commencer',
+    loginTitle:'Bon retour',loginSub:'Connecte-toi à ton compte ZIVR',regTitle:'Crée ton compte',regSub:'Commence gratuitement — sans carte de crédit',
+    nameLabel:'Nom complet',emailLabel:'Email',passLabel:'Mot de passe',loginBtn:'Se connecter →',regBtn:'Créer un compte →',
+    noAcc:'Pas de compte?',createAcc:'Créer un compte',hasAcc:'Déjà un compte?',signin:'Se connecter',
+    dashT:'Tableau de bord',leadsT:'Mes Leads',leadsS:'Gérer et appeler tes prospects',genT:'Générateur de Leads',genS:'Recherche de prospects par IA',accT:'Mon Compte',adminT:'Panel Admin',adminS:'Plan Agence · Accès restreint',
+    st1:'Démos',st2:'Appels',st3:'Leads',
+    slRecent:'Activité Récente',slProfile:'Profil',slPlan:'Plan Actuel',slUpgrade:'Mettre à Niveau',slAI:'Assistant IA — Temps Réel',slResult:'Résultat de l\'Appel',slSaleType:'Type de Vente',slSources:'Sources',slAllUsers:'Tous les Utilisateurs',
+    lblName:'Nom',lblAgency:'Nom de l\'Agence',lblCity:'Ville / Région',lblQty:'Quantité',lblBtype:'Type de business (optionnel)',
+    lbl_fn:'Prénom',lbl_ln:'Nom',lbl_biz:'Business',lbl_ph:'Téléphone',lbl_em:'Email',lbl_addr:'Adresse',lbl_web:'Site Web',lbl_niche:'Niche',lbl_rating:'Note Google',lbl_notes:'Notes',lbl_hassite:'Ce prospect a déjà un site web',
+    modalAddT:'Ajouter un Lead',modalAddS:'Entrée manuelle ou Quick Fill IA',modalLogT:'Logger l\'Appel',
+    lbl_addbtn:'Ajouter le Lead',lbl_savecall:'Sauvegarder',lbl_cbdate:'Date de Rappel',
+    qfBtn:'⚡ Quick Fill — Colle un nom / URL, l\'IA remplit tout',
+    rb1:'Démo Bookée',rb2:'Rappel',rb3:'Pas Intéressé',rb4:'En Cours',
+    bnav1:'Dashboard',bnav2:'Leads',bnav3:'Générer',bnav4:'Compte',bnav5:'Admin',
+    fp_all:'Tous',fp_pending:'À Appeler',fp_booked:'Démo',fp_callback:'Rappel',fp_no:'Non',
+    searchPh:'Rechercher...',genBtn:'🔍 Générer des Leads',gBtn:'🔍 Générer des Leads',
+    callBtn:'📞 Appeler',logBtn:'📋 Logger',saveProfile:'Sauvegarder',
+    aiWelcome:"💬 Tape ce que dit le prospect — je te suggère quoi répondre instantanément.",
+    savedOk:'✓ Sauvegardé',emptyLeads:'Aucun lead',emptyLeadsSub:'Ajoute des leads manuellement ou génère-les avec l\'IA',
+    emptyRecent:'Aucun appel pour l\'instant',emptyRecentSub:'Va dans Leads pour commencer',
+    upgradeTitle:'Générateur de Leads',upgradeSub:'Passe au plan Pro ou Agence pour accéder au générateur de leads IA.',upgradeCta:'Voir les plans →',
+    adm1:'Utilisateurs',adm2:'Leads Total',adm3:'Démos Total',
+    pgAi:'Agence IA',pgWeb:'Site Web',pgChalet:'STR / Airbnb',pgOther:'Autre',
+    ob1q:'Question 1 sur 4',ob1t:"Qu’est-ce que tu vends?",ob1s:'Personnalise tes scripts et la génération de leads.',
+    ob2q:'Question 2 sur 4',ob2t:'Quelle est la taille de ton équipe?',ob2s:"On va configurer le bon plan pour ta taille.",
+    ob3q:'Question 3 sur 4',ob3t:"Quel est ton objectif principal?",ob3s:"On va prioriser les fonctionnalités qui comptent le plus.",
+    ob4q:'Question 4 sur 4',ob4t:'Comment as-tu trouvé ZIVR?',ob4s:"Ça nous aide à comprendre ce qui fonctionne.",
+    obNext:'Continuer →',obSkip:'Passer pour l\'instant',obFinish:'Entrer dans ZIVR →',
+    spBack:'← Retour',privacyTitle:'Politique de Confidentialité',termsTitle:"Conditions d’Utilisation",contactTitle:'Nous Contacter',
+  },
+  es:{
+    pill:'Plataforma de Ventas IA',h1a:'Cierra Más Rápido.',h1b:'Vende Más Inteligente.',
+    hsub:'ZIVR da a cada vendedor un <strong>coach IA en tiempo real</strong> durante las llamadas, un generador de leads inteligente, y un CRM completo — todo en una sola plataforma.',
+    hcta1:'Comenzar Gratis →',hcta2:'Ver Funciones',cnt1l:'Usuarios Activos',cnt2l:'Leads Generados',cnt3l:'Demos Agendadas',cnt4l:'Idiomas',
+    howey:'Cómo funciona',howh:'De la llamada en frío<br>al trato cerrado.',
+    h1t:'Generar Leads Reales',h1d:'Nuestra IA encuentra prospectos calificados con números de teléfono, emails y direcciones reales — listos para llamar en segundos.',
+    h2t:'Llamar con Soporte IA',h2d:'En cada paso, ZIVR sugiere automáticamente la respuesta perfecta. Escribe lo que dice el prospecto para coaching IA instantáneo.',
+    h3t:'Cerrar y Rastrear',h3d:'Registra cada llamada, rastrea cada resultado. ZIVR gestiona los seguimientos automáticamente. Historial completo de cada contacto.',
+    featy:'Funciones',feath:'Todo lo que necesitas<br>para dominar las ventas.',
+    f1l:'Función Principal',f1t:'Coach IA en Tiempo Real + Auto-Sugerencia',f1d:'ZIVR sugiere automáticamente qué decir en cada paso del script. También puedes escribir lo que dice el prospecto para coaching instantáneo. Maneja cada objeción como un pro, cada vez.',
+    f2l:'Generación de Leads',f2t:'Generador de Leads con IA',f2d:'Genera leads calificados con información de contacto real — nombre, teléfono, email, dirección — en segundos.',
+    f3l:'Scripts',f3t:'Scripts de Llamada Adaptativos',f3d:'Los scripts se adaptan a cada respuesta. Sí, No, Dudando, Objeciones — ZIVR te guía en cada camino para tu nicho.',
+    f4l:'CRM',f4t:'Gestión Completa de Leads',f4d:'Perfiles completos de leads con historial de llamadas, notas, programación de seguimientos y seguimiento de estado.',
+    f5l:'Plan Agencia',f5t:'Panel Admin del Equipo',f5d:'Ve los leads, llamadas y demos de todo tu equipo en tiempo real. Solo en el plan Agencia — por invitación.',
+    f6l:'Internacional',f6t:'Plataforma Trilingüe',f6d:'Soporte completo para inglés, francés y español. Cambia el idioma en la configuración de tu cuenta.',
+    testiy:'Resultados',testih:'Equipos cerrando más<br>con ZIVR.',
+    t1:'"ZIVR cambió completamente cómo mi equipo maneja las objeciones. El coach IA es como tener a un gran vendedor susurrándote la respuesta correcta en cada llamada."',
+    t2:'"Pasamos de 3 demos por semana a 14. El generador de leads se pagó solo el primer día."',
+    t3:'"Por fin una herramienta de ventas que funciona en español. Mi equipo luchaba con software solo en inglés."',
+    pricey:'Precios',priceh:'Precios simples.<br>Resultados serios.',
+    pp1l:'Plan 01',pp1n:'Gratis',pp1p:'Siempre gratis · Con publicidad',
+    pf1a:'Scripts básicos',pf1b:'5 leads IA / mes',pf1c:'Registro de llamadas',pf1d:'Coach IA en tiempo real',pf1e:'Panel admin',pb1:'Comenzar Gratis',
+    pp2l:'Plan 02 — Más Popular',pp2n:'Pro',pp2p:'Por mes · Prueba gratis 7 días',
+    pf2a:'Scripts completos + Coach IA',pf2b:'50 leads IA / mes',pf2c:'IA tiempo real + auto-sugerencia',pf2d:'Historial completo',pf2e:'Panel admin',pb2:'Iniciar Prueba Gratis →',
+    pp3l:'Plan 03',pp3n:'Agencia',pp3p:'Por mes · Prueba gratis 7 días',
+    pf3a:'Todo lo de Pro',pf3b:'Leads IA ilimitados',pf3c:'Panel admin del equipo',pf3d:'Acceso multi-usuario',pf3e:'Exportar CSV + soporte prioritario',pb3:'Iniciar Prueba Gratis →',
+    ctah:'¿Listo para cerrar más rápido?',ctas:'Únete a miles de profesionales de ventas que usan ZIVR.',ctabtn:'Comenzar Gratis — Sin Tarjeta de Crédito →',
+    fl1:'Política de Privacidad',fl2:'Términos de Servicio',fl3:'Contacto',flcopy:'© 2026 ZIVR.AI — Todos los derechos reservados.',
+    nl1:'Cómo funciona',nl2:'Funciones',nl3:'Precios',nl4:'Contacto',nlLogin:'Iniciar Sesión',nlCta:'Comenzar',
+    loginTitle:'Bienvenido de vuelta',loginSub:'Inicia sesión en tu cuenta ZIVR',regTitle:'Crea tu cuenta',regSub:'Comienza gratis — sin tarjeta de crédito',
+    nameLabel:'Nombre completo',emailLabel:'Correo',passLabel:'Contraseña',loginBtn:'Iniciar Sesión →',regBtn:'Crear Cuenta →',
+    noAcc:'¿Sin cuenta?',createAcc:'Crear una gratis',hasAcc:'¿Ya tienes cuenta?',signin:'Iniciar sesión',
+    dashT:'Panel Principal',leadsT:'Mis Leads',leadsS:'Gestiona y llama a tus prospectos',genT:'Generador de Leads',genS:'Buscador de prospectos con IA',accT:'Mi Cuenta',adminT:'Panel Admin',adminS:'Plan Agencia · Acceso restringido',
+    st1:'Demos',st2:'Llamadas',st3:'Leads',
+    slRecent:'Actividad Reciente',slProfile:'Perfil',slPlan:'Plan Actual',slUpgrade:'Actualizar Plan',slAI:'Asistente IA — Tiempo Real',slResult:'Resultado de la Llamada',slSaleType:'Tipo de Venta',slSources:'Fuentes',slAllUsers:'Todos los Usuarios',
+    lblName:'Nombre',lblAgency:'Nombre de la Agencia',lblCity:'Ciudad / Región',lblQty:'Cantidad',lblBtype:'Tipo de negocio (opcional)',
+    lbl_fn:'Nombre',lbl_ln:'Apellido',lbl_biz:'Negocio',lbl_ph:'Teléfono',lbl_em:'Correo',lbl_addr:'Dirección',lbl_web:'Sitio Web',lbl_niche:'Nicho',lbl_rating:'Calificación Google',lbl_notes:'Notas',lbl_hassite:'El prospecto ya tiene un sitio web',
+    modalAddT:'Agregar Lead',modalAddS:'Entrada manual o Quick Fill IA',modalLogT:'Registrar Llamada',
+    lbl_addbtn:'Agregar Lead',lbl_savecall:'Guardar Llamada',lbl_cbdate:'Fecha de Llamada',
+    qfBtn:'⚡ Quick Fill — Pega un nombre / URL, la IA llena todo',
+    rb1:'Demo Agendada',rb2:'Rellamar',rb3:'No Interesado',rb4:'En Progreso',
+    bnav1:'Panel',bnav2:'Leads',bnav3:'Generar',bnav4:'Cuenta',bnav5:'Admin',
+    fp_all:'Todos',fp_pending:'Llamar',fp_booked:'Demo',fp_callback:'Rellamar',fp_no:'No',
+    searchPh:'Buscar leads...',genBtn:'🔍 Generar Leads',gBtn:'🔍 Generar Leads',
+    callBtn:'📞 Llamar',logBtn:'📋 Registrar',saveProfile:'Guardar Perfil',
+    aiWelcome:"💬 Escribe lo que dice el prospecto — te sugiero qué responder al instante.",
+    savedOk:'✓ Guardado',emptyLeads:'Sin leads aún',emptyLeadsSub:'Agrega leads manualmente o genéralos con IA',
+    emptyRecent:'Sin llamadas aún',emptyRecentSub:'Ve a Leads para empezar',
+    upgradeTitle:'Generador de Leads',upgradeSub:'Actualiza a Pro o Agencia para acceder al generador de leads con IA.',upgradeCta:'Ver Planes →',
+    adm1:'Usuarios',adm2:'Leads Total',adm3:'Demos Total',
+    pgAi:'Agencia IA',pgWeb:'Sitio Web',pgChalet:'STR / Airbnb',pgOther:'Otro',
+    ob1q:'Pregunta 1 de 4',ob1t:"¿Qué estás vendiendo?",ob1s:'Personaliza tus scripts y generación de leads.',
+    ob2q:'Pregunta 2 de 4',ob2t:'¿Qué tan grande es tu equipo?',ob2s:"Configuraremos el plan correcto para tu tamaño.",
+    ob3q:'Pregunta 3 de 4',ob3t:"¿Cuál es tu objetivo principal?",ob3s:"Priorizaremos las funciones más importantes para ti.",
+    ob4q:'Pregunta 4 de 4',ob4t:'¿Cómo encontraste ZIVR?',ob4s:"Nos ayuda a entender qué funciona.",
+    obNext:'Continuar →',obSkip:'Omitir por ahora',obFinish:'Entrar a ZIVR →',
+    spBack:'← Atrás',privacyTitle:'Política de Privacidad',termsTitle:'Términos de Servicio',contactTitle:'Contáctanos',
+  },
+};
+
+// ── STATIC PAGE CONTENT
+const PAGES={
+  privacy:(l)=>{
+    const t=TR[l];
+    const c={
+      en:{h3a:'Information We Collect',p1:'At ZIVR.AI we take your privacy seriously. This policy explains what we collect, how we use it, and your rights.',li1a:'Account information: name, email, agency name',li1b:'Usage data: leads created, calls logged, features used',li1c:'Onboarding responses: business type, team size, goals',li1d:'Technical data: browser type, IP address, session timestamps',h3b:'How We Use Your Information',li2a:'To provide and improve the ZIVR platform',li2b:'To personalize your experience and sales scripts',li2c:'To send important product updates and security alerts',h3c:'Data Storage & Security',p2:'Your data is stored securely on Supabase infrastructure in North America with industry-standard encryption.',h3d:'Data Sharing',p3:'We do not sell your personal data. We share data only with providers necessary to operate ZIVR.',h3e:'Your Rights',li3a:'Access, correct, or delete your data at any time',li3b:'Export your leads and call history as CSV',li3c:'Request account deletion: support@zivr.ai',h3f:'Contact',p4:'privacy@zivr.ai'},
+      fr:{h3a:'Informations que nous collectons',p1:"Chez ZIVR.AI, nous prenons votre vie privée très au sérieux. Cette politique explique ce que nous collectons, comment nous l’utilisons, et vos droits.",li1a:"Informations de compte : nom, email, nom d’agence",li1b:"Données d’utilisation : leads créés, appels enregistrés, fonctionnalités utilisées",li1c:'Réponses d’intégration : type de business, taille d’équipe, objectifs',li1d:'Données techniques : type de navigateur, adresse IP, horodatages de session',h3b:'Comment nous utilisons vos informations',li2a:'Pour fournir et améliorer la plateforme ZIVR',li2b:'Pour personnaliser votre expérience et vos scripts de vente',li2c:'Pour envoyer les mises à jour importantes du produit',h3c:'Stockage et sécurité des données',p2:"Vos données sont stockées de manière sécurisée sur l’infrastructure Supabase en Amérique du Nord avec un chiffrement standard.",h3d:'Partage des données',p3:'Nous ne vendons pas vos données personnelles. Nous partageons les données uniquement avec les fournisseurs nécessaires au fonctionnement de ZIVR.',h3e:'Vos droits',li3a:'Accéder, corriger ou supprimer vos données à tout moment',li3b:"Exporter vos leads et historique d’appels en CSV",li3c:'Demander la suppression du compte : support@zivr.ai',h3f:'Contact',p4:'privacy@zivr.ai'},
+      es:{h3a:'Información que recopilamos',p1:'En ZIVR.AI nos tomamos su privacidad muy en serio. Esta política explica qué recopilamos, cómo lo usamos y sus derechos.',li1a:'Información de cuenta: nombre, correo, nombre de agencia',li1b:'Datos de uso: leads creados, llamadas registradas, funciones usadas',li1c:'Respuestas de incorporación: tipo de negocio, tamaño de equipo, objetivos',li1d:'Datos técnicos: tipo de navegador, dirección IP, marcas de tiempo de sesión',h3b:'Cómo usamos su información',li2a:'Para proporcionar y mejorar la plataforma ZIVR',li2b:'Para personalizar su experiencia y scripts de ventas',li2c:'Para enviar actualizaciones importantes del producto',h3c:'Almacenamiento y seguridad de datos',p2:'Sus datos se almacenan de forma segura en la infraestructura de Supabase en América del Norte con cifrado estándar.',h3d:'Compartir datos',p3:'No vendemos sus datos personales. Compartimos datos solo con proveedores necesarios para operar ZIVR.',h3e:'Sus derechos',li3a:'Acceder, corregir o eliminar sus datos en cualquier momento',li3b:'Exportar sus leads e historial de llamadas como CSV',li3c:'Solicitar eliminación de cuenta: support@zivr.ai',h3f:'Contacto',p4:'privacy@zivr.ai'},
+    };
+    const d=c[l]||c.en;
+    return {title:t.privacyTitle,sub:'Last updated: April 19, 2026',html:`<p>${d.p1}</p><h3>${d.h3a}</h3><ul><li>${d.li1a}</li><li>${d.li1b}</li><li>${d.li1c}</li><li>${d.li1d}</li></ul><h3>${d.h3b}</h3><ul><li>${d.li2a}</li><li>${d.li2b}</li><li>${d.li2c}</li></ul><h3>${d.h3c}</h3><p>${d.p2}</p><h3>${d.h3d}</h3><p>${d.p3}</p><h3>${d.h3e}</h3><ul><li>${d.li3a}</li><li>${d.li3b}</li><li>${d.li3c}</li></ul><h3>${d.h3f}</h3><p>${d.p4}</p>`};
+  },
+  terms:(l)=>{
+    const t=TR[l];
+    const c={
+      en:{p1:'By using ZIVR.AI, you agree to these Terms of Service.',h3a:'User Accounts',li1a:'You must be 18+ and provide accurate information',li1b:'You are responsible for your account security',li1c:'No sharing accounts or creating multiple accounts',h3b:'Acceptable Use',li2a:'Use ZIVR only for lawful sales and business development',li2b:'No harassment, spam, or communications in violation of law',li2c:'No reselling ZIVR services without written permission',h3c:'Subscriptions',li3a:'Free plan: indefinitely free, ad-supported',li3b:'Paid plans: billed monthly, cancel anytime',li3c:'7-day free trial on Pro and Agency plans',h3d:'Limitation of Liability',p2:'ZIVR is provided "as is." Not responsible for sales results or indirect damages. Governed by the laws of Quebec, Canada.',h3e:'Contact',p3:'legal@zivr.ai'},
+      fr:{p1:"En utilisant ZIVR.AI, vous acceptez ces Conditions d’Utilisation.",h3a:'Comptes utilisateurs',li1a:'Vous devez avoir 18 ans ou plus et fournir des informations exactes',li1b:'Vous êtes responsable de la sécurité de votre compte',li1c:'Pas de partage de compte ni de création de comptes multiples',h3b:'Utilisation acceptable',li2a:'Utilisez ZIVR uniquement pour les ventes et le développement commercial légaux',li2b:'Pas de harcèlement, spam ou communications en violation de la loi',li2c:'Pas de revente des services ZIVR sans permission écrite',h3c:'Abonnements',li3a:'Plan gratuit : gratuit indéfiniment, avec publicités',li3b:'Plans payants : facturés mensuellement, annulation à tout moment',li3c:'Essai gratuit de 7 jours sur les plans Pro et Agence',h3d:'Limitation de responsabilité',p2:'ZIVR est fourni "tel quel." Non responsable des résultats de vente ou dommages indirects. Régi par les lois de la Province de Québec, Canada.',h3e:'Contact',p3:'legal@zivr.ai'},
+      es:{p1:'Al usar ZIVR.AI, usted acepta estos Términos de Servicio.',h3a:'Cuentas de usuario',li1a:'Debe tener 18+ años y proporcionar información precisa',li1b:'Usted es responsable de la seguridad de su cuenta',li1c:'No compartir cuentas ni crear múltiples cuentas',h3b:'Uso aceptable',li2a:'Use ZIVR solo para ventas y desarrollo comercial lícito',li2b:'Sin acoso, spam o comunicaciones que violen la ley',li2c:'Sin reventa de servicios ZIVR sin permiso escrito',h3c:'Suscripciones',li3a:'Plan gratuito: gratis indefinidamente, con publicidad',li3b:'Planes de pago: facturación mensual, cancelación en cualquier momento',li3c:'Prueba gratuita de 7 días en planes Pro y Agencia',h3d:'Limitación de responsabilidad',p2:'ZIVR se proporciona "tal cual". No responsable de resultados de ventas o daños indirectos. Regido por las leyes de Quebec, Canadá.',h3e:'Contacto',p3:'legal@zivr.ai'},
+    };
+    const d=c[l]||c.en;
+    return {title:t.termsTitle,sub:'Last updated: April 19, 2026',html:`<p>${d.p1}</p><h3>${d.h3a}</h3><ul><li>${d.li1a}</li><li>${d.li1b}</li><li>${d.li1c}</li></ul><h3>${d.h3b}</h3><ul><li>${d.li2a}</li><li>${d.li2b}</li><li>${d.li2c}</li></ul><h3>${d.h3c}</h3><ul><li>${d.li3a}</li><li>${d.li3b}</li><li>${d.li3c}</li></ul><h3>${d.h3d}</h3><p>${d.p2}</p><h3>${d.h3e}</h3><p>${d.p3}</p>`};
+  },
+  contact:(l)=>{
+    const t=TR[l];
+    const c={
+      en:{intro:'Have a question? Email us at',namePh:'Your name',subj:'Subject',opts:['General Question','Technical Support','Billing & Plans','Feature Request','Partnership'],msgPh:'Describe your question...',send:'Send →',ok:"✅ Message sent! We’ll reply within 24 hours."},
+      fr:{intro:'Une question ? Écrivez-nous à',namePh:'Votre nom',subj:'Sujet',opts:['Question générale','Support technique','Facturation & Plans','Demande de fonctionnalité','Partenariat'],msgPh:'Décrivez votre question...',send:'Envoyer →',ok:'✅ Message envoyé ! Nous répondrons dans les 24 heures.'},
+      es:{intro:'¿Tiene alguna pregunta? Escríbanos a',namePh:'Su nombre',subj:'Asunto',opts:['Pregunta general','Soporte técnico','Facturación y Planes','Solicitud de función','Asociación'],msgPh:'Describa su pregunta...',send:'Enviar →',ok:'✅ ¡Mensaje enviado! Responderemos en 24 horas.'},
+    };
+    const d=c[l]||c.en;
+    const subLabel={en:'We respond within 24 hours on business days.',fr:'Nous répondons dans les 24 heures les jours ouvrables.',es:'Respondemos dentro de las 24 horas en días hábiles.'};
+    return {title:t.contactTitle,sub:subLabel[l]||subLabel.en,html:`
+      <p>${d.intro} <strong style="color:var(--g)">support@zivr.ai</strong></p>
+      <div style="margin-top:28px">
+        <div class="cf-row"><label class="cf-lbl">${t.nameLabel}</label><input class="cf-inp" id="cf1" placeholder="${d.namePh}"></div>
+        <div class="cf-row"><label class="cf-lbl">Email</label><input class="cf-inp" id="cf2" type="email" placeholder="you@company.com"></div>
+        <div class="cf-row"><label class="cf-lbl">${d.subj}</label><select class="cf-inp" id="cf3" style="cursor:pointer;appearance:none">${d.opts.map(o=>`<option>${o}</option>`).join('')}</select></div>
+        <div class="cf-row"><label class="cf-lbl">Message</label><textarea class="cf-ta" id="cf4" placeholder="${d.msgPh}"></textarea></div>
+        <button class="cf-sub" onclick="submitCF()">${d.send}</button>
+        <div class="cf-ok" id="cf-ok">${d.ok}</div>
+      </div>`};
+  }
+};
+// ── APPLY TRANSLATIONS
+function applyLang(l){
+  const t=TR[l];if(!t)return;
+  const set=(id,val,prop='textContent')=>{const el=document.getElementById(id);if(el){if(prop==='innerHTML')el.innerHTML=val;else el.textContent=val;}};
+  const setPlaceholder=(id,val)=>{const el=document.getElementById(id);if(el)el.placeholder=val;};
+  // Landing
+  set('h-pill',t.pill);set('h-l1',t.h1a);set('h-l2',t.h1b);
+  set('h-sub',t.hsub,'innerHTML');set('h-cta1',t.hcta1);set('h-cta2',t.hcta2);
+  set('cnt1l',t.cnt1l);set('cnt2l',t.cnt2l);set('cnt3l',t.cnt3l);set('cnt4l',t.cnt4l);
+  set('s-how-ey',t.howey);set('s-how-h',t.howh,'innerHTML');
+  set('h1t',t.h1t);set('h1d',t.h1d);set('h2t',t.h2t);set('h2d',t.h2d);set('h3t',t.h3t);set('h3d',t.h3d);
+  set('s-feat-ey',t.featy);set('s-feat-h',t.feath,'innerHTML');
+  set('f1l',t.f1l);set('f1t',t.f1t);set('f1d',t.f1d);
+  set('f2l',t.f2l);set('f2t',t.f2t);set('f2d',t.f2d);
+  set('f3l',t.f3l);set('f3t',t.f3t);set('f3d',t.f3d);
+  set('f4l',t.f4l);set('f4t',t.f4t);set('f4d',t.f4d);
+  set('f5l',t.f5l);set('f5t',t.f5t);set('f5d',t.f5d);
+  set('f6l',t.f6l);set('f6t',t.f6t);set('f6d',t.f6d);
+  set('s-testi-ey',t.testiy);set('s-testi-h',t.testih,'innerHTML');
+  set('t1',t.t1);set('t2',t.t2);set('t3',t.t3);
+  set('s-price-ey',t.pricey);set('s-price-h',t.priceh,'innerHTML');
+  set('pp1l',t.pp1l);set('pp1n',t.pp1n);set('pp1p',t.pp1p);
+  set('pf1a',t.pf1a);set('pf1b',t.pf1b);set('pf1c',t.pf1c);set('pf1d',t.pf1d);set('pf1e',t.pf1e);set('pb1',t.pb1);
+  set('pp2l',t.pp2l);set('pp2n',t.pp2n);set('pp2p',t.pp2p);
+  set('pf2a',t.pf2a);set('pf2b',t.pf2b);set('pf2c',t.pf2c);set('pf2d',t.pf2d);set('pf2e',t.pf2e);set('pb2',t.pb2);
+  set('pp3l',t.pp3l);set('pp3n',t.pp3n);set('pp3p',t.pp3p);
+  set('pf3a',t.pf3a);set('pf3b',t.pf3b);set('pf3c',t.pf3c);set('pf3d',t.pf3d);set('pf3e',t.pf3e);set('pb3',t.pb3);
+  set('cta-h',t.ctah);set('cta-sub',t.ctas);set('cta-btn',t.ctabtn);
+  set('fl1',t.fl1);set('fl2',t.fl2);set('fl3',t.fl3);set('fl-copy',t.flcopy);
+  set('nl1',t.nl1);set('nl2',t.nl2);set('nl3',t.nl3);set('nl4',t.nl4);
+  set('nlLogin',t.nlLogin);set('nlCta',t.nlCta);
+  // Auth
+  if(!isReg){set('aTitle',t.loginTitle);set('aSub',t.loginSub);set('aBtn',t.loginBtn);set('aSwitch','');if(document.getElementById('aSwitch'))document.getElementById('aSwitch').innerHTML=`${t.noAcc} <a onclick="toggleReg()">${t.createAcc}</a>`;}
+  else{set('aTitle',t.regTitle);set('aSub',t.regSub);set('aBtn',t.regBtn);if(document.getElementById('aSwitch'))document.getElementById('aSwitch').innerHTML=`${t.hasAcc} <a onclick="toggleReg()">${t.signin}</a>`;}
+  set('aNameLbl',t.nameLabel);set('aEmailLbl',t.emailLabel);set('aPassLbl',t.passLabel);
+  // App
+  set('app-dash-t',t.dashT);set('app-leads-t',t.leadsT);set('app-leads-s',t.leadsS);
+  set('app-gen-t',t.genT);set('app-gen-s',t.genS);set('app-acc-t',t.accT);
+  set('app-admin-t',t.adminT);set('app-admin-s',t.adminS);
+  set('st1l',t.st1);set('st2l',t.st2);set('st3l',t.st3);
+  set('sl-recent',t.slRecent);set('sl-profile',t.slProfile);set('sl-plan',t.slPlan);set('sl-upgrade',t.slUpgrade);
+  set('sl-ai',t.slAI);set('sl-result',t.slResult);set('sl-saletype',t.slSaleType);set('sl-sources',t.slSources);set('sl-allusers',t.slAllUsers);
+  set('lbl-name',t.lblName);set('lbl-agency',t.lblAgency);set('gl-city',t.lblCity);set('gl-qty',t.lblQty);set('gl-btype',t.lblBtype);
+  set('lbl-fn',t.lbl_fn);set('lbl-ln',t.lbl_ln);set('lbl-biz',t.lbl_biz);set('lbl-ph',t.lbl_ph);set('lbl-em',t.lbl_em);set('lbl-addr',t.lbl_addr);set('lbl-web',t.lbl_web);set('lbl-niche',t.lbl_niche);set('lbl-rating',t.lbl_rating);set('lbl-notes',t.lbl_notes);set('lbl-hassite',t.lbl_hassite);
+  set('modal-add-t',t.modalAddT);set('modal-add-s',t.modalAddS);set('modal-log-t',t.modalLogT);
+  set('lbl-addbtn',t.lbl_addbtn);set('lbl-savecall',t.lbl_savecall);set('lbl-cbdate',t.lbl_cbdate);
+  set('qfBtn',t.qfBtn);set('rb1',t.rb1);set('rb2',t.rb2);set('rb3',t.rb3);set('rb4',t.rb4);
+  set('bnav1',t.bnav1);set('bnav2',t.bnav2);set('bnav3',t.bnav3);set('bnav4',t.bnav4);set('bnav5',t.bnav5);
+  set('fp-all',t.fp_all);set('fp-pending',t.fp_pending);set('fp-booked',t.fp_booked);set('fp-callback',t.fp_callback);set('fp-no',t.fp_no);
+  set('pg-ai',t.pgAi);set('pg-web',t.pgWeb);set('pg-chalet',t.pgChalet);set('pg-other',t.pgOther);
+  set('gBtn',t.gBtn);set('adm1l',t.adm1);set('adm2l',t.adm2);set('adm3l',t.adm3);
+  setPlaceholder('lSearch',t.searchPh);setPlaceholder('aiIn',t.aiWelcome.replace('💬 ',''));
+  set('aiWelcome',t.aiWelcome);
+  set('sp-back-btn',t.spBack);
+  set('sSaveBtn',t.saveProfile);
+  // Settings lang select
+  const sl=document.getElementById('sLang');if(sl)sl.value=l;
+}
+
+function setLang(l,btn){
+  lang=l;
+  document.querySelectorAll('.lang-sw button').forEach(b=>{b.classList.remove('on');});
+  btn.classList.add('on');
+  applyLang(l);
+}
+function setLangFromApp(l){
+  lang=l;
+  document.querySelectorAll('.lang-sw button').forEach(b=>b.classList.remove('on'));
+  const btn=document.getElementById('ll'+l);if(btn)btn.classList.add('on');
+  applyLang(l);
+  renderLeads();renderRecent();updateStats();
+}
+
+// ── SCROLL NAV
+window.addEventListener('scroll',()=>document.getElementById('mainNav')?.classList.toggle('stuck',scrollY>60));
+
+// ── COUNTERS
+function animCnt(id,target){let n=0;const s=Math.ceil(target/55);const iv=setInterval(()=>{n=Math.min(n+s,target);const el=document.getElementById(id);if(el)el.textContent=n.toLocaleString();if(n>=target)clearInterval(iv);},28);}
+
+// ── DEMO FILL
+function fillDemo(email, pass) {
+  if(isReg) toggleReg();
+  document.getElementById('aEmail').value = email;
+  document.getElementById('aPass').value = pass;
+  document.getElementById('aBtn').style.boxShadow = '0 0 28px rgba(0,230,118,.5)';
+  setTimeout(() => { document.getElementById('aBtn').style.boxShadow = ''; }, 800);
+}
+
+// ── SUPABASE INIT
+async function init(){
+  await new Promise(r=>setTimeout(r,1700));
+  document.getElementById('loading').style.display='none';
+  document.getElementById('landing').style.display='block';
+  setTimeout(()=>{animCnt('cnt1',1247);animCnt('cnt2',38420);animCnt('cnt3',5831);},400);
+  applyLang('en');
+  try{
+    const {data:{session}}=await db.auth.getSession();
+    if(session){user=session.user;await loadProfile();await checkOb();}
+    db.auth.onAuthStateChange(async(e,s)=>{
+      if(e==='SIGNED_IN'&&s){user=s.user;await loadProfile();await checkOb();}
+      else if(e==='SIGNED_OUT'){user=null;profile=null;document.getElementById('appScreen').classList.remove('on');document.getElementById('onboarding').style.display='none';document.getElementById('landing').style.display='block';applyLang(lang);}
+    });
+  }catch(err){
+    console.warn('Supabase init error:',err);
+    // Still show landing — auth will work when user tries to sign in
+  }
+}
+
+async function loadProfile(){
+  const {data,error}=await db.from('profiles').select('*').eq('id',user.id).single();
+  profile=data||{id:user.id,full_name:user.user_metadata?.full_name||user.email,plan:'free',role:'user',onboarding_done:false};
+}
+
+async function checkOb(){
+  if(!profile?.onboarding_done){
+    document.getElementById('landing').style.display='none';
+    document.getElementById('authScreen').classList.remove('on');
+    startOb();
+  } else {
+    showApp();
+  }
+}
+
+function showApp(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('authScreen').classList.remove('on');
+  document.getElementById('onboarding').style.display='none';
+  document.getElementById('appScreen').classList.add('on');
+  const name=profile?.full_name||user.email;
+  document.getElementById('appAvatar').textContent=name.charAt(0).toUpperCase();
+  document.getElementById('dUser').textContent=name.split(' ')[0];
+  document.getElementById('sName').value=name;
+  document.getElementById('sAgency').value=profile?.agency_name||'';
+  document.getElementById('sLang').value=lang;
+  const plan=profile?.plan||'free';
+  const pb=document.getElementById('planBadge');
+  pb.textContent={free:'Free',pro:'Pro',agence:'Agency',admin:'Admin'}[plan]||'Free';
+  pb.className='plan-bdg '+{free:'bdg-free',pro:'bdg-pro',agence:'bdg-agence',admin:'bdg-admin'}[plan];
+  // Admin — agency only
+  document.getElementById('navAdmin').style.display=(profile?.role==='admin')?'flex':'none';
+  applyLang(lang);
+  loadLeads();loadLogs();renderGenGate();renderPlans();renderCurPlan();
+}
+
+// ── AUTH
+let isReg=false;
+function openAuth(reg=false){
+  if(reg&&!isReg)toggleReg();
+  document.getElementById('landing').style.display='none';
+  document.getElementById('authScreen').classList.add('on');
+}
+function closeAuth(){
+  document.getElementById('authScreen').classList.remove('on');
+  document.getElementById('landing').style.display='block';
+}
+function toggleReg(){
+  isReg=!isReg;
+  const t=TR[lang];
+  document.getElementById('aTitle').textContent=isReg?t.regTitle:t.loginTitle;
+  document.getElementById('aSub').textContent=isReg?t.regSub:t.loginSub;
+  document.getElementById('aNameFld').style.display=isReg?'block':'none';
+  document.getElementById('aBtn').textContent=isReg?t.regBtn:t.loginBtn;
+  document.getElementById('aSwitch').innerHTML=isReg?`${t.hasAcc} <a onclick="toggleReg()">${t.signin}</a>`:`${t.noAcc} <a onclick="toggleReg()">${t.createAcc}</a>`;
+  document.getElementById('authErr').style.display='none';
+  document.getElementById('authOk').style.display='none';
+}
+async function doAuth(){
+  const em=document.getElementById('aEmail').value.trim();
+  const pw=document.getElementById('aPass').value;
+  const btn=document.getElementById('aBtn');
+  if(!em||!pw){showAuthMsg('Email and password required',false);return;}
+  btn.disabled=true;btn.textContent='⏳ ...';
+  document.getElementById('authErr').style.display='none';document.getElementById('authOk').style.display='none';
+  try{
+    if(isReg){
+      const nm=document.getElementById('aName').value.trim()||'User';
+      const {error}=await db.auth.signUp({email:em,password:pw,options:{data:{full_name:nm}}});
+      if(error)throw error;
+      showAuthMsg('✅ Check your email to confirm your account!',true);
+    }else{
+      const {error}=await db.auth.signInWithPassword({email:em,password:pw});
+      if(error)throw error;
+    }
+  }catch(e){showAuthMsg(e.message||'Authentication error',false);}
+  btn.disabled=false;btn.textContent=isReg?TR[lang].regBtn:TR[lang].loginBtn;
+}
+function showAuthMsg(msg,ok){
+  const el=document.getElementById(ok?'authOk':'authErr');
+  const ot=document.getElementById(ok?'authErr':'authOk');
+  ot.style.display='none';el.textContent=msg;el.style.display='block';
+}
+async function doLogout(){await db.auth.signOut();}
+
+// ── ONBOARDING
+const OB=[
+  {key:'business_type',opts:[{icon:'🤖',name:'AI Agency',val:'ai_agency'},{icon:'🌐',name:'Website',val:'website'},{icon:'🏔️',name:'STR / Airbnb',val:'str'},{icon:'✨',name:'Other',val:'other'}]},
+  {key:'team_size',opts:[{icon:'👤',name:'Just me',val:'solo'},{icon:'👥',name:'2–5 people',val:'small'},{icon:'🏢',name:'6–15 people',val:'medium'},{icon:'🏭',name:'16+ people',val:'large'}]},
+  {key:'goal',opts:[{icon:'📅',name:'Book more demos',val:'demos'},{icon:'⚡',name:'Close faster',val:'close'},{icon:'🔍',name:'Find more leads',val:'leads'},{icon:'📚',name:'Train my team',val:'train'}]},
+  {key:'how_found',opts:[{icon:'🔎',name:'Google',val:'google'},{icon:'📱',name:'Social Media',val:'social'},{icon:'🤝',name:'Referral',val:'referral'},{icon:'✨',name:'Other',val:'other'}]},
+];
+function startOb(){
+  obStep=1;obData={};
+  document.getElementById('onboarding').style.display='block';
+  renderOb();
+}
+function renderOb(){
+  const t=TR[lang];
+  const s=OB[obStep-1];
+  const titles=[t.ob1t,t.ob2t,t.ob3t,t.ob4t];
+  const subs=[t.ob1s,t.ob2s,t.ob3s,t.ob4s];
+  const qs=[t.ob1q,t.ob2q,t.ob3q,t.ob4q];
+  const opts=s.opts.map(o=>{
+    const optName=(()=>{
+      if(lang==='fr'){const fmap={'AI Agency':'Agence IA','Website':'Site Web','STR / Airbnb':'STR / Airbnb','Other':'Autre','Just me':'Juste moi','2–5 people':'2–5 personnes','6–15 people':'6–15 personnes','16+ people':'16+ personnes','Book more demos':'Booker plus de démos','Close faster':'Closer plus vite','Find more leads':'Trouver plus de leads','Train my team':'Former mon équipe','Google':'Google','Social Media':'Réseaux Sociaux','Referral':'Référence','Other':'Autre'};return fmap[o.name]||o.name;}
+      if(lang==='es'){const emap={'AI Agency':'Agencia IA','Website':'Sitio Web','STR / Airbnb':'STR / Airbnb','Other':'Otro','Just me':'Solo yo','2–5 people':'2–5 personas','6–15 people':'6–15 personas','16+ people':'16+ personas','Book more demos':'Agendar más demos','Close faster':'Cerrar más rápido','Find more leads':'Encontrar más leads','Train my team':'Entrenar mi equipo','Google':'Google','Social Media':'Redes Sociales','Referral':'Referencia','Other':'Otro'};return emap[o.name]||o.name;}
+      return o.name;
+    })();
+    const sel=obData[s.key]===o.val;
+    return `<div onclick="selOb('${s.key}','${o.val}',this)" class="ob-opt${sel?' on':''} _obopt"><div class="ob-opt-icon">${o.icon}</div><div class="ob-opt-name">${optName}</div></div>`;
+  }).join('');
+  for(let i=1;i<=4;i++){const d=document.getElementById('obp'+i);if(d)d.className='ob-prog-dot'+(i<=obStep?' done':'');}
+  const isLast=obStep===4;
+  document.getElementById('obContent').innerHTML=`
+    <div class="ob-q">${qs[obStep-1]}</div>
+    <div class="ob-title">${titles[obStep-1]}</div>
+    <div class="ob-sub">${subs[obStep-1]}</div>
+    <div class="ob-opts">${opts}</div>
+    <button class="ob-next" onclick="nextOb()">${isLast?t.obFinish:t.obNext}</button>
+    <button class="ob-skip" onclick="skipOb()">${t.obSkip}</button>
+  `;
+}
+function selOb(key,val,el){
+  obData[key]=val;
+  document.querySelectorAll('._obopt').forEach(o=>{o.classList.remove('on');});
+  el.classList.add('on');
+}
+async function nextOb(){
+  if(obStep<4){obStep++;renderOb();}
+  else await finishOb();
+}
+async function finishOb(){
+  try{await db.from('profiles').update({onboarding_done:true,business_type:obData.business_type||null,team_size:obData.team_size||null,goal:obData.goal||null,how_found:obData.how_found||null}).eq('id',user.id);if(profile)profile.onboarding_done=true;}catch(e){}
+  document.getElementById('onboarding').style.display='none';
+  showApp();
+}
+async function skipOb(){
+  try{await db.from('profiles').update({onboarding_done:true}).eq('id',user.id);if(profile)profile.onboarding_done=true;}catch(e){}
+  document.getElementById('onboarding').style.display='none';
+  showApp();
+}
+
+// ── STATIC PAGES
+function showStaticPage(page){
+  const p=PAGES[page]?.(lang);if(!p)return;
+  document.getElementById('spBody').innerHTML=`<div class="sp-h1">${p.title}</div><div class="sp-updated">${p.sub}</div>${p.html}`;
+  document.getElementById('staticPage').style.display='block';
+  document.getElementById('staticPage').scrollTop=0;
+}
+function closeStaticPage(){document.getElementById('staticPage').style.display='none';}
+function submitCF(){
+  const n=document.getElementById('cf1')?.value.trim();
+  const e=document.getElementById('cf2')?.value.trim();
+  const m=document.getElementById('cf4')?.value.trim();
+  if(!n||!e||!m){alert('Please fill in all fields.');return;}
+  document.getElementById('cf-ok').style.display='block';
+  ['cf1','cf2','cf4'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+// ── SCREENS
+function showScr(name,btn){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.bni').forEach(b=>b.classList.remove('on'));
+  document.getElementById('scr'+name)?.classList.add('on');
+  if(btn)btn.classList.add('on');
+  else document.getElementById('nav'+name)?.classList.add('on');
+  if(name==='Dash'){updateStats();renderRecent();}
+  if(name==='Leads')renderLeads();
+  if(name==='Admin')loadAdmin();
+  if(name==='Gen')renderGenGate();
+}
+
+// ── LEADS
+async function loadLeads(){const {data}=await db.from('leads').select('*').eq('user_id',user.id).order('created_at',{ascending:false});leads=data||[];renderLeads();updateStats();}
+async function loadLogs(){const {data}=await db.from('call_logs').select('*').eq('user_id',user.id).order('created_at',{ascending:false});logs=data||[];updateStats();renderRecent();}
+
+const NM={chalet:'🏔️',clinique:'🦷',auto:'🚗',gym:'💪',resto:'🍽️',courtier:'🏠',autre:'🏢'};
+const PM={ai:'🤖',web:'🌐',chalet:'🏔️',other:'✨'};
+
+function renderLeads(){
+  const q=(document.getElementById('lSearch')?.value||'').toLowerCase();
+  const c=document.getElementById('leadsList');if(!c)return;
+  const t=TR[lang];
+  let fl=leads.filter(l=>{
+    const ms=`${l.first_name||''} ${l.last_name||''} ${l.business||''}`.toLowerCase().includes(q);
+    return ms&&(filterSt==='all'||l.status===filterSt);
+  });
+  if(!fl.length){c.innerHTML=`<div class="empty"><div class="empty-icon">👥</div><div class="empty-t">${t.emptyLeads}</div><div class="empty-s">${t.emptyLeadsSub}</div></div>`;return;}
+  c.innerHTML=fl.map(l=>{
+    const sb={pending:`<span class="badge bdg-b">${t.fp_pending}</span>`,booked:`<span class="badge bdg-g">${t.fp_booked}</span>`,callback:`<span class="badge bdg-o">${t.fp_callback}</span>`,no:`<span class="badge bdg-r">${t.fp_no}</span>`}[l.status]||'';
+    const locked=l.status==='no'&&l.locked_until&&new Date(l.locked_until)>new Date();
+    const days=locked?Math.ceil((new Date(l.locked_until)-new Date())/864e5):0;
+    return `<div class="lcard" onclick="openDetail('${l.id}')">
+      <div class="lcard-top"><div class="lcard-name">${NM[l.niche]||'👤'} ${l.first_name||''} ${l.last_name||''}${l.google_rating?` <span style="color:var(--g);font-size:10px">★${l.google_rating}</span>`:''}</div><div>${sb}</div></div>
+      <div class="lcard-biz">${l.business||''}${l.phone?' · '+l.phone:''}${l.address?' · '+l.address.split(',')[0]:''}</div>
+      ${l.website?`<div style="font-size:10px;color:var(--t3)">🌐 ${l.website}</div>`:''}
+      ${l.notes?`<div class="lcard-note">${l.notes}</div>`:''}
+      ${l.product==='web'&&!l.has_site?`<span class="badge bdg-o" style="margin-bottom:7px;display:inline-block">🚫 No website</span>`:''}
+      ${locked?`<div class="countdown">⏳ ${days}d</div>`:
+      `<div class="lcard-actions" onclick="event.stopPropagation()">
+        <button class="la-btn g" onclick="openCall('${l.id}')">${t.callBtn}</button>
+        <button class="la-btn" onclick="openLog('${l.id}')">${t.logBtn}</button>
+        <button class="la-btn" onclick="deleteLead('${l.id}')">🗑️</button>
+      </div>`}
+    </div>`;
+  }).join('');
+}
+
+function setFilter(s,btn){filterSt=s;document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderLeads();}
+
+// ── ADD LEAD
+let selLeadProd='ai';
+function openAddModal(){document.getElementById('addModal').classList.add('on');}
+function selLP(p,el){selLeadProd=p;document.querySelectorAll('#addModal .prod-c').forEach(c=>c.classList.remove('on'));el.classList.add('on');document.getElementById('hasSiteField').style.display=p==='web'?'block':'none';document.getElementById('noSiteWarn').style.display='none';}
+function toggleNSW(){const hs=document.getElementById('hasSite').checked;document.getElementById('noSiteWarn').style.display=(!hs&&selLeadProd==='web')?'block':'none';}
+async function saveLead(){
+  const fn=document.getElementById('mFn').value.trim();
+  const ln=document.getElementById('mLn').value.trim();
+  if(!fn&&!ln){alert('Name required');return;}
+  const lead={user_id:user.id,first_name:fn,last_name:ln,business:document.getElementById('mBiz').value.trim(),phone:document.getElementById('mPh').value.trim(),email:document.getElementById('mEm').value.trim(),address:document.getElementById('mAddr').value.trim(),website:document.getElementById('mWeb').value.trim(),google_rating:document.getElementById('mRating').value.trim(),niche:document.getElementById('mNi').value,product:selLeadProd,has_site:document.getElementById('hasSite').checked,notes:document.getElementById('mNo').value.trim(),status:'pending'};
+  const {data,error}=await db.from('leads').insert(lead).select().single();
+  if(!error&&data){leads.unshift(data);document.getElementById('addModal').classList.remove('on');['mFn','mLn','mBiz','mPh','mEm','mAddr','mWeb','mRating','mNo'].forEach(id=>document.getElementById(id).value='');renderLeads();updateStats();}
+  else alert('Error saving lead. Please try again.');
+}
+async function deleteLead(id){if(!confirm('Delete?'))return;await db.from('leads').delete().eq('id',id);leads=leads.filter(l=>l.id!==id);renderLeads();updateStats();}
+
+// ── QUICK FILL
+async function quickFill(){
+  const input=prompt('Paste a business name, phone, or URL:');if(!input)return;
+  const btn=document.getElementById('qfBtn');btn.textContent='⏳ AI analyzing...';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:`Generate realistic business lead from: "${input}". JSON only: {"fn":"","ln":"","biz":"","ph":"","em":"","address":"","website":"","google_rating":"4.5","niche":"chalet|clinique|auto|gym|resto|courtier|autre","hasSite":true,"notes":""}`}]})});
+    const d=await r.json();
+    const p=JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
+    if(p.fn)document.getElementById('mFn').value=p.fn;if(p.ln)document.getElementById('mLn').value=p.ln;if(p.biz)document.getElementById('mBiz').value=p.biz;if(p.ph)document.getElementById('mPh').value=p.ph;if(p.em)document.getElementById('mEm').value=p.em;if(p.address)document.getElementById('mAddr').value=p.address;if(p.website)document.getElementById('mWeb').value=p.website;if(p.google_rating)document.getElementById('mRating').value=p.google_rating;if(p.niche)document.getElementById('mNi').value=p.niche;if(p.hasSite!==undefined){document.getElementById('hasSite').checked=p.hasSite;toggleNSW();}if(p.notes)document.getElementById('mNo').value=p.notes;
+  }catch(e){alert('Quick Fill error — fill manually.');}
+  btn.textContent=TR[lang].qfBtn;
+}
+
+// ── DETAIL
+function openDetail(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const lh=logs.filter(x=>x.lead_id===id);
+  const sc={pending:'var(--blue)',booked:'var(--g)',callback:'var(--orange)',no:'var(--red)'};
+  const t=TR[lang];
+  document.getElementById('detailContent').innerHTML=`
+    <button class="back-lnk" onclick="showScr('Leads',document.getElementById('navLeads'))">← ${t.fp_all}</button>
+    <div class="ld-header">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
+        <div><div class="ld-name">${NM[l.niche]||'👤'} ${l.first_name||''} ${l.last_name||''}</div><div style="font-size:13px;color:var(--t2)">${l.business||'—'}</div></div>
+        <span class="badge" style="background:rgba(255,255,255,.05);color:${sc[l.status]||'var(--t2)'}">${(l.status||'').toUpperCase()}</span>
+      </div>
+      <div class="ld-grid">
+        <div class="ld-item"><div class="ld-item-lbl">${t.lbl_ph}</div><div class="ld-item-val">${l.phone||'—'}</div></div>
+        <div class="ld-item"><div class="ld-item-lbl">Email</div><div class="ld-item-val">${l.email||'—'}</div></div>
+        <div class="ld-item"><div class="ld-item-lbl">${t.lbl_addr}</div><div class="ld-item-val">${l.address||'—'}</div></div>
+        <div class="ld-item"><div class="ld-item-lbl">${t.lbl_web}</div><div class="ld-item-val">${l.website||'—'}</div></div>
+        <div class="ld-item"><div class="ld-item-lbl">${t.lbl_rating}</div><div class="ld-item-val" style="color:var(--g)">${l.google_rating?'★ '+l.google_rating:'—'}</div></div>
+        <div class="ld-item"><div class="ld-item-lbl">Product</div><div class="ld-item-val">${PM[l.product]||'✨'} ${l.product||'—'}</div></div>
+      </div>
+      ${l.notes?`<div style="margin-top:11px;padding:9px;background:var(--bg2);font-size:12px;color:var(--t2)">${l.notes}</div>`:''}
+    </div>
+    <div style="display:flex;gap:7px;margin-bottom:12px">
+      <button class="la-btn g" style="flex:1;padding:12px" onclick="openCall('${l.id}')">${t.callBtn}</button>
+      <button class="la-btn" style="flex:1;padding:12px" onclick="openLog('${l.id}')">${t.logBtn}</button>
+    </div>
+    ${lh.length?`<div class="ld-hist"><div class="slbl" style="margin-bottom:10px">History (${lh.length})</div>${lh.map(h=>`<div class="hist-item"><div class="hist-result" style="color:${h.result==='booked'?'var(--g)':h.result==='no'?'var(--red)':'var(--orange)'}">${(h.result||'').toUpperCase()}</div><div class="hist-notes">${h.notes||'—'}</div><div class="hist-date">${h.call_date||''}</div></div>`).join('')}</div>`:`<div class="empty"><div class="empty-icon">📞</div><div class="empty-t">${t.emptyRecent}</div></div>`}
+  `;
+  showScr('Detail',null);document.getElementById('navLeads').classList.add('on');
+}
+
+// ── CALL SCREEN with AI auto-suggest
+const scripts={
+  ai:{pain:"answering the same client questions 24/7",result:"automate all client communication and lead follow-up",example:"chatbot, auto-calls, lead tracking"},
+  web:{noSite:{pitch:"I noticed you don’t have a website. In your industry, 70% of customers search online before calling. I’ll build you a professional turnkey site with all AI systems included — in under 2 weeks.",tip:"Key angle: competition is online, they’re not yet."},hasSite:{pitch:"Your website could be working much harder for you. An optimized site with AI chatbot can double your leads without increasing your ad budget.",tip:"Key angle: their site probably generates zero leads."}},
+  chalet:{pain:"coordinating cleaners and answering guest questions 24/7",result:"automate your entire STR property lifecycle",example:"auto check-in, cleaning coordination, Airbnb messaging"},
+  other:{pain:"losing opportunities from lack of automated follow-up",result:"automate your sales and communication processes",example:"leads, follow-ups, appointments"},
+};
+
+let stepCtr=1;
+
+function openCall(id){
+  activeLead=id;
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const s=scripts[l.product]||scripts.ai;
+  const agency=profile?.agency_name||'ZIVR';
+  const uname=(profile?.full_name||user.email).split(' ')[0];
+  const painQ=l.product==='web'?(l.has_site?'does your website generate leads and booked calls every week?':`I noticed you don’t have a web presence — do you ever lose clients because people can’t find you online?`):`do you or your team spend time <strong>${s.pain}</strong>?`;
+  stepCtr=1;
+  document.getElementById('callContent').innerHTML=`
+    <button class="back-lnk" onclick="showScr('Leads',document.getElementById('navLeads'))">← Back</button>
+    <div class="call-banner"><div class="cb-dot"></div><div class="cb-inf"><div class="cb-name">${l.first_name||''} ${l.last_name||''}</div><div class="cb-sub">${l.business||''} · ${l.phone||'—'}</div></div><button class="cb-btn" onclick="openLog('${l.id}')">Log →</button></div>
+    ${l.product==='web'&&!l.has_site?`<div class="tip"><div class="tip-icon">🚫</div><div class="tip-text">No website — angle: "I’ll build you a pro site with all AI systems included in under 2 weeks."</div></div>`:''}
+    <div class="script-box hot">
+      <div class="script-lbl"><div class="pulse-dot"></div>OPENING — READ WORD FOR WORD</div>
+      <div class="script-text">"Hi, am I speaking with <strong>${l.first_name||'them'}</strong>?<br><br>
+      Perfect! This is <strong>${uname}</strong> from <strong>${agency}</strong>. I won’t take much of your time — just one quick question.<br><br>
+      Does ${painQ}?"</div>
+    </div>
+    <div class="tip"><div class="tip-icon">⏸️</div><div class="tip-text">Pause 2 seconds. Let the silence work. Never fill the void.</div></div>
+    <div class="ai-auto on" id="aiAutoBox0">
+      <div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div>
+      <div class="ai-auto-txt thinking" id="aiAutoTxt0">Generating suggestion...</div>
+    </div>
+    <div class="resp-grid" id="stepResp0">
+      <button class="resp-btn yes" onclick="showStep('pitch','${l.product}','${l.id}',${!!l.has_site})"><div class="resp-emoji">✅</div><div><div class="resp-title">Yes, it’s a problem</div><div class="resp-sub">→ Pitch</div></div></button>
+      <button class="resp-btn maybe" onclick="showStep('clarify','${l.product}','${l.id}',${!!l.has_site})"><div class="resp-emoji">🤔</div><div><div class="resp-title">Not really</div><div class="resp-sub">→ Dig deeper</div></div></button>
+      <button class="resp-btn no" onclick="showStep('wrongtime','${l.product}','${l.id}',${!!l.has_site})"><div class="resp-emoji">❌</div><div><div class="resp-title">Bad time</div><div class="resp-sub">→ Schedule callback</div></div></button>
+    </div>
+    <div id="stepArea"></div>`;
+  showScr('Call',document.getElementById('navLeads'));document.getElementById('navLeads').classList.add('on');
+  autoSuggest(0,`Opening cold call for ${l.niche||'business'} selling ${l.product||'ai agency'}. Prospect answered. Best opener follow-up if they say yes to having the problem.`,l);
+}
+
+async function autoSuggest(id,ctx,lead){
+  const box=document.getElementById(`aiAutoBox${id}`);
+  const txt=document.getElementById(`aiAutoTxt${id}`);
+  if(!box||!txt)return;
+  box.classList.add('on');
+  txt.className='ai-auto-txt thinking';txt.textContent='AI is generating a suggestion...';
+  const langLabel=lang==='fr'?'French (Quebec)':lang==='es'?'Spanish':'English';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:180,messages:[{role:'user',content:`Expert sales coach for AI/tech agency. Niche: ${lead?.niche||'business'}. Product: ${lead?.product||'ai'}. ${lead?.product==='web'&&!lead?.has_site?'Prospect has NO website.':''} Language: ${langLabel}. Situation: ${ctx}. Give ONE short natural response (2-3 sentences max). Start directly with what to say.`}]})});
+    const d=await r.json();
+    txt.className='ai-auto-txt';txt.textContent=d.content[0].text;
+  }catch(e){txt.className='ai-auto-txt';txt.textContent='Follow the script above.';}
+}
+
+function showStep(step,prod,lid,hasSite){
+  const l=leads.find(x=>x.id===lid);
+  const s=scripts[prod]||scripts.ai;
+  const agency=profile?.agency_name||'ZIVR';
+  const sc=++stepCtr;
+  let pitch=prod==='web'?(hasSite?s.hasSite?.pitch:s.noSite?.pitch):`What we do at <strong>${agency}</strong> is install an AI system that <strong>${s.result}</strong> — ${s.example} — automatically.<br><br>Your clients get a response in under <strong>60 seconds</strong>, 24/7. Even when you sleep.<br><br>I have 15 minutes this week. Would <strong>Tuesday or Thursday</strong> work?`;
+  const ctxMap={pitch:'After pitch, prospect seems interested but hasn\'t agreed to demo yet. Best line to close for a meeting.',clarify:'Prospect says the problem isn\'t really there. Best question to uncover hidden pain.',wrongtime:'Bad timing response. Best way to schedule callback without being pushy.',objPrice:'After price objection reframe. Best line to close for free demo.',objTime:'After time objection. Best line to close for 15-min demo.',objSystem:'After "already have something" objection. Best complementary positioning.',objThink:'After "need to think" — best follow-up to uncover real objection.',objTrust:'After trust objection. Best line to close for no-commitment demo.',objAI:'After AI fear objection. Best reassurance to close for quick demo.',hesitate:'Prospect hesitating after pitch. Best urgency line.',book:'Confirmed demo. Best confirmation line to end call professionally.',hardno:'Hard no. Best polite exit that leaves the door open.'};
+  const autoCtx=ctxMap[step]||`Step ${step}. Best next line.`;
+  const content={
+    pitch:`<div class="script-box hot"><div class="script-lbl"><div class="pulse-dot"></div>30-SECOND PITCH</div><div class="script-text">"${pitch}"</div></div>${prod==='web'&&!hasSite?`<div class="tip"><div class="tip-icon">🔥</div><div class="tip-text">${s.noSite?.tip}</div></div>`:`<div class="tip"><div class="tip-icon">⚡</div><div class="tip-text">Always propose TWO specific days. Never an open availability question.</div></div>`}<div class="ai-auto" id="aiAutoBox${sc}"><div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div><div class="ai-auto-txt thinking" id="aiAutoTxt${sc}">Generating...</div></div><div class="resp-grid"><button class="resp-btn yes" onclick="showStep('book','${prod}','${lid}',${hasSite})"><div class="resp-emoji">📅</div><div><div class="resp-title">They agree</div><div class="resp-sub">→ Close</div></div></button><button class="resp-btn maybe" onclick="showStep('hesitate','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🤔</div><div><div class="resp-title">Hesitating</div></div></button><button class="resp-btn obj" onclick="showStep('objections','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚧</div><div><div class="resp-title">Objection</div></div></button><button class="resp-btn no" onclick="showStep('hardno','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚫</div><div><div class="resp-title">Hard no</div></div></button></div>`,
+    clarify:`<div class="script-box hot"><div class="script-lbl">DIG DEEPER</div><div class="script-text">"Interesting! So do you already have someone handling this or is it you personally?<br><br><em>[Let them answer]</em><br><br>And how many hours per week does that represent?"</div></div><div class="ai-auto" id="aiAutoBox${sc}"><div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div><div class="ai-auto-txt thinking" id="aiAutoTxt${sc}">Generating...</div></div><div class="resp-grid"><button class="resp-btn yes" onclick="showStep('pitch','${prod}','${lid}',${hasSite})"><div class="resp-emoji">💡</div><div><div class="resp-title">They realize it’s a problem</div></div></button><button class="resp-btn no" onclick="showStep('hardno','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚫</div><div><div class="resp-title">Truly no problem</div></div></button></div>`,
+    wrongtime:`<div class="script-box"><div class="script-lbl">BAD TIMING</div><div class="script-text">"No problem at all. What’s the best time to reach you — <strong>tomorrow morning or later this week</strong>?"</div></div><div class="ai-auto" id="aiAutoBox${sc}"><div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div><div class="ai-auto-txt thinking" id="aiAutoTxt${sc}">Generating...</div></div><div class="resp-grid"><button class="resp-btn yes" onclick="openLog('${lid}')"><div class="resp-emoji">📞</div><div><div class="resp-title">They give a time → Log callback</div></div></button><button class="resp-btn no" onclick="showStep('hardno','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚫</div><div><div class="resp-title">Not interested</div></div></button></div>`,
+    objections:`<div class="script-box"><div class="script-lbl">WHICH OBJECTION?</div></div><div class="obj-list"><button class="obj-item" onclick="showStep('objPrice','${prod}','${lid}',${hasSite})"><span>💸</span> "It’s too expensive"</button><button class="obj-item" onclick="showStep('objTime','${prod}','${lid}',${hasSite})"><span>⏰</span> "I don’t have time"</button><button class="obj-item" onclick="showStep('objSystem','${prod}','${lid}',${hasSite})"><span>🔧</span> "I already have something"</button><button class="obj-item" onclick="showStep('objThink','${prod}','${lid}',${hasSite})"><span>🧠</span> "I need to think about it"</button><button class="obj-item" onclick="showStep('objTrust','${prod}','${lid}',${hasSite})"><span>🤝</span> "I don’t know your company"</button><button class="obj-item" onclick="showStep('objAI','${prod}','${lid}',${hasSite})"><span>🤖</span> "AI is not for me"</button></div>`,
+    objPrice:`<div class="script-box hot"><div class="script-lbl"><div class="pulse-dot"></div>PRICE OBJECTION</div><div class="script-text">"Before we talk price — do you have someone answering your clients when you’re closed?<br><br>Our clients save <strong>10–15 hours per week</strong>. At $20/hour that’s $200–300/week saved. What we charge monthly is well below that.<br><br>The demo is <strong>completely free</strong>."</div></div><div class="ai-auto" id="aiAutoBox${sc}"><div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div><div class="ai-auto-txt thinking" id="aiAutoTxt${sc}">Generating...</div></div><div class="resp-grid"><button class="resp-btn yes" onclick="showStep('book','${prod}','${lid}',${hasSite})"><div class="resp-emoji">📅</div><div><div class="resp-title">OK let’s see the demo</div></div></button><button class="resp-btn obj" onclick="showStep('objections','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚧</div><div><div class="resp-title">Another objection</div></div></button></div>`,
+    objTime:`<div class="script-box hot"><div class="script-lbl"><div class="pulse-dot"></div>TIME OBJECTION</div><div class="script-text">"That’s exactly why I’m calling — the system is designed to <strong>give you back time</strong>. You don’t touch anything, we install everything.<br><br>The demo is <strong>15 minutes maximum</strong>. Tuesday morning or Thursday afternoon?"</div></div><div class="ai-auto" id="aiAutoBox${sc}"><div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div><div class="ai-auto-txt thinking" id="aiAutoTxt${sc}">Generating...</div></div><div class="resp-grid"><button class="resp-btn yes" onclick="showStep('book','${prod}','${lid}',${hasSite})"><div class="resp-emoji">📅</div><div><div class="resp-title">OK 15 min</div></div></button><button class="resp-btn no" onclick="showStep('hardno','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚫</div><div><div class="resp-title">No</div></div></button></div>`,
+    objSystem:`<div class="script-box hot"><div class="script-lbl"><div class="pulse-dot"></div>ALREADY HAVE SOMETHING</div><div class="script-text">"Does your current system answer calls at <strong>2am</strong> when a client has an urgent problem?<br><br>What we do <strong>adds on top</strong> of what you have — it fills the gaps."</div></div><div class="ai-auto" id="aiAutoBox${sc}"><div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div><div class="ai-auto-txt thinking" id="aiAutoTxt${sc}">Generating...</div></div><div class="resp-grid"><button class="resp-btn yes" onclick="showStep('book','${prod}','${lid}',${hasSite})"><div class="resp-emoji">📅</div><div><div class="resp-title">I want to see it</div></div></button><button class="resp-btn no" onclick="showStep('hardno','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚫</div><div><div class="resp-title">No</div></div></button></div>`,
+    objThink:`<div class="script-box hot"><div class="script-lbl"><div class="pulse-dot"></div>NEED TO THINK</div><div class="script-text">"Of course. What specifically do you need to think about?<br><br><em>[Let them answer — often a hidden real objection]</em><br><br>The demo is free — if it’s no, it’s no."</div></div><div class="ai-auto" id="aiAutoBox${sc}"><div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div><div class="ai-auto-txt thinking" id="aiAutoTxt${sc}">Generating...</div></div><div class="resp-grid"><button class="resp-btn yes" onclick="showStep('book','${prod}','${lid}',${hasSite})"><div class="resp-emoji">📅</div><div><div class="resp-title">OK let’s meet</div></div></button><button class="resp-btn obj" onclick="showStep('objections','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚧</div><div><div class="resp-title">Real objection</div></div></button></div>`,
+    objTrust:`<div class="script-box hot"><div class="script-lbl"><div class="pulse-dot"></div>TRUST OBJECTION</div><div class="script-text">"Completely legitimate. I personally used these systems in <strong>my own company</strong> — I know firsthand what it does in real life.<br><br>The demo is <strong>zero commitment</strong>. You see it, you decide."</div></div><div class="ai-auto" id="aiAutoBox${sc}"><div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div><div class="ai-auto-txt thinking" id="aiAutoTxt${sc}">Generating...</div></div><div class="resp-grid"><button class="resp-btn yes" onclick="showStep('book','${prod}','${lid}',${hasSite})"><div class="resp-emoji">📅</div><div><div class="resp-title">OK</div></div></button><button class="resp-btn no" onclick="showStep('hardno','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚫</div><div><div class="resp-title">No</div></div></button></div>`,
+    objAI:`<div class="script-box hot"><div class="script-lbl"><div class="pulse-dot"></div>AI OBJECTION</div><div class="script-text">"You touch <strong>absolutely nothing</strong> technical. We install everything. What you see is just an app on your phone showing your leads and bookings.<br><br>In 15 minutes you’ll see it’s <strong>much simpler</strong> than you think."</div></div><div class="ai-auto" id="aiAutoBox${sc}"><div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div><div class="ai-auto-txt thinking" id="aiAutoTxt${sc}">Generating...</div></div><div class="resp-grid"><button class="resp-btn yes" onclick="showStep('book','${prod}','${lid}',${hasSite})"><div class="resp-emoji">📅</div><div><div class="resp-title">OK show me</div></div></button><button class="resp-btn no" onclick="showStep('hardno','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚫</div><div><div class="resp-title">No</div></div></button></div>`,
+    hesitate:`<div class="script-box hot"><div class="script-lbl"><div class="pulse-dot"></div>HESITATION</div><div class="script-text">"Let me be direct. One of your <strong>competitors</strong> is probably already using this to capture clients <strong>while you sleep</strong>. In 15 minutes I show you exactly what — free, zero commitment."</div></div><div class="ai-auto" id="aiAutoBox${sc}"><div class="ai-auto-lbl"><div class="pulse-dot"></div>AI SUGGESTION</div><div class="ai-auto-txt thinking" id="aiAutoTxt${sc}">Generating...</div></div><div class="resp-grid"><button class="resp-btn yes" onclick="showStep('book','${prod}','${lid}',${hasSite})"><div class="resp-emoji">📅</div><div><div class="resp-title">OK show me</div></div></button><button class="resp-btn obj" onclick="showStep('objections','${prod}','${lid}',${hasSite})"><div class="resp-emoji">🚧</div><div><div class="resp-title">Objection</div></div></button></div>`,
+    book:`<div class="script-box hot"><div class="script-lbl"><div class="pulse-dot"></div>CLOSING — BOOK THE DEMO</div><div class="script-text">"Perfect! I have <strong>Tuesday at 10am or 2pm</strong>, and <strong>Thursday at 11am or 3pm</strong>.<br><br>Which works best for you?<br><br><em>[WAIT — SAY NOTHING]</em><br><br>Great! I’ll send a confirmation text in the next few minutes."</div></div><div class="tip"><div class="tip-icon">✅</div><div class="tip-text">Send the text confirmation within 2 minutes. No confirmation = 50% no-show.</div></div><button class="btn-green" onclick="openLog('${lid}')" style="width:100%;box-shadow:0 0 18px var(--gglow)">🎯 Demo Booked — Log the Call</button>`,
+    hardno:`<div class="script-box"><div class="script-lbl">CLEAN EXIT</div><div class="script-text">"No problem at all. I’ll leave you my number — if anything changes, don’t hesitate to reach out. Have a great day!"</div></div><button class="la-btn" onclick="openLog('${lid}')" style="width:100%;padding:12px">📋 Log and Move to Next Lead</button>`,
+  };
+  const area=document.getElementById('stepArea');
+  if(area){
+    area.innerHTML=content[step]||'';
+    area.scrollIntoView({behavior:'smooth',block:'start'});
+    if(step!=='book'&&step!=='hardno'&&step!=='objections'){
+      autoSuggest(sc,autoCtx,l);
+    }
+  }
+}
+
+// ── LOG
+function openLog(id){
+  activeLead=id;selResult=null;
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const t=TR[lang];
+  document.getElementById('cbDateWrap').style.display='none';
+  document.getElementById('callNotes').value='';
+  document.getElementById('aiBox').innerHTML=`<div class="ai-msg" id="aiWelcome">${t.aiWelcome}</div>`;
+  ['rBooked','rCallback','rNo','rPending'].forEach(id=>document.getElementById(id)?.classList.remove('on'));
+  document.getElementById('logLeadInfo').innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:11px;background:var(--bg2);border:1px solid var(--b)"><div style="font-size:20px">${NM[l.niche]||'👤'}</div><div><div style="font-family:'Syne',sans-serif;font-weight:700">${l.first_name||''} ${l.last_name||''}</div><div style="font-size:11px;color:var(--t3)">${l.business||''} · ${l.phone||'—'}</div></div></div>`;
+  document.getElementById('logModal').classList.add('on');
+}
+function setRes(r){
+  selResult=r;
+  ['rBooked','rCallback','rNo','rPending'].forEach(id=>document.getElementById(id)?.classList.remove('on'));
+  const m={booked:'rBooked',callback:'rCallback',no:'rNo',pending:'rPending'};
+  document.getElementById(m[r])?.classList.add('on');
+  document.getElementById('cbDateWrap').style.display=r==='callback'?'block':'none';
+}
+async function saveLog(){
+  if(!selResult){alert('Select a result first');return;}
+  const l=leads.find(x=>x.id===activeLead);if(!l)return;
+  const notes=document.getElementById('callNotes').value.trim();
+  const today=new Date().toISOString().split('T')[0];
+  const update={status:selResult};
+  if(selResult==='no'){const d=new Date();d.setDate(d.getDate()+60);update.locked_until=d.toISOString().split('T')[0];}
+  if(selResult==='callback')update.callback_date=document.getElementById('cbDate').value||null;
+  await db.from('leads').update(update).eq('id',activeLead);
+  const {data:ld}=await db.from('call_logs').insert({user_id:user.id,lead_id:activeLead,lead_name:`${l.first_name||''} ${l.last_name||''}`,business:l.business||'',result:selResult,notes,call_date:today}).select().single();
+  const idx=leads.findIndex(x=>x.id===activeLead);if(idx>-1)leads[idx]={...leads[idx],...update};
+  if(ld)logs.unshift(ld);
+  document.getElementById('logModal').classList.remove('on');
+  updateStats();renderLeads();renderRecent();
+  if(selResult==='booked')doConfetti();
+}
+
+// ── AI MANUAL
+async function sendAI(){
+  const inp=document.getElementById('aiIn').value.trim();if(!inp)return;
+  const box=document.getElementById('aiBox');
+  box.innerHTML+=`<div class="ai-client"><strong>Prospect:</strong> ${inp}</div>`;
+  box.innerHTML+=`<div class="ai-msg" id="aiThink" style="color:var(--t3);font-style:italic">⏳ Analyzing...</div>`;
+  box.scrollTop=box.scrollHeight;
+  document.getElementById('aiIn').value='';
+  const l=leads.find(x=>x.id===activeLead);
+  const langLabel=lang==='fr'?'French (Quebec)':lang==='es'?'Spanish':'English';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:280,messages:[{role:'user',content:`Expert sales coach AI agency. Niche: ${l?.niche||'general'}. Product: ${l?.product||'ai'}. ${l?.product==='web'&&!l?.has_site?'Prospect has NO website.':''} Language: ${langLabel}. Prospect says: "${inp}". Give SHORT response (2-3 sentences max), direct, natural. Start directly with what to say.`}]})});
+    const d=await r.json();
+    document.getElementById('aiThink')?.remove();
+    box.innerHTML+=`<div class="ai-reply"><strong>💡 Say:</strong> ${d.content[0].text}</div>`;
+    box.scrollTop=box.scrollHeight;
+  }catch(e){document.getElementById('aiThink').textContent='⚠️ AI error';}
+}
+
+// ── STATS
+function updateStats(){
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('stBooked').textContent=leads.filter(l=>l.status==='booked').length;
+  document.getElementById('stCalls').textContent=logs.filter(l=>l.call_date===today).length;
+  document.getElementById('stLeads').textContent=leads.filter(l=>l.status==='pending').length;
+}
+function renderRecent(){
+  const c=document.getElementById('dRecent');if(!c)return;
+  const t=TR[lang];
+  if(!logs.length){c.innerHTML=`<div class="empty"><div class="empty-icon">📞</div><div class="empty-t">${t.emptyRecent}</div><div class="empty-s">${t.emptyRecentSub}</div></div>`;return;}
+  c.innerHTML=[...logs].slice(0,5).map(l=>`<div class="rlog"><div class="rlog-dot ${l.result||'pending'}"></div><div class="rlog-info"><div class="rlog-name">${l.lead_name||'—'}</div><div class="rlog-det">${l.notes||'No notes'}</div></div><div class="rlog-date">${l.call_date||''}</div></div>`).join('');
+}
+
+// ── GENERATOR
+let selGenProdVal='ai';
+function selGenProd(p,el){selGenProdVal=p;document.querySelectorAll('#genContent .prod-c').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+function renderGenGate(){
+  const plan=profile?.plan||'free';const t=TR[lang];
+  const gate=document.getElementById('genGate');const content=document.getElementById('genContent');
+  if(plan==='free'){gate.innerHTML=`<div class="upgrade-wall"><div class="upgrade-icon">🔍</div><div class="upgrade-title">${t.upgradeTitle}</div><div class="upgrade-sub">${t.upgradeSub}</div><button class="btn-green" onclick="showScr('Account',document.getElementById('navAccount'))" style="box-shadow:0 0 14px var(--gglow)">${t.upgradeCta}</button></div>`;content.style.display='none';}
+  else{gate.innerHTML='';content.style.display='block';}
+}
+
+async function generateLeads(){
+  const city=document.getElementById('gCity').value.trim()||'Montreal';
+  const qty=parseInt(document.getElementById('gQty').value)||15;
+  const bizType=document.getElementById('gBizType').value.trim();
+  document.getElementById('genSrc').style.display='block';
+  document.getElementById('genResults').innerHTML='';
+  document.getElementById('gBtn').disabled=true;
+  document.getElementById('gBtn').textContent='⏳ Generating...';
+  const srcs=['s1','s2','s3','s4','s5','s6'];let si=0;
+  const fill=document.getElementById('gFill');
+  const iv=setInterval(()=>{if(si<srcs.length){document.getElementById(srcs[si]).classList.add('on');fill.style.width=((si+1)/srcs.length*100)+'%';si++;}else clearInterval(iv);},300);
+  const status=document.getElementById('genStatus');
+  let googleLeads=[];
+  // Google Places API
+  try{
+    status.textContent='🔍 Searching business database...';
+    const q=bizType||(selGenProdVal==='chalet'?'vacation rental manager':selGenProdVal==='web'?'local business':selGenProdVal==='ai'?'business':selGenProdVal);
+    const placesUrl=`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(q+' '+city)}&key=${GKEY}`;
+    const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(placesUrl)}`;
+    const resp=await fetch(proxyUrl);const raw=await resp.json();
+    const places=JSON.parse(raw.contents);
+    if(places.results?.length){
+      googleLeads=places.results.slice(0,qty).map(p=>({biz:p.name,address:p.formatted_address||city,phone:p.formatted_phone_number||'',google_rating:p.rating?p.rating.toString():''}));
+      status.textContent=`✅ Found ${googleLeads.length} businesses`;
+    }
+  }catch(e){status.textContent='⚠️ Using AI generation...';}
+  // AI enrichment
+  try{
+    status.textContent='🤖 Enriching with AI...';
+    const prompt=googleLeads.length>0
+      ?`Enrich these leads with contact info for cold calling. JSON only:\n${JSON.stringify(googleLeads.slice(0,qty).map(g=>({biz:g.biz,address:g.address,phone:g.phone,rating:g.google_rating})))}\nReturn: [{"fn":"","ln":"","biz":"","ph":"","em":"","address":"","website":"","google_rating":"","niche":"chalet|clinique|auto|gym|resto|courtier|autre","hasSite":true,"notes":""}]`
+      :`Generate ${qty} realistic business leads for ${bizType||selGenProdVal} in ${city}. JSON only: [{"fn":"","ln":"","biz":"","ph":"","em":"","address":"","website":"","google_rating":"","niche":"chalet|clinique|auto|gym|resto|courtier|autre","hasSite":true,"notes":""}]`;
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const enriched=JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
+    clearInterval(iv);fill.style.width='100%';srcs.forEach(s=>document.getElementById(s).classList.add('on'));
+    status.textContent=`✅ ${enriched.length} leads ready`;
+    const final=enriched.map((l,i)=>({...l,...(googleLeads[i]||{})}));
+    document.getElementById('genResults').innerHTML=`<div class="slbl" style="margin-top:13px">${final.length} Leads Found</div>${final.map((l,i)=>`
+      <div class="gen-lead">
+        <div class="gl-top">
+          <div><div class="gl-name">${l.fn||''} ${l.ln||''}</div><div class="gl-biz">${l.biz||l.name||''}</div></div>
+          <button class="add-btn" id="gaB${i}" onclick="addGL(${i},'${encodeURIComponent(JSON.stringify(l))}')">+ Add</button>
+        </div>
+        <div class="gl-info">📞 ${l.ph||l.phone||'—'} &nbsp;📧 ${l.em||'—'}<br>📍 ${l.address||city}${l.google_rating?`<br><span style="color:var(--g)">★ ${l.google_rating}</span>`:''}${l.hasSite===false?`<br><span style="color:var(--orange)">🚫 No website</span>`:''}${l.notes?`<br>📝 ${l.notes}`:''}</div>
+      </div>`).join('')}`;
+  }catch(e){document.getElementById('genResults').innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-t">Error</div><div class="empty-s">Try again in a moment</div></div>`;}
+  document.getElementById('gBtn').disabled=false;document.getElementById('gBtn').textContent=TR[lang].gBtn||'🔍 Generate Leads';
+  setTimeout(()=>{srcs.forEach(s=>document.getElementById(s).classList.remove('on'));fill.style.width='0%';document.getElementById('genSrc').style.display='none';status.textContent='';},3000);
+}
+
+async function addGL(idx,enc){
+  try{
+    const l=JSON.parse(decodeURIComponent(enc));
+    const lead={user_id:user.id,first_name:l.fn||'',last_name:l.ln||'',business:l.biz||l.name||'',phone:l.ph||l.phone||'',email:l.em||'',address:l.address||'',website:l.website||'',google_rating:l.google_rating||l.rating||'',niche:l.niche||'autre',product:selGenProdVal,has_site:l.hasSite!==false,notes:l.notes||'',status:'pending'};
+    const {data,error}=await db.from('leads').insert(lead).select().single();
+    if(!error&&data){leads.unshift(data);const btn=document.getElementById(`gaB${idx}`);if(btn){btn.textContent='✓';btn.classList.add('done');btn.disabled=true;}updateStats();}
+  }catch(e){}
+}
+
+// ── PLANS
+const PLANS={
+  free:{name:'Free',price:'$0/mo',badge:'bdg-free',features:['Basic scripts','5 leads/month','Call logging','Ad-supported']},
+  pro:{name:'Pro',price:'$47/mo',badge:'bdg-pro',features:['Full scripts + AI','50 leads/month','Real-time AI coach','Full history']},
+  agence:{name:'Agency',price:'$97/mo',badge:'bdg-agence',features:['Everything in Pro','Unlimited leads','Team admin panel','Multi-user','CSV export']},
+};
+function renderCurPlan(){
+  const plan=profile?.plan||'free';const p=PLANS[plan];const t=TR[lang];
+  const el=document.getElementById('curPlanCard');if(!el)return;
+  el.innerHTML=`<div class="card" style="border-color:${plan==='agence'?'rgba(0,230,118,.2)':plan==='pro'?'rgba(41,182,246,.2)':'var(--b)'}"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:${plan==='agence'?'var(--g)':plan==='pro'?'var(--blue)':'var(--t2)'}">${p.name}</div><div style="font-size:14px;color:var(--t2)">${p.price}</div></div><ul style="list-style:none">${p.features.map(f=>`<li style="font-size:12px;color:var(--t2);padding:5px 0;border-bottom:1px solid var(--b);display:flex;gap:8px"><span style="color:var(--g)">—</span>${f}</li>`).join('')}</ul></div>`;
+}
+function renderPlans(){
+  const cur=profile?.plan||'free';const t=TR[lang];
+  const el=document.getElementById('plansGrid');if(!el)return;
+  el.innerHTML=Object.entries(PLANS).filter(([k])=>k!==cur).map(([key,p])=>`
+    <div class="card" style="border-color:${key==='agence'?'rgba(0,230,118,.15)':key==='pro'?'rgba(41,182,246,.15)':'var(--b)'}">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:${key==='agence'?'var(--g)':'var(--blue)'};margin-bottom:4px">${p.name}</div>
+      <div style="font-size:20px;font-weight:700;color:var(--t);margin-bottom:12px">${p.price}</div>
+      <ul style="list-style:none;margin-bottom:14px">${p.features.map(f=>`<li style="font-size:11px;color:var(--t2);padding:4px 0;border-bottom:1px solid var(--b);display:flex;gap:7px"><span style="color:var(--g)">—</span>${f}</li>`).join('')}</ul>
+      <button class="btn-green" onclick="upgradePlan('${key}')" style="box-shadow:0 0 14px var(--gglow)">Upgrade to ${p.name} →</button>
+    </div>`).join('');
+}
+async function upgradePlan(plan){
+  const {error}=await db.from('profiles').update({plan}).eq('id',user.id);
+  if(!error){profile.plan=plan;const p=PLANS[plan];const pb=document.getElementById('planBadge');pb.textContent=p.name;pb.className='plan-bdg '+p.badge;renderCurPlan();renderPlans();renderGenGate();alert(`✅ ${p.name} activated! Payment via Stripe at launch.`);}
+}
+
+// ── PROFILE
+async function saveProfile(){
+  const name=document.getElementById('sName').value.trim();
+  const agency=document.getElementById('sAgency').value.trim();
+  await db.from('profiles').update({full_name:name,agency_name:agency}).eq('id',user.id);
+  profile.full_name=name;profile.agency_name=agency;
+  document.getElementById('appAvatar').textContent=name.charAt(0).toUpperCase();
+  document.getElementById('dUser').textContent=name.split(' ')[0];
+  const btn=document.getElementById('sSaveBtn');
+  btn.textContent=TR[lang].savedOk;setTimeout(()=>btn.textContent=TR[lang].saveProfile,1500);
+}
+
+// ── ADMIN
+async function loadAdmin(){
+  if(profile?.role!=='admin'){document.getElementById('adminList').innerHTML=`<div class="empty"><div class="empty-icon">🔒</div><div class="empty-t">Access denied</div><div class="empty-s">Admin access is by invitation only</div></div>`;return;}
+  const {data:users}=await db.from('profiles').select('*').order('created_at',{ascending:false});
+  const {data:allLeads}=await db.from('leads').select('*');
+  const {data:allLogs}=await db.from('call_logs').select('*');
+  document.getElementById('admU').textContent=users?.length||0;
+  document.getElementById('admL').textContent=allLeads?.length||0;
+  document.getElementById('admB').textContent=allLeads?.filter(l=>l.status==='booked').length||0;
+  const c=document.getElementById('adminList');
+  if(!users?.length){c.innerHTML=`<div class="empty"><div class="empty-icon">👥</div><div class="empty-t">No users yet</div></div>`;return;}
+  c.innerHTML=users.map(u=>{
+    const ul=allLeads?.filter(l=>l.user_id===u.id).length||0;
+    const ub=allLeads?.filter(l=>l.user_id===u.id&&l.status==='booked').length||0;
+    const uc=allLogs?.filter(l=>l.user_id===u.id).length||0;
+    const p=PLANS[u.plan||'free'];
+    return `<div class="admin-row">
+      <div class="admin-av">${(u.full_name||'U').charAt(0).toUpperCase()}</div>
+      <div class="admin-info"><div class="admin-name">${u.full_name||'No name'}</div><div class="admin-email">${ul} leads · ${ub} demos · ${uc} calls</div></div>
+      <span class="plan-bdg ${p?.badge||'bdg-free'}">${p?.name||'Free'}</span>
+      <select class="admin-btn" onchange="adminCP('${u.id}',this.value)" style="cursor:pointer">
+        <option value="">Plan...</option><option value="free">Free</option><option value="pro">Pro</option><option value="agence">Agency</option><option value="admin">Admin</option>
+      </select>
+    </div>`;
+  }).join('');
+}
+async function adminCP(uid,plan){if(!plan)return;const u=plan==='admin'?{role:'admin',plan:'agence'}:{plan,role:'user'};await db.from('profiles').update(u).eq('id',uid);loadAdmin();}
+
+// ── CONFETTI
+function doConfetti(){for(let i=0;i<10;i++)setTimeout(()=>{const e=document.createElement('div');e.textContent=['🎉','⭐','💰','🔥','✅','🚀'][Math.floor(Math.random()*6)];e.style.cssText=`position:fixed;top:40%;left:${5+Math.random()*90}%;font-size:24px;z-index:9998;pointer-events:none;animation:cffall 1.8s ease forwards`;document.body.appendChild(e);setTimeout(()=>e.remove(),1800);},i*70);}
+const cs=document.createElement('style');cs.textContent='@keyframes cffall{0%{transform:translateY(0) scale(0) rotate(0deg);opacity:1}100%{transform:translateY(-250px) scale(1.3) rotate(360deg);opacity:0}}';document.head.appendChild(cs);
+
+// Close modals
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
+
+// ── INIT
+init();
+</script>
+</body>
+</html>
