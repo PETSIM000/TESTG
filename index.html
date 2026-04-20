@@ -1321,7 +1321,8 @@ async function init(){
     if(session){user=session.user;await loadProfile();await checkOb();}
     db.auth.onAuthStateChange(async(e,s)=>{
       if(e==='SIGNED_IN'&&s){user=s.user;await loadProfile();await checkOb();}
-      else if(e==='SIGNED_OUT'){user=null;profile=null;document.getElementById('appScreen').classList.remove('on');document.getElementById('onboarding').style.display='none';document.getElementById('landing').style.display='block';applyLang(lang);}
+      else if(e==='SIGNED_OUT'){user=null;profile=null;document.getElementById('appScreen').classList.remove('on');document.getElementById('onboarding').style.display='none';document.getElementById('authScreen').classList.remove('on');document.getElementById('landing').style.display='block';window.scrollTo(0,0);applyLang(lang);
+}
     });
   }catch(err){
     console.warn('Supabase init error:',err);
@@ -1550,8 +1551,10 @@ async function saveLead(){
   const ln=document.getElementById('mLn').value.trim();
   if(!fn&&!ln){alert('Name required');return;}
   const lead={user_id:user.id,first_name:fn,last_name:ln,business:document.getElementById('mBiz').value.trim(),phone:document.getElementById('mPh').value.trim(),email:document.getElementById('mEm').value.trim(),address:document.getElementById('mAddr').value.trim(),website:document.getElementById('mWeb').value.trim(),google_rating:document.getElementById('mRating').value.trim(),niche:document.getElementById('mNi').value,product:selLeadProd,has_site:document.getElementById('hasSite').checked,notes:document.getElementById('mNo').value.trim(),status:'pending'};
-  const {data,error}=await db.from('leads').insert(lead).select().single();
-  if(!error&&data){leads.unshift(data);document.getElementById('addModal').classList.remove('on');['mFn','mLn','mBiz','mPh','mEm','mAddr','mWeb','mRating','mNo'].forEach(id=>document.getElementById(id).value='');renderLeads();updateStats();}
+  const {data,error}=await db.from('leads').insert(lead).select();
+
+  if(!error&&data&&data.length>0){leads.unshift(data[0]);
+document.getElementById('addModal').classList.remove('on');['mFn','mLn','mBiz','mPh','mEm','mAddr','mWeb','mRating','mNo'].forEach(id=>document.getElementById(id).value='');renderLeads();updateStats();}
   else alert('Error saving lead. Please try again.');
 }
 async function deleteLead(id){if(!confirm('Delete?'))return;await db.from('leads').delete().eq('id',id);leads=leads.filter(l=>l.id!==id);renderLeads();updateStats();}
