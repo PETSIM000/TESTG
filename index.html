@@ -411,7 +411,7 @@ textarea{font-family:var(--f-mono);font-size:12px;resize:vertical;margin:10px 0;
 .err{color:#ff7b8b;font-weight:700;font-size:13px}
 /* v13 belts, wall, age */
 [hidden]{display:none!important}
-.onmode #tabs{display:none!important}.onmode .next{display:none!important}
+.onmode #tabs,.onmode #hdr{display:none!important}.onmode .next{display:none!important}
 .mbtn.mon{background:linear-gradient(135deg,rgba(79,128,255,.35),rgba(79,128,255,.12));border-color:rgba(120,160,255,.45)}
 .pickb{display:flex;gap:6px;align-items:center;margin-bottom:10px}.pickb select{flex:1;min-width:0;height:46px;border-radius:14px;background:var(--s2);color:var(--ink);border:1px solid var(--line2);padding:0 12px;font-weight:800;font-size:16px;font-family:inherit}.pickb .btn{flex:none;width:46px;height:46px;padding:0;font-size:22px}
 .bsvg{display:inline-block;vertical-align:middle;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45));flex:none}
@@ -1785,12 +1785,12 @@ function setCamp(fid,k){
 }
 
 
-/* ================= v36 : MODE EN LIGNE (comptes Supabase) ================= */
+/* ================= v37 : MODE EN LIGNE (comptes + écurie en ligne) ================= */
 const SB_URL='https://hlqhasvorjdutyhyibao.supabase.co',SB_KEY='sb_publishable_PiCmbjESB8hXaSfsFVdAmQ_yVeO34Ci',ONK='cr_acct';
 let ON=null;try{ON=JSON.parse(localStorage.getItem(ONK)||'null');if(!ON||typeof ON.token!=='string'||!/^[0-9a-f]{64}$/.test(ON.token))ON=null}catch(e){ON=null}
 try{localStorage.removeItem('cr_online')}catch(e){}
 const onSave=()=>{try{ON?localStorage.setItem(ONK,JSON.stringify(ON)):localStorage.removeItem(ONK)}catch(e){}};
-const ONERR={session:'Ta session a expiré. Reconnecte-toi.',login:'Nom d’utilisateur ou mot de passe incorrect.',locked:'Trop d’essais ratés. Réessaie dans 15 minutes.',username:'Nom d’utilisateur : 3 à 16 caractères (lettres, chiffres, _ . -).',password:'Mot de passe : au moins 8 caractères, différent du nom.',taken:'Ce nom d’utilisateur est déjà pris.',captcha:'Vérification anti-robot échouée. Réessaie.',rate:'Trop de tentatives. Réessaie plus tard.',code:'Aucun joueur avec ce code.',self:'C’est ton propre code 😅',max:'Tu as déjà 100 amis.',opp:'Cet adversaire n’est plus disponible.',slow:'Attends quelques secondes entre deux combats.',daily:'Maximum 10 combats par jour contre le même gérant.',dailyall:'Maximum 60 combats en ligne par jour.',roster:'Écurie trop grosse pour être envoyée.'};
+const ONERR={session:'Ta session a expiré. Reconnecte-toi.',login:'Nom d’utilisateur ou mot de passe incorrect.',locked:'Trop d’essais ratés. Réessaie dans 15 minutes.',username:'Nom d’utilisateur : 3 à 16 caractères (lettres, chiffres, _ . -).',password:'Mot de passe : au moins 8 caractères, différent du nom.',taken:'Ce nom d’utilisateur est déjà pris.',captcha:'Vérification anti-robot échouée. Réessaie.',rate:'Trop de tentatives. Réessaie plus tard.',code:'Aucun joueur avec ce code.',self:'C’est ton propre code 😅',max:'Tu as déjà 100 amis.',opp:'Cet adversaire n’est plus disponible.',slow:'Attends quelques secondes entre deux combats.',daily:'Maximum 3 combats par jour contre le même boxeur.',dailyall:'Maximum 80 combats en ligne par jour.',roster:'Écurie trop grosse.',full:'Tu as déjà un boxeur dans chaque catégorie.',divtaken:'Tu as déjà un boxeur dans cette catégorie.',div:'Catégorie invalide.',bname:'Nom du boxeur trop court.',stats:'Répartition des points invalide.',pts:'Pas assez de points.',nobox:'Boxeur introuvable.'};
 async function rpc(fn,body){
   let r;try{r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{}),cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer'})}catch(e){throw new Error('Pas de connexion Internet.')}
   const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
@@ -1813,20 +1813,24 @@ function onClean(o){o=o||{};const L=o.look||{};return{id:/^[A-Za-z0-9_]{1,24}$/.
   pow:onI(o.pow,1,99,50),spd:onI(o.spd,1,99,50),def:onI(o.def,1,99,50),sta:onI(o.sta,1,99,50),chin:onI(o.chin,1,99,50),w:onI(o.w,0,999,0),l:onI(o.l,0,999,0),d:onI(o.d,0,999,0),ko:onI(o.ko,0,999,0),fame:onI(o.fame,0,100,1),
   style:['agr','eq','pru','corps'].includes(o.style)?o.style:'eq',traits:(Array.isArray(o.traits)?o.traits:[]).filter(t=>typeof t==='string'&&TRAITS[t]).slice(0,6),belts:(Array.isArray(o.belts)?o.belts:[]).filter(t=>BELTS.includes(t)).slice(0,5),
   look:{skin:onI(L.skin,0,5,2),hair:onI(L.hair,0,5,1),hc:onI(L.hc,0,5,1),beard:onI(L.beard,0,3,0),scar:L.scar===true,tr:onI(L.tr,0,6,0)}}}
-const onP=p=>p&&Object.assign({},p,{name:onT(p.name,16),club:onT(p.club,30),code:onT(p.code,8),elo:onI(p.elo,0,9999,1000),w:onI(p.w,0,99999,0),l:onI(p.l,0,99999,0),d:onI(p.d,0,99999,0),kos:onI(p.kos,0,99999,0),hw:onI(p.hw,0,9999,0),hl:onI(p.hl,0,9999,0),hd:onI(p.hd,0,9999,0),roster:(Array.isArray(p.roster)?p.roster:[]).slice(0,6).map(onClean)});
-const onUi=()=>ui.on||(ui.on={sub:'adv',auth:'signup',home:null,top:null,busy:false,msg:'',err:'',fr:null,mb:null,last:0,acct:false});
-function onSnap(b){const o={};for(const k of['id','name','nick','nat','age','div','pow','spd','def','sta','chin','w','l','d','ko','style','traits','look','fame'])if(b[k]!==undefined)o[k]=b[k];o.belts=beltsOf(b);return o}
-function onRoster(){return sortB(club().filter(b=>!b.retired)).slice(0,6).map(onSnap)}
+const onP=p=>p&&Object.assign({},p,{name:onT(p.name,16),club:onT(p.club,30),code:onT(p.code,8),elo:onI(p.elo,0,9999,1000),w:onI(p.w,0,99999,0),l:onI(p.l,0,99999,0),d:onI(p.d,0,99999,0),kos:onI(p.kos,0,99999,0),hw:onI(p.hw,0,9999,0),hl:onI(p.hl,0,9999,0),hd:onI(p.hd,0,9999,0),divs:(Array.isArray(p.divs)?p.divs:[]).filter(d=>ON_DIV.includes(d))});
+const onB=o=>o&&Object.assign(onClean(o),{id:String(o.id||'').replace(/[^0-9a-f-]/g,'').slice(0,36),pid:String(o.pid||'').replace(/[^0-9a-f-]/g,'').slice(0,36),ovr:onI(o.ovr,1,99,50),lvl:onI(o.lvl,1,40,1),xp:onI(o.xp,0,99999,0),need:onI(o.need,1,99999,65),pts:onI(o.pts,0,999,0),rating:onI(o.rating,0,9999,1000),rank:onI(o.rank,1,99999,999),streak:onI(o.streak,-999,999,0),mgr:onT(o.mgr,16),bot:o.bot===true});
+const onUi=()=>ui.on||(ui.on={sub:'ecurie',auth:'signup',home:null,rank:{},rdiv:null,busy:false,msg:'',err:'',acct:false,box:null,opps:null,up:null,cr:null,top:null});
 const onR=()=>{if(ui.tab==='online'&&!ui.fight&&!ui.menu)render()};
+const ONTIER=r=>r>=1400?['💎','Élite']:r>=1200?['🥇','Prétendant']:r>=1050?['🥈','Pro']:r>=950?['🥉','Espoir']:['🟤','Débutant'];
+const onFights=b=>b.w+b.l+b.d;
+const onRankTxt=b=>onFights(b)<3?'Non classé':b.rank===1?'👑 Champion':'#'+b.rank;
 async function onLoad(force){
-  const u=onUi();if(!ON||u.busy)return;if(!force&&u.home&&Date.now()-u.last<45000)return;
+  const u=onUi();if(!ON||u.busy)return;if(!force&&u.home&&Date.now()-u.last<30000)return;
   u.busy=true;u.err='';onR();
-  try{if(S)await rpc('cr_sync',{p_token:ON.token,p_club:S.club,p_roster:onRoster()});
-    const h=await rpc('cr_home',{p_token:ON.token});u.home={me:onP(h.me),friends:(h.friends||[]).map(onP),opps:(h.opps||[]).map(onP),feed:h.feed||[]};u.last=Date.now()}
+  try{const h=await rpc('cr_ob_mine',{p_token:ON.token});u.home={me:onP(h.me),boxers:(h.boxers||[]).map(onB),friends:(h.friends||[]).map(onP),feed:h.feed||[]};u.last=Date.now();u.rank={};u.top=null}
   catch(e){u.err=e.message}
   u.busy=false;onR();
 }
+async function onRankLoad(dv){const u=onUi();try{u.rank[dv]=((await rpc('cr_ob_rank',{p_div:dv}))||[]).map(onB)}catch(e){u.err=e.message}onR()}
 async function onTop(){const u=onUi();try{u.top=((await rpc('cr_top',{}))||[]).map(onP)}catch(e){u.err=e.message}onR()}
+async function onOpps(bid){const u=onUi();u.box=bid;u.opps=null;onR();
+  try{const r=await rpc('cr_ob_opps',{p_token:ON.token,p_box:bid});u.opps={friends:(r.friends||[]).map(onB),match:(r.match||[]).map(onB)}}catch(e){u.opps={friends:[],match:[],err:e.message}}onR()}
 const onVal=id=>{const e=document.getElementById(id);return e?e.value:''};
 async function onAuth(kind){
   const u=onUi(),user=onVal('on-user').trim(),pass=onVal('on-pass'),hp=onVal('on-web');
@@ -1835,7 +1839,7 @@ async function onAuth(kind){
   if(kind==='signup'&&pass!==onVal('on-pass2')){u.err='Les deux mots de passe ne sont pas pareils.';onR();return}
   u.busy=true;u.err='';u.msg='🤖 Vérification anti-robot…';onR();
   try{const cap=await onCaptcha(kind);u.msg=kind==='signup'?'Création du compte…':'Connexion…';onR();
-    const r=kind==='signup'?await rpc('cr_signup',{p_user:user,p_pass:pass,p_club:S?S.club:'',p_hp:hp,...cap}):await rpc('cr_login',{p_user:user,p_pass:pass,...cap});
+    const r=kind==='signup'?await rpc('cr_signup',{p_user:user,p_pass:pass,p_club:'',p_hp:hp,...cap}):await rpc('cr_login',{p_user:user,p_pass:pass,...cap});
     ON={token:r.token,name:onT(r.me.name,16)};onSave();u.busy=false;u.msg='';u.home=null;toast(kind==='signup'?'🎉 Compte créé !':'👋 Content de te revoir !');await onLoad(true)}
   catch(e){u.busy=false;u.msg='';u.err=e.message;onR()}
 }
@@ -1851,30 +1855,49 @@ async function onShareCode(){
   try{if(navigator.share){await navigator.share({text:txt});return}}catch(e){return}
   try{await navigator.clipboard.writeText(txt);toast('Code copié !')}catch(e){toast('Ton code : '+code)}
 }
-function onFighters(){return sortB(club().filter(b=>!b.retired&&!b.inj))}
-const onFind=id=>{const H=onUi().home;return H&&(H.friends.find(x=>x.id===id)||H.opps.find(x=>x.id===id))};
-function onStart(fid,idx){
-  const u=onUi(),f=onFind(fid),snap=f&&f.roster[idx],mb=getB(u.mb);
-  if(!f||!snap||!mb){toast('Choisis ton boxeur');return}
-  const me=JSON.parse(JSON.stringify(mb));delete me.hist;me.fatigue=10;me.morale=70;
-  const op=Object.assign(onClean(snap),{id:'on_'+snap.id,mine:false,fatigue:10,morale:70,salary:0,hist:[],pot:0,lvl:1,xp:0,sp:0,champ:false,pts:0});
-  const F=newFight(me,op,10,false);F.online={fid,n:f.name,b1:onSnap(mb),b2:snap};beginFight(F);
+/* --- création d'un boxeur en ligne --- */
+const ONSTAT=[['pow','Puissance'],['spd','Vitesse'],['def','Défense'],['sta','Cardio'],['chin','Menton']];
+const onRandLook=()=>({skin:ri(0,5),hair:ri(0,5),hc:ri(0,5),beard:R()<.45?ri(1,3):0,scar:R()<.15,tr:ri(0,6)});
+function onNewCr(dv){const nat='CA';return{div:dv,nat,name:natName(nat),style:'eq',look:onRandLook(),st:{pow:40,spd:40,def:40,sta:40,chin:40}}}
+const onLeft=c=>240-ONSTAT.reduce((a,[k])=>a+c.st[k],0);
+async function onCreate(){
+  const u=onUi(),c=u.cr;if(!c)return;c.name=onVal('on-bname').trim()||c.name;
+  if(onLeft(c)!==0){toast(`Place encore ${onLeft(c)} point${onLeft(c)>1?'s':''}`);return}
+  u.busy=true;onR();
+  try{const b=onB(await rpc('cr_ob_create',{p_token:ON.token,p_div:c.div,p_name:c.name,p_nat:c.nat,p_style:c.style,p_look:c.look,p_stats:c.st}));
+    u.cr=null;u.busy=false;toast(`🥊 ${b.name} rejoint ton écurie en ligne !`);await onLoad(true)}
+  catch(e){u.busy=false;toast(e.message);onR()}
+}
+async function onSpend(){
+  const u=onUi(),p=u.up;if(!p)return;const add={};let n=0;for(const[k]of ONSTAT){add[k]=p.add[k]||0;n+=add[k]}if(!n)return;
+  try{await rpc('cr_ob_spend',{p_token:ON.token,p_box:p.id,p_add:add});u.up=null;toast('💪 Points placés !');await onLoad(true)}catch(e){toast(e.message)}
+}
+async function onRetire(id){try{await rpc('cr_ob_retire',{p_token:ON.token,p_box:id});ui.confirm=null;toast('Boxeur retiré');await onLoad(true)}catch(e){toast(e.message)}}
+/* --- combat --- */
+function onFighter(b,mine){return Object.assign(onClean(b),{id:'on_'+b.id,mine,fatigue:10,morale:70,salary:0,hist:[],pot:0,lvl:b.lvl||1,xp:0,sp:0,champ:false,pts:0,traits:[],retired:false,booked:false,inj:0})}
+function onStart(oid){
+  const u=onUi(),mb=u.home&&u.home.boxers.find(b=>b.id===u.box),op=u.opps&&[...u.opps.friends,...u.opps.match].find(x=>x.id===oid);
+  if(!mb||!op){toast('Adversaire introuvable');return}
+  const title=op.rank===1&&onFights(op)>=3&&onFights(mb)>=2,F=newFight(onFighter(mb,true),onFighter(op,false),title?12:10,false);
+  F.cut=1;F.online={fid:op.id,bid:mb.id,n:op.mgr,title,bn:op.name};beginFight(F);
 }
 async function onDone(F){
-  const r=F.res,res=r.w==='A'?'W':r.w==='B'?'L':'D',o=F.online;
-  try{const x=await rpc('cr_report',{p_token:ON.token,p_opp:o.fid,p_res:res,p_method:r.m==='KO'||r.m==='TKO'?r.m:'DEC',p_rnd:r.r||0,p_b1:o.b1,p_b2:o.b2});
-    toast(`${res==='W'?'🏆 Victoire':res==='L'?'❌ Défaite':'🤝 Nul'} contre ${o.n} · ELO ${x.d>=0?'+':''}${x.d}`)}
+  const r=F.res,res=r.w==='A'?'W':r.w==='B'?'L':'D',o=F.online,u=onUi();
+  try{const x=await rpc('cr_ob_report',{p_token:ON.token,p_box:o.bid,p_opp:o.fid,p_res:res,p_method:r.m==='KO'||r.m==='TKO'?r.m:'DEC',p_rnd:r.r||0});
+    const ups=onI(x.ups,0,40,0);toast(`${res==='W'?(x.title?'👑 NOUVEAU CHAMPION !':'🏆 Victoire'):res==='L'?'❌ Défaite':'🤝 Nul'} · +${onI(x.xp,0,999,0)} XP · cote ${x.d>=0?'+':''}${onI(x.d,-99,99,0)}${ups?` · ⬆️ Niveau ${onI(x.box&&x.box.lvl,1,40,1)} (+${ups*4} pts)`:''}`)}
   catch(e){toast('Résultat non envoyé : '+e.message)}
-  onUi().fr=null;await onLoad(true);
+  u.opps=null;u.box=null;await onLoad(true);
 }
+/* --- affichage --- */
 const onDiv=d=>(DIVS.find(x=>x.id===d)||{n:'?'}).n;
 const onRec=p=>`${p.w}-${p.l}-${p.d}`;
 const onAgo=t=>{const m=Math.round((Date.now()-new Date(t))/60000);return!(m>=0)?'':m<2?'en ligne':m<60?`vu il y a ${m} min`:m<1440?`vu il y a ${Math.round(m/60)} h`:`vu il y a ${Math.round(m/1440)} j`};
 const onTag=p=>p.bot?' <span class="chip" style="font-size:10px">IA</span>':'';
 const ONIN='width:100%;font:inherit;font-size:16px;color:var(--ink);background:rgba(0,0,0,.4);border:1px solid var(--line2);border-radius:12px;padding:12px 13px';
+const onBar=(v,max,cls)=>`<div class="trk ${cls||'gold'}" style="margin:4px 0"><i style="width:${Math.max(0,Math.min(100,Math.round(v/max*100)))}%"></i></div>`;
 function vOnAuth(){const u=onUi(),su=u.auth==='signup';
   return`<div class="panel"><div style="margin-bottom:12px">${segH('onauth',[['signup','Créer un compte'],['login','Se connecter']],u.auth)}</div>
-    <p class="lede" style="margin:0 0 12px">${su?'Ton compte garde ton ELO, ton record et tes amis. Tu peux te connecter sur n’importe quel téléphone.':'Content de te revoir !'}</p>
+    <p class="lede" style="margin:0 0 12px">${su?'Bâtis une écurie en ligne : un boxeur par catégorie, que tu fais progresser combat après combat contre de vrais gérants. Ton compte marche sur n’importe quel téléphone.':'Content de te revoir !'}</p>
     <div class="stack" style="gap:10px">
     <label class="fld"><span>Nom d’utilisateur</span><input id="on-user" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false" style="${ONIN}" placeholder="ex. Max_514"></label>
     <label class="fld"><span>Mot de passe</span><input id="on-pass" type="password" maxlength="72" autocomplete="${su?'new-password':'current-password'}" style="${ONIN}" placeholder="8 caractères minimum"></label>
@@ -1883,46 +1906,78 @@ function vOnAuth(){const u=onUi(),su=u.auth==='signup';
     </div>
     <button class="btn pri big" style="margin-top:14px;width:100%" data-a="${su?'onsignup':'onlogin'}" ${u.busy?'disabled':''}>${u.busy?esc(u.msg||'…'):su?'Créer mon compte':'Me connecter'}</button>
     ${u.err?`<p class="small" style="color:#ff7b8b;margin:10px 0 0">${esc(u.err)}</p>`:''}
-    <p class="small" style="margin:12px 0 0">🔒 Ton mot de passe est chiffré : personne ne peut le lire, même pas nous. On ne demande ni courriel ni numéro de téléphone. Garde ton mot de passe en lieu sûr : sans courriel, on ne peut pas le récupérer.</p></div>`}
+    <p class="small" style="margin:12px 0 0">🔒 Ton mot de passe est chiffré : personne ne peut le lire. On ne demande ni courriel ni numéro de téléphone. Garde ton mot de passe en lieu sûr : sans courriel, on ne peut pas le récupérer.</p></div>`}
+function vOnBox(b){const u=onUi(),[ti,tn]=ONTIER(b.rating),conf=ui.confirm==='obr'+b.id;
+  return`<div class="panel" style="padding:13px"><div class="row" style="flex-wrap:nowrap;gap:12px;align-items:flex-start"><div class="av">${avatar(b,'red')}</div>
+    <div style="min-width:0;flex:1"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b style="min-width:0">${flag(b.nat)} ${esc(b.name)}</b><span class="chip ${b.rank===1&&onFights(b)>=3?'gold':''}">${onRankTxt(b)}</span></div>
+      <span class="small">${onDiv(b.div)} · <b>${b.ovr}</b> global · Niv. ${b.lvl} · ${onRec(b)}${b.ko?` (${b.ko} KO)`:''}${b.streak>=3?` · 🔥 ${b.streak} de suite`:''}</span>
+      <div class="row small" style="justify-content:space-between;margin-top:4px"><span>${ti} ${tn} · cote ${b.rating}</span><span>${b.lvl>=40?'Niveau max':`XP ${b.xp}/${b.need}`}</span></div>${b.lvl<40?onBar(b.xp,b.need):''}</div></div>
+    <div class="row" style="margin-top:8px"><button class="btn pri" data-a="onopp" data-id="${b.id}">🥊 Trouver un combat</button>${b.pts?`<button class="btn gold" data-a="onup" data-id="${b.id}">💪 +${b.pts} pts</button>`:''}<button class="btn sm" data-a="onret" data-id="${b.id}">${conf?'Confirmer le retrait ?':'Retirer'}</button></div></div>`}
+function vOnUp(b){const p=onUi().up,used=ONSTAT.reduce((a,[k])=>a+(p.add[k]||0),0),left=b.pts-used;
+  return`<div class="panel"><div class="ph"><b class="nm" style="font-size:20px">💪 ${esc(b.name)}</b><button class="btn sm" data-a="onupx">← Retour</button></div>
+    <p class="small" style="margin:0 0 8px">Points à placer : <b>${left}</b> (maximum 95 par stat)</p>
+    ${ONSTAT.map(([k,n])=>{const v=b[k]+(p.add[k]||0);return`<div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin:6px 0"><span style="width:90px">${n}</span><span style="flex:1;min-width:0">${onBar(v,99)}</span><b class="num" style="width:34px;text-align:right">${v}</b><button class="btn sm" data-a="onupm" data-k="${k}" ${p.add[k]?'':'disabled'}>−</button><button class="btn sm" data-a="onupp" data-k="${k}" ${left>0&&v<95?'':'disabled'}>+</button></div>`}).join('')}
+    <button class="btn pri big" style="width:100%;margin-top:8px" data-a="onupok" ${used?'':'disabled'}>Valider</button></div>`}
+function vOnCreate(){const u=onUi(),c=u.cr,left=onLeft(c),mine=u.home?u.home.boxers.map(b=>b.div):[],free=ON_DIV.filter(d=>!mine.includes(d));if(!free.includes(c.div))c.div=free[0];
+  const pv=Object.assign({},c.st,{look:c.look,nat:c.nat,name:c.name});
+  return`<div class="panel"><div class="ph"><b class="nm" style="font-size:20px">Nouveau boxeur</b><button class="btn sm" data-a="oncrx">← Retour</button></div>
+    <div class="row" style="flex-wrap:nowrap;gap:12px"><div class="av lg">${avatar(pv,'red')}</div><div style="min-width:0;flex:1" class="stack">
+      <button class="btn sm" data-a="onlook">🎲 Nouveau visage</button><span class="small">${flag(c.nat)} ${NAT[c.nat].n}</span></div></div>
+    <label class="fld" style="margin-top:10px"><span>Nom</span><div class="row" style="flex-wrap:nowrap"><input id="on-bname" maxlength="28" value="${esc(c.name)}" style="${ONIN};flex:1;min-width:0" autocomplete="off"><button class="btn" data-a="onrname">🎲</button></div></label>
+    <span class="lab" style="display:block;margin-top:10px">Catégorie</span><div style="margin-top:6px">${selH('oncdiv',free.map(d=>[d,onDiv(d)]),c.div,'k')}</div>
+    <span class="lab" style="display:block;margin-top:10px">Pays</span><div style="margin-top:6px">${selH('oncnat',Object.keys(NAT).map(k=>[k,flag(k)+' '+NAT[k].n]),c.nat,'k')}</div>
+    <span class="lab" style="display:block;margin-top:10px">Style</span><div style="margin-top:6px">${segH('oncsty',Object.entries(STRAT).filter(([k])=>['agr','eq','pru','corps'].includes(k)).map(([k,s])=>[k,s.n]),c.style)}</div>
+    <span class="lab" style="display:block;margin-top:12px">Stats de départ · <b style="color:${left?'var(--gold,#f5c451)':'var(--green)'}">${left} point${left>1?'s':''} à placer</b></span>
+    ${ONSTAT.map(([k,n])=>`<div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin:6px 0"><span style="width:90px">${n}</span><span style="flex:1;min-width:0">${onBar(c.st[k],60)}</span><b class="num" style="width:28px;text-align:right">${c.st[k]}</b><button class="btn sm" data-a="oncm" data-k="${k}" ${c.st[k]>40?'':'disabled'}>−</button><button class="btn sm" data-a="oncp" data-k="${k}" ${left>0&&c.st[k]<60?'':'disabled'}>+</button></div>`).join('')}
+    <p class="small" style="margin:6px 0 0">Chaque stat va de 40 à 60 au départ. Tu gagnes 4 points à chaque niveau, jusqu’à 95.</p>
+    <button class="btn pri big" style="width:100%;margin-top:12px" data-a="oncok" ${left||u.busy?'disabled':''}>${u.busy?'Création…':'Créer mon boxeur'}</button></div>`}
+function vOnOpps(){const u=onUi(),b=u.home.boxers.find(x=>x.id===u.box);if(!b){u.box=null;return''}
+  const O=u.opps,row=(o,fr)=>{const diff=o.ovr-b.ovr,champ=o.rank===1&&onFights(o)>=3&&onFights(b)>=2;
+    return`<div class="panel" style="padding:12px"><div class="row" style="flex-wrap:nowrap;gap:10px"><div class="av sm" style="width:44px;height:44px">${avatar(o,'blue')}</div><span style="min-width:0;flex:1"><b>${flag(o.nat)} ${esc(o.name)}</b> ${champ?'<span class="chip gold">👑 Champion</span>':''}<br>
+      <span class="small">${o.ovr} global (${diff>0?'+':''}${diff}) · Niv. ${o.lvl} · ${onRec(o)} · ${onRankTxt(o)}</span><br><span class="small">${fr?'🤝 ':''}${esc(o.mgr)}${onTag(o)}</span></span>
+      <button class="btn ${champ?'gold':'pri'} sm" data-a="ongo" data-id="${o.id}">${champ?'Titre !':'Combattre'}</button></div></div>`};
+  return`<div class="panel"><div class="ph"><b class="nm" style="font-size:20px">🥊 ${esc(b.name)}</b><button class="btn sm" data-a="onoppx">← Retour</button></div>
+    <p class="small" style="margin:0">${onDiv(b.div)} · ${b.ovr} global · cote ${b.rating}. Adversaires du même poids et de niveau proche. Bats le champion 👑 (#1) en 12 rounds pour lui prendre la ceinture (après 2 combats).</p></div>
+    ${!O?'<p class="small">Recherche d’adversaires…</p>':O.err?`<p class="small" style="color:#ff7b8b">${esc(O.err)}</p>`:
+    `${O.friends.length?`<span class="lab" style="display:block;margin:12px 0 6px">Tes amis</span><div class="list" style="grid-template-columns:1fr">${O.friends.map(o=>row(o,1)).join('')}</div>`:''}
+     <span class="lab" style="display:block;margin:12px 0 6px">Adversaires proposés</span><div class="list" style="grid-template-columns:1fr">${O.match.map(o=>row(o)).join('')||'<p class="small">Personne dans cette catégorie pour l’instant.</p>'}</div>
+     <button class="btn" style="width:100%;margin-top:10px" data-a="onopp" data-id="${b.id}">🔄 Autres adversaires</button>`}`}
 function vOnline(){
   const u=onUi(),hdr=`<div class="row" style="justify-content:space-between;margin-bottom:10px;flex-wrap:nowrap"><h2 style="margin:0">🌐 En ligne</h2><button class="btn sm" data-a="onexit">← Menu</button></div>`;
   if(!ON)return hdr+vOnAuth();
   if(!u.home&&!u.busy&&!u.err)setTimeout(()=>onLoad(),0);
-  const H=u.home,me=H?H.me:{name:ON.name,code:'…',elo:'…',w:0,l:0,d:0,kos:0};
+  const H=u.home;
+  if(!H)return hdr+`<div class="panel"><p class="small" style="margin:0">${u.err?esc(u.err):'Chargement…'}</p>${u.err?'<button class="btn" style="margin-top:8px" data-a="onref">Réessayer</button>':''}</div>`;
+  const me=H.me;
   if(u.acct)return hdr+`<div class="panel"><div class="ph"><b class="nm" style="font-size:20px">Mon compte</b><button class="btn sm" data-a="onacct">← Retour</button></div>
-    <p class="small">Connecté en tant que <b>${esc(me.name)}</b>. Ton écurie en ligne vient de ta carrière <b>${esc(S.club)}</b>.</p>
+    <p class="small">Connecté en tant que <b>${esc(me.name)}</b>.</p>
     <span class="lab">Changer le mot de passe</span><div class="stack" style="gap:8px;margin-top:6px"><input id="on-old" type="password" autocomplete="current-password" placeholder="Mot de passe actuel" style="${ONIN}"><input id="on-new" type="password" autocomplete="new-password" placeholder="Nouveau mot de passe" style="${ONIN}"><button class="btn" data-a="onpass">Changer</button></div>
     <button class="btn" style="margin-top:14px;width:100%" data-a="onlogout">Se déconnecter</button></div>`;
-  const prof=`<div class="panel"><div class="ph"><div style="min-width:0"><b class="nm" style="font-size:20px">${esc(me.name)}</b><span class="small" style="display:block">${esc(S.club)}</span></div><span class="chip gold">ELO ${me.elo}</span></div>
-    <div class="row" style="justify-content:space-between;margin-top:8px"><span><span class="lab">Record en ligne</span><br><b class="num" style="font-size:20px">${onRec(me)}</b> <span class="small">${me.kos||0} KO</span></span>
-    <span style="text-align:right"><span class="lab">Ton code ami</span><br><b class="num" style="font-size:22px;letter-spacing:.12em">${esc(me.code||'')}</b></span></div>
-    <div class="row" style="margin-top:10px"><button class="btn pri" data-a="onshare">📤 Mon code</button><button class="btn" data-a="onref" ${u.busy?'disabled':''}>${u.busy?'…':'↻'}</button><button class="btn" data-a="onacct">⚙️ Compte</button></div>
+  if(u.cr)return hdr+vOnCreate();
+  if(u.up){const b=H.boxers.find(x=>x.id===u.up.id);if(b)return hdr+vOnUp(b);u.up=null}
+  if(u.box)return hdr+vOnOpps();
+  const champs=H.boxers.filter(b=>b.rank===1&&onFights(b)>=3).length;
+  const prof=`<div class="panel"><div class="ph"><div style="min-width:0"><b class="nm" style="font-size:20px">${esc(me.name)}</b><span class="small" style="display:block">Code ami : <b class="num" style="letter-spacing:.1em">${esc(me.code||'')}</b>${champs?` · 👑 ×${champs}`:''}</span></div><span class="chip gold">ELO ${me.elo}</span></div>
+    <div class="row" style="margin-top:8px;justify-content:space-between"><span class="small">Record en ligne <b class="num">${onRec(me)}</b> · ${me.kos||0} KO</span><span class="row"><button class="btn sm" data-a="onshare">📤 Code</button><button class="btn sm" data-a="onref" ${u.busy?'disabled':''}>${u.busy?'…':'↻'}</button><button class="btn sm" data-a="onacct">⚙️</button></span></div>
     ${u.err?`<p class="small" style="color:#ff7b8b;margin:8px 0 0">${esc(u.err)}</p>`:''}</div>`;
-  if(u.fr){const f=onFind(u.fr);if(f)return hdr+prof+vOnFight(f);u.fr=null}
-  const sub=u.sub,seg=`<div style="margin:12px 0">${segH('onsub',[['adv','⚔️ Adversaires'],['amis','🤝 Amis'],['hist','📜 Historique'],['top','🌍 Top']],sub)}</div>`;
-  const card=(f,rank)=>`<div class="panel" style="padding:13px"><div class="ph"><div style="min-width:0"><b>${rank?rank+'. ':''}${esc(f.name)}</b>${onTag(f)}<span class="small" style="display:block">${esc(f.club||'')} · ${onRec(f)} · ${onAgo(f.seen)}</span></div><span class="chip">ELO ${f.elo}</span></div>
-    <div class="row" style="justify-content:space-between;margin-top:8px"><span class="small">Toi contre lui : <b class="num">${f.hw}-${f.hl}-${f.hd}</b></span><button class="btn pri sm" data-a="onfr" data-id="${esc(f.id)}" ${f.roster.length?'':'disabled'}>🥊 Défier</button></div>
-    ${f.roster.length?'':'<p class="small" style="margin:6px 0 0">Pas encore d’écurie envoyée.</p>'}</div>`;
+  const sub=u.sub,seg=`<div style="margin:12px 0">${segH('onsub',[['ecurie','🥊 Écurie'],['cls','🏆 Rangs'],['amis','🤝 Amis'],['hist','📜 Combats']],sub)}</div>`;
   let body='';
-  if(!H)body=`<p class="small">${u.busy?'Chargement…':''}</p>`;
-  else if(sub==='adv')body=`<p class="small" style="margin:0 0 8px">Des gérants proches de ton ELO. Bats-les pour grimper au classement mondial.</p><div class="list" style="grid-template-columns:1fr">${H.opps.map(f=>card(f)).join('')||'<p class="small">Personne pour l’instant.</p>'}</div>`;
-  else if(sub==='amis')body=`<div class="panel"><span class="lab">Ajouter un ami</span><div class="row" style="margin-top:8px;flex-wrap:nowrap"><input id="on-code" maxlength="8" placeholder="CODE" autocomplete="off" autocapitalize="characters" style="${ONIN};flex:1;min-width:0;letter-spacing:.12em;text-transform:uppercase"><button class="btn pri" data-a="onadd">Ajouter</button></div></div>
-    <div class="list" style="grid-template-columns:1fr;margin-top:8px">${H.friends.map((f,i)=>card(f,i+1)).join('')||'<div class="panel"><p class="small" style="margin:0">Pas encore d’amis. Envoie ton code à tes amis, ou entre le leur ci-dessus.</p></div>'}</div>`;
-  else if(sub==='hist'){const L=H.feed;
-    body=!L.length?`<div class="panel"><p class="small" style="margin:0">Aucun combat en ligne pour l’instant.</p></div>`:`<div class="list" style="grid-template-columns:1fr">${L.map(m=>{const m1=m.p1===H.me.id,win=m.res===0?'N':((m.res===1)===m1)?'V':'D',d=onI(m1?m.d1:m.d2,-99,99,0);
-      return`<div class="panel" style="padding:12px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span style="min-width:0"><b style="color:${win==='V'?'var(--green)':win==='D'?'#ff7b8b':'var(--muted)'}">${win==='V'?'Victoire':win==='D'?'Défaite':'Nul'}</b> <span class="small">${m.method==='DEC'?'aux points':esc(m.method)+' R'+onI(m.rnd,0,12,0)}</span><br><span class="small">${esc(onT(m1?m.b1:m.b2,40))} vs ${esc(onT(m1?m.b2:m.b1,40))} (${esc(onT(m1?m.n2:m.n1,16))})${m1?'':' · il t’a défié'}</span></span><span class="num" style="text-align:right">${d>=0?'+':''}${d}<br><span class="small">${onAgo(m.at).replace('vu ','')}</span></span></div></div>`}).join('')}</div>`}
-  else{if(!u.top)setTimeout(onTop,0);
-    body=!u.top?'<p class="small">Chargement…</p>':`<div class="panel">${u.top.map((p,i)=>`<div class="row" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:nowrap"><span style="min-width:0"><b>${i+1}. ${esc(p.name)}</b>${onTag(p)}${H&&p.id===H.me.id?' <span class="chip gold">Toi</span>':''}<br><span class="small">${esc(p.club||'')} · ${onRec(p)}</span></span><b class="num">${p.elo}</b></div>`).join('')}</div>`}
+  if(sub==='ecurie'){const free=ON_DIV.filter(d=>!H.boxers.some(b=>b.div===d));
+    body=(H.boxers.length?'':`<div class="panel"><b>Crée ton premier boxeur !</b><p class="small" style="margin:6px 0 0">Un boxeur par catégorie de poids (9 au maximum). Il commence autour de 48 global. Chaque combat lui donne de l’XP : il monte de niveau, tu places ses points et il grimpe au classement de sa catégorie jusqu’à la ceinture.</p></div>`)+
+      `<div class="list" style="grid-template-columns:1fr;margin-top:8px">${H.boxers.map(vOnBox).join('')}</div>`+
+      (free.length?`<button class="btn ${H.boxers.length?'':'pri big'}" style="width:100%;margin-top:10px" data-a="oncr">➕ Nouveau boxeur (${free.length} catégorie${free.length>1?'s':''} libre${free.length>1?'s':''})</button>`:'')}
+  else if(sub==='cls'){const dv=u.rdiv||(H.boxers[0]&&H.boxers[0].div)||'leger';u.rdiv=dv;
+    const L=dv==='mgr'?u.top:u.rank[dv];if(!L)setTimeout(()=>dv==='mgr'?onTop():onRankLoad(dv),0);
+    body=`<div style="margin-bottom:8px">${selH('onrdiv',[['mgr','👔 Gérants (ELO)'],...ON_DIV.map(d=>[d,(H.boxers.some(b=>b.div===d)?'⭐ ':'')+onDiv(d)])],dv,'k')}</div>`+
+      (!L?'<p class="small">Chargement…</p>':dv==='mgr'?`<div class="panel">${L.map((p,i)=>`<div class="row" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:nowrap"><span style="min-width:0"><b>${i+1}. ${esc(p.name)}</b>${onTag(p)}${p.id===me.id?' <span class="chip gold">Toi</span>':''}<br><span class="small">${onRec(p)}</span></span><b class="num">${p.elo}</b></div>`).join('')}</div>`:
+      `<div class="panel">${L.map((b,i)=>`<div class="row" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:nowrap;gap:8px"><span style="min-width:0"><b>${i===0?'👑':(i+1)+'.'} ${flag(b.nat)} ${esc(b.name)}</b>${b.pid===me.id?' <span class="chip gold">Toi</span>':''}<br><span class="small">${b.ovr} global · Niv. ${b.lvl} · ${onRec(b)} · ${esc(b.mgr)}${onTag(b)}</span></span><b class="num">${b.rating}</b></div>`).join('')||'<p class="small">Personne.</p>'}</div>`)}
+  else if(sub==='amis')body=`<div class="panel"><span class="lab">Ajouter un ami</span><div class="row" style="margin-top:8px;flex-wrap:nowrap"><input id="on-code" maxlength="8" placeholder="CODE" autocomplete="off" autocapitalize="characters" style="${ONIN};flex:1;min-width:0;letter-spacing:.12em;text-transform:uppercase"><button class="btn pri" data-a="onadd">Ajouter</button></div><p class="small" style="margin:8px 0 0">Les boxeurs de tes amis apparaissent en premier quand tu cherches un combat dans leur catégorie.</p></div>
+    <div class="list" style="grid-template-columns:1fr;margin-top:8px">${H.friends.map((f,i)=>`<div class="panel" style="padding:13px"><div class="ph"><div style="min-width:0"><b>${i+1}. ${esc(f.name)}</b><span class="small" style="display:block">${onRec(f)} · ${onAgo(f.seen)}</span></div><span class="chip">ELO ${f.elo}</span></div>
+      <span class="small">Toi contre lui : <b class="num">${f.hw}-${f.hl}-${f.hd}</b> · Catégories : ${f.divs.map(onDiv).join(', ')||'aucun boxeur'}</span></div>`).join('')||'<div class="panel"><p class="small" style="margin:0">Pas encore d’amis. Envoie ton code à tes amis, ou entre le leur ci-dessus.</p></div>'}</div>`;
+  else{const L=H.feed;
+    body=!L.length?`<div class="panel"><p class="small" style="margin:0">Aucun combat en ligne pour l’instant.</p></div>`:`<div class="list" style="grid-template-columns:1fr">${L.map(m=>{const m1=m.p1===me.id,win=m.res===0?'N':((m.res===1)===m1)?'V':'D',d=onI(m1?m.d1:m.d2,-99,99,0);
+      return`<div class="panel" style="padding:12px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span style="min-width:0"><b style="color:${win==='V'?'var(--green)':win==='D'?'#ff7b8b':'var(--muted)'}">${win==='V'?'Victoire':win==='D'?'Défaite':'Nul'}</b> <span class="small">${m.method==='DEC'?'aux points':esc(m.method)+' R'+onI(m.rnd,0,12,0)}${m1&&m.xp?` · +${onI(m.xp,0,999,0)} XP`:''}</span><br><span class="small">${esc(onT(m1?m.b1:m.b2,40))} vs ${esc(onT(m1?m.b2:m.b1,40))} (${esc(onT(m1?m.n2:m.n1,16))})${m1?'':' · il t’a défié'}</span></span><span class="num" style="text-align:right">${d>=0?'+':''}${d}<br><span class="small">${onAgo(m.at).replace('vu ','')}</span></span></div></div>`}).join('')}</div>`}
   return hdr+prof+seg+body;
-}
-function vOnFight(f){
-  const u=onUi(),M=onFighters();if(!u.mb||!M.find(b=>b.id===u.mb))u.mb=M[0]?.id;const mb=getB(u.mb);
-  return`<div class="panel" style="margin-top:12px"><div class="ph"><b class="nm" style="font-size:20px">🥊 Défier ${esc(f.name)}</b><button class="btn sm" data-a="onback">← Retour</button></div>
-    <span class="lab">Ton boxeur</span><div style="margin:6px 0 4px">${M.length?selH('onmb',M.map(b=>[b.id,`${ovr(b)} · ${esc(b.name)} · ${divN(b.div)}`]),u.mb,'k'):'<p class="small">Aucun boxeur disponible (blessés ?).</p>'}</div>
-    <p class="small" style="margin:4px 0 0">Combat en 10 rounds. Les deux boxeurs arrivent frais. Ta carrière n’est pas touchée : seuls ton ELO et ton record en ligne bougent.</p></div>
-    <div class="list" style="grid-template-columns:1fr;margin-top:10px">${f.roster.map((o,i)=>{const same=mb&&o.div===mb.div;
-      return`<div class="panel" style="padding:12px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span style="min-width:0"><b>${flag(o.nat)} ${esc(o.name)}</b>${o.belts.length?' 🏆':''}<br><span class="small">${ovr(o)} global · ${onDiv(o.div)} · ${o.w}-${o.l}-${o.d} · ${o.age} ans${same?'':' · autre poids'}</span></span>
-      <button class="btn ${same?'pri':''} sm" data-a="ongo" data-id="${esc(f.id)}" data-k="${i}" ${mb?'':'disabled'}>Combattre</button></div></div>`}).join('')}</div>`;
 }
 
 /* --- événements aléatoires --- */
@@ -2646,7 +2701,7 @@ function render(){
 const pill=w=>w==null?'<span class="pill">…</span>':`<span class="pill ${w>=60?'g':w>=40?'y':'r'}">${w} %</span>`;
 function buildFight(){
   const F=ui.fight,el=document.getElementById('fx');ui.flog=false;
-  const tag=F.online?`🌐 Défi en ligne · ${esc(F.online.n)}`:F.tour?`${(TOURS.find(t=>S.tour&&t.id===S.tour.tid)||{n:'Tournoi'}).n} · ${RNDN[F.tour-1]}`:F.trial?`Épreuve · niveau ${F.trial.lvl}`:F.ex?`Défi · ${S.gyms[F.ex.g].name}`:`${F.title?titleTxt(F.title):F.ntitle?'Titre national '+flag(F.A.b.nat):'Combat'} · ${divN(F.A.b.div)}`;
+  const tag=F.online?`🌐 ${F.online.title?'👑 Championnat · ':''}En ligne · ${divN(F.A.b.div)}`:F.tour?`${(TOURS.find(t=>S.tour&&t.id===S.tour.tid)||{n:'Tournoi'}).n} · ${RNDN[F.tour-1]}`:F.trial?`Épreuve · niveau ${F.trial.lvl}`:F.ex?`Défi · ${S.gyms[F.ex.g].name}`:`${F.title?titleTxt(F.title):F.ntitle?'Titre national '+flag(F.A.b.nat):'Combat'} · ${divN(F.A.b.div)}`;
   el.innerHTML=`<div class="fxw"><div class="fxtop"><span class="chip ${F.title||F.ntitle?'gold':F.ex||F.trial||F.online?'blue':''}">${tag}${F.rival?' · Revanche':''}</span>
       <div class="seg spd">${[1,2,4].map(s=>`<button data-a="fspeed" data-k="${s}" aria-pressed="${F.speed===s}">×${s}</button>`).join('')}</div><button class="btn sm" data-a="flog">Déroulé</button></div>
     <div id="fxhud"></div><div class="stage"><canvas id="cv" aria-label="Le ring"></canvas><div id="bub" class="bub" hidden></div><div id="ov" class="ov"></div></div><div id="fxctl" class="fxctl"></div></div>
@@ -2655,7 +2710,7 @@ function buildFight(){
   if(!RAF)RAF=requestAnimationFrame(loop);
 }
 function hudHTML(F){
-  const o=F.odds,lab=i=>F.online?(i?esc(F.online.n):'Toi'):F.tour?(i?'Tournoi':'Ton club'):F.trial?(i?'Mentor':'Ton club'):F.ex?(i?(S.gyms[F.ex.g].m.indexOf(F.B.b)===2?'Chef':'Gym'):'Ton club'):rankLabel(i?F.B.b:F.A.b);
+  const o=F.odds,lab=i=>F.online?(i?esc(F.online.n):'Toi')+(F.online.title&&i?' · 👑':''):F.tour?(i?'Tournoi':'Ton club'):F.trial?(i?'Mentor':'Ton club'):F.ex?(i?(S.gyms[F.ex.g].m.indexOf(F.B.b)===2?'Chef':'Gym'):'Ton club'):rankLabel(i?F.B.b:F.A.b);
   const side=(X,i,cls)=>`<div class="hs ${cls}"><div class="hn"><div class="av sm">${avatar(X.b,cls)}</div><div style="min-width:0"><b>${flag(X.b.nat)} ${esc(sur(X.b))}</b><span class="small">${lab(i)} · ${ovr(X.b)}</span></div></div>
     <div class="trk ${cls} hp"><i id="hp${i}" style="width:${pct(F.disp.hp[i])}%"></i></div><div class="trk green en"><i id="en${i}" style="width:${pct(F.disp.en[i])}%"></i></div>
     <span class="small"><span class="num">${X.land}/${X.thr}</span>${X.kd?` · <b style="color:#ff7b8b">${X.kd} KD</b>`:''}${X.cut?` · <b style="color:#ff7b8b">Coupure ${X.cut}/3</b>`:''}</span></div>`;
@@ -2718,10 +2773,11 @@ document.addEventListener('click',e=>{
   const a=t.dataset.a,id=t.dataset.id,k=t.dataset.k;
   if(a.startsWith('m_')){menuAct(a,t);return}
   if(!S)return;
-  if(!['release','new','fire','cancelf','negno','cdiv','retire','sellpromo'].includes(a))ui.confirm=null;
-  const b=id?getB(id):null;
+  if(!['release','new','fire','cancelf','negno','cdiv','retire','sellpromo','onret'].includes(a))ui.confirm=null;
+  if(ui.on&&ui.on.cr){const e=document.getElementById('on-bname');if(e&&e.value.trim())ui.on.cr.name=e.value.slice(0,28)}
+  const b=id&&!a.startsWith('on')?getB(id):null;
   switch(a){
-    case'onsignup':onAuth('signup');return;case'onlogin':onAuth('login');return;case'onauth':onUi().auth=k;onUi().err='';break;case'onlogout':onLogout();return;case'onacct':onUi().acct=!onUi().acct;break;case'onpass':onPass();return;case'onexit':save();openMenu('home');return;case'onadd':onAddFriend();return;case'onshare':onShareCode();return;case'onref':onUi().top=null;onLoad(true);return;case'onsub':onUi().sub=k;onUi().fr=null;break;case'onfr':onUi().fr=id;window.scrollTo(0,0);break;case'onback':onUi().fr=null;break;case'onmb':onUi().mb=k;break;case'ongo':onStart(id,+k);return;
+    case'onsignup':onAuth('signup');return;case'onlogin':onAuth('login');return;case'onauth':onUi().auth=k;onUi().err='';break;case'onlogout':onLogout();return;case'onacct':onUi().acct=!onUi().acct;break;case'onpass':onPass();return;case'onexit':save();openMenu('home');return;case'onadd':onAddFriend();return;case'onshare':onShareCode();return;case'onref':onLoad(true);return;case'onsub':onUi().sub=k;if(k==='cls'){onUi().rank={};onUi().top=null}window.scrollTo(0,0);break;case'onrdiv':onUi().rdiv=k;onUi().rank={};onUi().top=null;break;case'onopp':onOpps(id);window.scrollTo(0,0);return;case'onoppx':onUi().box=null;onUi().opps=null;break;case'ongo':onStart(id);return;case'onup':onUi().up={id,add:{}};window.scrollTo(0,0);break;case'onupx':onUi().up=null;break;case'onupp':{const u=onUi(),bx=u.home&&u.home.boxers.find(x=>x.id===u.up.id);if(bx){const used=ONSTAT.reduce((s2,[q])=>s2+(u.up.add[q]||0),0);if(used<bx.pts&&bx[k]+(u.up.add[k]||0)<95)u.up.add[k]=(u.up.add[k]||0)+1}break}case'onupm':{const u=onUi();if(u.up.add[k])u.up.add[k]--;break}case'onupok':onSpend();return;case'onret':if(ui.confirm==='obr'+id){onRetire(id);return}ui.confirm='obr'+id;break;case'oncr':{const u=onUi(),mine=u.home?u.home.boxers.map(x=>x.div):[],fr=ON_DIV.filter(d=>!mine.includes(d));if(fr.length)u.cr=onNewCr(fr[0]);window.scrollTo(0,0);break}case'oncrx':onUi().cr=null;break;case'onlook':onUi().cr.look=onRandLook();break;case'onrname':onUi().cr.name=natName(onUi().cr.nat);break;case'oncdiv':onUi().cr.div=k;break;case'oncnat':if(NAT[k]){onUi().cr.nat=k;onUi().cr.name=natName(k)}break;case'oncsty':onUi().cr.style=k;break;case'oncm':{const c=onUi().cr;if(c.st[k]>40)c.st[k]--;break}case'oncp':{const c=onUi().cr;if(c.st[k]<60&&onLeft(c)>0)c.st[k]++;break}case'oncok':onCreate();return;
     case'tab':ui.tab=k;ui.sheet=null;window.scrollTo(0,0);break;
     case'esub':ui.esub=k;break;
     case'csub':ui.csub=k;break;
@@ -2919,13 +2975,13 @@ function renderMenu(){
     h=`<div class="mstage"><canvas id="mcv" aria-hidden="true"></canvas></div><div class="mwrap gut">
       <div class="logo"><h1>Coin Rouge</h1><span class="tag">Gérant de boxe</span></div>
       ${m?`<button class="mbtn pri" data-a="m_cont"><b>Continuer</b><span>${flag(m.home)} ${esc(m.club)} · ${when(m.t)} · ${$(m.money)}</span></button>`:''}
-      <button class="mbtn mon" data-a="m_online"><b>🌐 En ligne</b><span>${cnt?'Affronte tes amis et des gérants du monde entier avec ton écurie':'Crée d’abord une carrière : ton écurie te suit en ligne'}</span></button>
+      <button class="mbtn mon" data-a="m_online"><b>🌐 En ligne</b><span>Bâtis ton écurie en ligne : un boxeur par catégorie, monte au classement mondial</span></button>
       <button class="mbtn ${m?'':'pri'}" data-a="m_new"><b>Nouvelle carrière</b><span>Crée ton club, choisis ton pays et tes deux premiers boxeurs</span></button>
       <button class="mbtn" data-a="m_load" ${cnt?'':'disabled'}><b>Charger une partie</b><span>${cnt?`${cnt} sauvegarde${cnt>1?'s':''} sur 3`:'Aucune sauvegarde'}</span></button>
       <button class="mbtn" data-a="m_imp"><b>Importer</b><span>Colle un code de sauvegarde venu d’un autre appareil</span></button>
       <button class="mbtn" onclick="openFB()"><b>💬 Donner mon avis</b><span>Dis-nous ce qui marche et ce qu’il faut améliorer</span></button>
       <p class="mfoot">Aucun achat · Aucune pub · Aucune énergie<br><span class="vtag">VERSION TEST ${GAME_V}</span></p></div>`}
-  else if(st==='onslot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>🌐 En ligne</h2><p class="lede">Avec quelle carrière veux-tu jouer en ligne ? Tes 6 meilleurs boxeurs de ce club formeront ton écurie en ligne.</p>
+  else if(st==='onslot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>🌐 En ligne</h2><p class="lede">Choisis une partie pour entrer en ligne (ton écurie en ligne est séparée de ta carrière, elle ne change rien).</p>
       <div class="stack">${[1,2,3].filter(n=>slotMeta(n)).map(n=>{const m=slotMeta(n);return`<button class="mbtn" data-a="m_onld" data-k="${n}"><b>${flag(m.home)} ${esc(m.club)}</b><span>${when(m.t)} · ${$(m.money)}</span></button>`}).join('')}</div></div>`}
   else if(st==='load'||st==='slot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>${st==='load'?'Charger une partie':'Choisis un emplacement'}</h2>
       ${st==='slot'?'<p class="lede">Les 3 emplacements sont pris. Choisis celui à remplacer.</p>':''}<div class="stack">${[1,2,3].map(n=>slotRow(n,st)).join('')}</div></div>`}
@@ -3191,7 +3247,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='d4a3461b73';if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='bfa2f93f3d';if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b)b.hidden=false;return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),300000)});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});</script>
