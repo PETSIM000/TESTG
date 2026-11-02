@@ -800,9 +800,11 @@ function vAmSheet(b){const full=club().length>=rosterCap(),c=amPrice(b);
     :`<div class="panel"><span class="lab">Pas encore évalué</span><p class="small" style="margin:6px 0 10px">Ses stats exactes et son potentiel sont inconnus. Envoie un recruteur le voir boxer.</p><button class="btn gold" data-a="amscout" data-id="${b.id}" ${S.money>=5000?'':'disabled'}>🔍 Envoyer un recruteur · 5 000 $</button></div>`}
   <div class="panel"><span class="lab">Médailles</span>${(b.am.med||[]).length?`<ul class="log">${b.am.med.slice().reverse().map(m=>`<li>${MEDI[m.r]} ${esc(m.n)} <span class="small">an ${m.y}</span></li>`).join('')}</ul>`:'<p class="small" style="margin:6px 0 0">Aucune médaille pour l’instant.</p>'}</div>
   <div class="mbar"><div style="flex:1;min-width:0"><b>${$(c)}</b><span class="small"> prime de signature · contrat 3 ans</span></div><button class="btn pri" data-a="amsign" data-id="${b.id}" ${b.age<17||full||S.money<c?'disabled':''}>${b.age<17?'Trop jeune':full?'Écurie pleine':'✍️ Signer pro'}</button></div></div>`}
+const unbeatP=b=>b.age<=21?.8:b.age<=24?.55:ovr(b)>=80?.4:ovr(b)>=72?.25:ovr(b)>=62?.12:.05;
 function seedRecord(b){
-  const n=Math.max(0,(b.age-19)*ri(1,2)+ri(0,3)), wr=cl(.45+(ovr(b)-55)/60,.15,.95);
-  b.w=Math.round(n*wr); b.d=R()<.3?Math.min(ri(0,2),n-b.w):0; b.l=Math.max(0,n-b.w-b.d);
+  const n=Math.max(0,b.age<=21?ri(0,3)+(b.age-18)*ri(1,3):(b.age-19)*ri(1,2)+ri(0,3)), wr=cl(.6+(ovr(b)-55)/45,.25,.97);
+  if(R()<unbeatP(b)){b.d=n>6&&R()<.15?1:0;b.w=n-b.d;b.l=0}
+  else{b.w=Math.round(n*wr); b.d=R()<.25?Math.min(ri(0,1),n-b.w):0; b.l=Math.max(0,n-b.w-b.d);if(!b.l&&n>0){b.l=1;b.w=Math.max(0,b.w-1)}}
   b.ko=Math.round(b.w*(.3+b.pow/250));
   b.pts=Math.max(0,Math.round((ovr(b)-42)*8+ri(-15,25)));
   b.fame=cl(Math.round((ovr(b)-42)*1.4+ri(0,8)),1,100);
@@ -846,10 +848,10 @@ function genStaff(){
 }
 function genFA(){
   const out=[],res=S.mgr?S.mgr.perks.res:0;
-  for(let i=0;i<12;i++){
+  for(let i=0;i<16;i++){
     const r=R(),d=pick(DIVS).id;let b;
-    if(r<.45)b=makeBoxer({div:d,ovr:ri(38,50)+res*2,age:ri(18,21),pot:ri(14,36)+res*3});
-    else if(r<.8)b=makeBoxer({div:d,ovr:ri(50,62)+res*2,age:ri(24,30),pot:ri(1,8)+res});
+    if(r<.6)b=makeBoxer({div:d,ovr:ri(38,52)+res*2,age:ri(18,21),pot:ri(16,38)+res*3});
+    else if(r<.85)b=makeBoxer({div:d,ovr:ri(50,62)+res*2,age:ri(24,30),pot:ri(1,8)+res});
     else b=makeBoxer({div:d,ovr:ri(60,69)+res*2,age:ri(31,34),pot:ri(0,2)});
     seedRecord(b);
     if(b.age<22){b.pts=Math.round(b.pts*.3);b.fame=cl(Math.round(b.fame*.5),1,100)}
@@ -1131,6 +1133,7 @@ function newYear(){
   for(const d of DIVS){
     const n=S.boxers.filter(b=>b.div===d.id&&!b.mine).length;
     for(let i=n;i<64;i++){const nb=makeBoxer({div:d.id,ovr:ri(46,62),age:ri(19,23),pot:ri(6,24)});seedRecord(nb);nb.pts=Math.round(nb.pts*.5);S.boxers.push(nb)}
+    for(let i=0,c=n;i<4&&c<78;i++,c++){const nb=makeBoxer({div:d.id,ovr:ri(44,56),age:ri(18,21),pot:ri(18,38)});seedRecord(nb);nb.pts=Math.round(nb.pts*.3);nb.fame=cl(Math.round(nb.fame*.5),1,100);S.boxers.push(nb);prOf(nb)}
     ensureBelts(d.id);
   }
   log(`Début de l’an ${Math.floor((S.t-1)/52)+1}. Tout le monde prend un an.`);
@@ -2529,7 +2532,7 @@ async function unpackSave(code){code=(code||'').replace(/\s+/g,'');
   if(code.startsWith('CRZ1:')){const bin=atob(code.slice(5)),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const st=new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'));return JSON.parse(await new Response(st).text())}
   if(code.startsWith('CRJ1:'))return JSON.parse(decodeURIComponent(escape(atob(code.slice(5)))));throw new Error('format')}
 function enterGame(s){
-  S=s;fixup(S);S.set=Object.assign({...DEFSET},S.set||{});if(S.event===undefined)S.event=null;migr7();ensurePromos();ensureAm();syncPerks();gymInit();
+  S=s;fixup(S);S.set=Object.assign({...DEFSET},S.set||{});if(S.event===undefined)S.event=null;migr7();if(!S.rec25){S.rec25=1;for(const b of S.boxers)if(!b.mine&&!b.retired&&b.l>0&&R()<unbeatP(b)*.8){b.w+=b.l;b.l=0}}ensurePromos();ensureAm();syncPerks();gymInit();
   ensureAllNat();
   Object.assign(ui,{tab:'ecurie',esub:'mine',csub:'cal',sheet:null,fight:null,confirm:null,bookFor:null,div:null,oc:{},expCode:null,rsub:'monde',rnat:S.home,bsc:'niv'});
   closeMenu();render();save();
