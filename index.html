@@ -473,6 +473,31 @@ input,select,textarea{font-size:16px}
 .fbf textarea,.fbf input{width:100%;box-sizing:border-box;border-radius:12px;border:1px solid var(--line2);background:var(--s2);color:var(--ink);padding:10px 12px;font-family:inherit;font-size:16px;resize:vertical}
 .fbf textarea{min-height:64px}
 .vtag{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gold);border:1px solid rgba(245,196,81,.4)}
+.ngp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:2px 0 4px}
+.ngp div{display:grid;gap:5px;text-align:center;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ngp i{display:block;height:5px;border-radius:3px;background:rgba(255,255,255,.1)}
+.ngp .on i{background:linear-gradient(90deg,var(--red),var(--gold))}.ngp .cur{color:var(--ink)}
+.ngcard{display:flex;align-items:center;gap:14px;padding:16px;border-radius:20px;border:1px solid rgba(245,196,81,.35);background:radial-gradient(circle at 0 0,rgba(255,59,80,.18),transparent 60%),linear-gradient(160deg,var(--s2),var(--s1))}
+.crest{flex:none;width:68px;height:76px;display:grid;place-items:center;font-family:var(--f-disp);font-weight:900;font-size:24px;color:#2a1c00;background:linear-gradient(180deg,#fff1b8,#f5c451 55%,#b8860b);clip-path:polygon(50% 0,100% 14%,100% 60%,50% 100%,0 60%,0 14%);text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.ngcard b{display:block;font-family:var(--f-disp);font-size:24px;line-height:1.05;text-transform:uppercase;overflow-wrap:anywhere}
+.ngcard span{font-size:12.5px;color:var(--muted)}
+.inrow{display:flex;gap:8px}.inrow input{flex:1;min-width:0}.inrow .btn{flex:none;width:50px;padding:0;font-size:20px}
+.bflags{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.bfl{display:grid;justify-items:center;gap:4px;padding:12px 4px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.3);font-size:12px;font-weight:800;min-width:0}
+.bfl span{font-size:34px;line-height:1}.bfl[aria-pressed="true"]{border-color:var(--gold);background:rgba(245,196,81,.12);box-shadow:0 0 0 1px rgba(245,196,81,.4)}
+.difc{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;text-align:left;padding:14px;border-radius:18px;border:1px solid var(--line);background:rgba(0,0,0,.3)}
+.difc>i{grid-row:span 2;font-style:normal;font-size:30px;line-height:1}.difc b{font-size:17px}.difc ul{margin:2px 0 0;padding:0 0 0 16px;font-size:12.5px;color:var(--muted);line-height:1.45}
+.difc[aria-pressed="true"]{border-color:var(--gold);background:rgba(245,196,81,.1);box-shadow:0 0 0 1px rgba(245,196,81,.4)}
+.pkc{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;padding:11px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(160deg,var(--s2),var(--s1))}
+.pkc .av{width:56px;height:56px}.pkc .nm{font-weight:800;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pkc .meta{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pkc .st{white-space:nowrap;overflow:hidden}.pkc .st{display:flex;gap:8px;margin-top:5px;font-size:11px;color:var(--muted)}.pkc .st b{color:var(--ink);font-size:12px}
+.pkc .ovr{text-align:center}.pkc .ovr b{display:block;font-size:24px;font-weight:900;line-height:1}.pkc .ovr small{font-size:9.5px;color:var(--muted)}
+.pkc[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold),0 0 22px rgba(245,196,81,.3);background:linear-gradient(160deg,rgba(245,196,81,.12),var(--s1))}
+.grp{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;margin-right:4px}
+.grp.e{background:rgba(56,217,138,.15);color:#5fe0a0}.grp.c{background:rgba(79,128,255,.15);color:#8fb0ff}.grp.v{background:rgba(255,159,67,.15);color:#ffb877}
+.tray{display:flex;gap:8px;align-items:center}.tray .ts{flex:1;min-width:0;display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:12px;border:1px dashed var(--line2);font-size:12px;color:var(--muted)}
+.tray .ts.on{border-style:solid;border-color:rgba(245,196,81,.5);color:var(--ink)}.tray .ts .av{width:30px;height:30px;border-radius:8px}.tray .ts b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px}
+.ngbar{flex-direction:column;align-items:stretch}.ngbar .row{display:flex;gap:8px}.ngbar .row .btn{margin:0}
 .fitw body{width:var(--fitw);max-width:var(--fitw)}
 .fitw nav.tabs,.fitw .sheet,.fitw .modal,.fitw .menu,.fitw body::before{right:auto;width:var(--fitw)}
 .fitw .toast{left:calc(var(--fitw) / 2);max-width:calc(var(--fitw) - 32px)}
@@ -497,6 +522,8 @@ input,select,textarea{font-size:16px}
 document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.sa)return;const b=document.createElement('button');b.hidden=true;b.dataset.a=t.dataset.sa;b.dataset[t.dataset.sk||'k']=t.value;document.body.appendChild(b);b.click();b.remove()});
 const selH=(act,items,cur,key)=>`<select class="selx" data-sa="${act}" data-sk="${key||'k'}">${items.map(([k,n])=>`<option value="${k}" ${k===cur?'selected':''}>${n}</option>`).join('')}</select>`;
 const GAME_V='0.9';
+// Où arrivent les avis des testeurs (laisser vide = l'ami choisit à qui l'envoyer)
+const FB_TO={sms:'',email:'',nom:'le créateur du jeu'};
 /* ---- avis des testeurs (partage par Messages, WhatsApp, etc.) ---- */
 const FBK='coin-rouge-avis';let FB={n:0,like:'',fix:'',bug:'',nm:''};
 function fbLoad(){try{const v=JSON.parse(localStorage.getItem(FBK)||'null');if(v)FB={...FB,...v}}catch(e){}}
@@ -505,7 +532,7 @@ function fbText(){const st=typeof S!=='undefined'&&S?(()=>{const m=S.boxers.filt
   return`🥊 AVIS COIN ROUGE (v${GAME_V})${FB.nm?' — de '+FB.nm:''}\nNote : ${FB.n?'⭐'.repeat(FB.n)+' ('+FB.n+'/5)':'—'}\n\n👍 J’aime :\n${FB.like||'—'}\n\n🔧 À améliorer :\n${FB.fix||'—'}\n\n🐞 Bugs :\n${FB.bug||'—'}\n\n${st}\nÉcran : ${innerWidth}×${innerHeight}`}
 function fbRender(msg){const el=document.getElementById('fb'),e=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   el.innerHTML=`<div class="mcard nt fbf" role="dialog" aria-label="Donner mon avis"><span class="lab">Version test ${GAME_V}</span><h3>Ton avis</h3><div class="mbody">
-  <p class="small" style="margin:0 0 6px">Tu testes le jeu avant sa sortie. Dis franchement ce que tu en penses : ton message part par Messages, WhatsApp, Messenger ou l’app de ton choix.</p>
+  <p class="small" style="margin:0 0 6px">Tu testes le jeu avant sa sortie. Dis franchement ce que tu en penses. ${FB_TO.sms||FB_TO.email?`Ton message part directement à ${e(FB_TO.nom)}.`:'Touche Envoyer, puis choisis la personne qui t’a envoyé le jeu (Messages, WhatsApp, Messenger…).'}</p>
   <label>Ta note</label><div class="fbst">${[1,2,3,4,5].map(i=>`<button type="button" data-fbn="${i}" class="${FB.n>=i?'on':''}" aria-label="${i} sur 5">⭐</button>`).join('')}</div>
   <label for="fb-like">👍 Ce que tu aimes</label><textarea id="fb-like" data-fbk="like" placeholder="Les combats en 3D, les ceintures…">${e(FB.like)}</textarea>
   <label for="fb-fix">🔧 Ce qu’il faut améliorer ou ajouter</label><textarea id="fb-fix" data-fbk="fix" placeholder="Ce qui est mêlant, trop dur, ce qui manque…">${e(FB.fix)}</textarea>
@@ -515,6 +542,8 @@ function fbRender(msg){const el=document.getElementById('fb'),e=s=>String(s).rep
   <div class="row" style="gap:8px;margin-top:12px;flex-wrap:nowrap"><button type="button" class="btn" data-fbx="close" style="flex:none">Fermer</button><button type="button" class="btn pri" data-fbx="send" style="flex:1;margin:0;min-height:48px">📨 Envoyer mon avis</button></div></div>`;el.hidden=false}
 function openFB(){fbLoad();fbRender()}
 async function fbSend(){const t=fbText();
+  if(FB_TO.sms){location.href='sms:'+FB_TO.sms+(/iPhone|iPad|Mac/.test(navigator.userAgent)?'&':'?')+'body='+encodeURIComponent(t);return}
+  if(FB_TO.email){location.href='mailto:'+FB_TO.email+'?subject='+encodeURIComponent('Avis Coin Rouge v'+GAME_V)+'&body='+encodeURIComponent(t);return}
   try{if(navigator.share){await navigator.share({title:'Mon avis sur Coin Rouge',text:t});fbRender('Merci ! Ton avis est envoyé 🙌');return}}catch(e){if(e&&e.name==='AbortError')return}
   try{await navigator.clipboard.writeText(t);fbRender('Message copié ! Colle-le dans Messages ou WhatsApp pour l’envoyer.');return}catch(e){}
   location.href='sms:?&body='+encodeURIComponent(t)}
@@ -2315,6 +2344,17 @@ function pickCard(b,i){const sel=ui.ng.picks.includes(i);
     <div class="s5" style="margin-top:11px">${STATS.map(([k,,a])=>`<div><small>${a}</small><b class="${tone(b[k])}">${Math.floor(b[k])}</b></div>`).join('')}</div>
     ${b.traits.length?`<div class="chips" style="margin-top:9px">${traitChips(b)}</div>`:''}
     <div class="row small" style="justify-content:space-between;margin-top:10px"><span>Fiche ${rec(b)}</span><span>${$(b.salary)}/sem.</span></div></button>`}
+const CLUB_A=['Gym','Club de boxe','Académie','Écurie','Boxing Club','Fight Club'],CLUB_B=['Coin Rouge','Saint-Henri','Les Faucons','Titan','La Forge','Main de Fer','Hochelaga','Ring d’Or','Les Cogneurs','Phénix','Lionheart','Le Bastion','Gants d’Acier','Nord-Est','Le Dernier Round'];
+const TOPNAT=['CA','US','MX','GB','FR','JP'];
+function ngSteps(i){return`<div class="ngp">${['Club','Pays','Niveau','Boxeurs'].map((n,j)=>`<div class="${j<=i?'on':''} ${j===i?'cur':''}"><i></i>${n}</div>`).join('')}</div>`}
+function ngCard(g){const nm=(g.club||'').trim()||'Coin Rouge';return`<div class="ngcard"><div class="crest" id="ng-ci">${esc(initials(nm))}</div><div style="min-width:0"><b id="ng-cn">${esc(nm)}</b><span>${flag(g.home)} ${NAT[g.home].n} · Gérant : <span id="ng-cm">${esc((g.mgr||'').trim()||'toi')}</span>${g.diff?` · ${DIFF[g.diff].n}`:''}</span></div></div>`}
+const ngBar=(back,next,label,dis)=>`<div class="mbar ngbar"><div class="row">${back?`<button class="btn" data-a="${back}" style="flex:none">←</button>`:''}<button class="btn pri big" style="flex:1" data-a="${next}" ${dis?'disabled':''}>${label}</button></div></div>`;
+function pickCard2(b,i){const sel=ui.ng.picks.includes(i),gc=b.grp==='Espoir'?'e':b.grp==='Confirmé'?'c':'v';
+  return`<button class="pkc" data-a="m_pick" data-k="${i}" aria-pressed="${sel}"><div class="av ${tcls(b)}">${avatar(b)}</div>
+    <div style="min-width:0"><div class="nm">${sel?'✓ ':''}${esc(b.name)}</div><div class="meta"><span class="grp ${gc}">${b.grp}</span>${flag(b.nat)} ${b.age} ans · ${divN(b.div)}</div>
+    <div class="st">${STATS.map(([k,,a])=>`<span>${a} <b class="${tone(b[k])}">${Math.floor(b[k])}</b></span>`).join('')}</div>
+    <div class="st"><span>Pot. <b>${potG(b)}</b></span><span>${STYLES[b.style]}</span><span>${$(b.salary)}/s</span></div></div>
+    <div class="ovr"><b>${ovr(b)}</b><small>NOTE</small></div></button>`}
 function renderMenu(){
   const el=document.getElementById('menu'),st=ui.menu,back='<button class="back" data-a="m_home">← Menu</button>';let h='';
   if(st==='home'){const n=lastSlot(),m=n&&slotMeta(n),cnt=[1,2,3].filter(x=>slotMeta(x)).length;
@@ -2328,17 +2368,30 @@ function renderMenu(){
       <p class="mfoot">Aucun achat · Aucune pub · Aucune énergie<br><span class="vtag">VERSION TEST ${GAME_V}</span></p></div>`}
   else if(st==='load'||st==='slot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>${st==='load'?'Charger une partie':'Choisis un emplacement'}</h2>
       ${st==='slot'?'<p class="lede">Les 3 emplacements sont pris. Choisis celui à remplacer.</p>':''}<div class="stack">${[1,2,3].map(n=>slotRow(n,st)).join('')}</div></div>`}
-  else if(st==='ng1'){const g=ui.ng;h=`<div class="mwrap gut" style="padding-top:16px">${back}<span class="lab">Étape 1 sur 2 · Emplacement ${g.slot}</span><h2>Ton club</h2>
-      <div class="panel stack"><label class="fld"><span>Nom du club</span><input id="ng-club" maxlength="24" placeholder="Coin Rouge" value="${esc(g.club)}" autocomplete="off"></label>
-        <label class="fld"><span>Ton nom de gérant</span><input id="ng-mgr" maxlength="24" placeholder="Ton nom" value="${esc(g.mgr)}" autocomplete="off"></label></div>
-      <div class="panel"><span class="lab">Pays du club · ${flag(g.home)} ${NAT[g.home].n}</span><p class="small" style="margin:6px 0 0">Tes premiers espoirs viennent d’ici, et tu grimpes d’abord le classement national de ce pays.</p>
-        <div class="flags">${Object.entries(NAT).map(([c,n])=>`<button class="fl" data-a="m_nat" data-k="${c}" aria-pressed="${g.home===c}"><span>${flag(c)}</span>${n.n}</button>`).join('')}</div></div>
-      <div class="panel"><span class="lab">Difficulté</span><div class="stack" style="gap:8px;margin-top:10px">${Object.entries(DIFF).map(([k,d])=>`<button class="dif" data-a="m_diff" data-k="${k}" aria-pressed="${g.diff===k}"><b>${d.n}</b><span>${d.d}</span></button>`).join('')}</div></div>
-      <div class="mbar"><button class="btn pri big" data-a="m_ng2">Suivant : tes boxeurs</button></div></div>`}
-  else if(st==='ng2'){const g=ui.ng;h=`<div class="mwrap gut" style="padding-top:16px"><button class="back" data-a="m_back1">← Ton club</button><span class="lab">Étape 2 sur 2</span><h2>Tes premiers boxeurs</h2>
-      <p class="lede">Choisis 2 boxeurs. Les espoirs sont faibles mais peuvent devenir des légendes. Les vétérans gagnent tout de suite, mais ne progresseront plus beaucoup.</p>
-      <div class="stack">${g.pool.map(pickCard).join('')}</div>
-      <div class="mbar"><button class="btn" data-a="m_rr" ${g.rr?'':'disabled'}>Nouveau tirage (${g.rr})</button><button class="btn pri" style="flex:1" data-a="m_go" ${g.picks.length===2?'':'disabled'}>Commencer · ${g.picks.length}/2</button></div></div>`}
+  else if(st==='ng1'){const g=ui.ng;h=`<div class="mwrap gut" style="padding-top:16px">${back}${ngSteps(0)}<span class="lab">Nouvelle carrière · emplacement ${g.slot}</span><h2>Fonde ton club</h2>
+      ${ngCard(g)}
+      <div class="panel stack"><label class="fld"><span>Nom du club</span><div class="inrow"><input id="ng-club" maxlength="24" placeholder="Coin Rouge" value="${esc(g.club)}" autocomplete="off"><button class="btn" data-a="m_rclub" aria-label="Nom au hasard">🎲</button></div></label>
+        <label class="fld"><span>Ton nom de gérant</span><div class="inrow"><input id="ng-mgr" maxlength="24" placeholder="Ton nom" value="${esc(g.mgr)}" autocomplete="off"><button class="btn" data-a="m_rmgr" aria-label="Nom au hasard">🎲</button></div></label></div>
+      <p class="small" style="margin:0">Pas d’idée ? Touche 🎲 pour un nom au hasard. Tu pourras jouer avec n’importe quel nom.</p>
+      ${ngBar('','m_ngc','Suivant →')}</div>`}
+  else if(st==='ngc'){const g=ui.ng,oth=Object.keys(NAT).filter(c=>!TOPNAT.includes(c));h=`<div class="mwrap gut" style="padding-top:16px">${back}${ngSteps(1)}<h2>Ton pays</h2>
+      ${ngCard(g)}
+      <p class="small" style="margin:0">Tes premiers espoirs viennent d’ici, et tu montes d’abord le classement national de ce pays avant de viser les ceintures mondiales.</p>
+      <div class="bflags">${TOPNAT.map(c=>`<button class="bfl" data-a="m_nat" data-k="${c}" aria-pressed="${g.home===c}"><span>${flag(c)}</span>${NAT[c].n}</button>`).join('')}</div>
+      <label class="fld"><span>Autres pays</span><select class="selx" data-sa="m_nat" style="margin:0">${!TOPNAT.includes(g.home)?'':'<option value="" selected>Choisir un autre pays…</option>'}${oth.map(c=>`<option value="${c}" ${g.home===c?'selected':''}>${flag(c)} ${NAT[c].n}</option>`).join('')}</select></label>
+      ${ngBar('m_ng1','m_ngd','Suivant →')}</div>`}
+  else if(st==='ngd'){const g=ui.ng,IC={facile:'🟢',normal:'🟡',difficile:'🔴'},BL={facile:['50 000 $ pour commencer','Entraîneur-chef 2 étoiles','Pour découvrir le jeu tranquille'],normal:['25 000 $ pour commencer','Un vieil entraîneur bénévole (1 étoile)','L’expérience prévue : chaque choix compte'],difficile:['10 000 $ seulement','Aucun staff au départ','Pour les vrais gérants : chaque dollar compte']};
+    h=`<div class="mwrap gut" style="padding-top:16px">${back}${ngSteps(2)}<h2>Ton niveau</h2>
+      ${ngCard(g)}
+      <div class="stack" style="gap:8px">${Object.entries(DIFF).map(([k,d])=>`<button class="difc" data-a="m_diff" data-k="${k}" aria-pressed="${g.diff===k}"><i>${IC[k]||'⚪'}</i><b>${d.n}${k==='normal'?' <span class="chip gold" style="font-size:10px">Conseillé</span>':''}</b><ul>${(BL[k]||[d.d]).map(x=>`<li>${x}</li>`).join('')}</ul></button>`).join('')}</div>
+      ${ngBar('m_ngc','m_ng2','Choisir mes boxeurs →')}</div>`}
+  else if(st==='ng2'){const g=ui.ng,flt=g.flt||'all',idx=g.pool.map((b,i)=>i).filter(i=>flt==='all'||g.pool[i].grp===flt),pk=g.picks.map(i=>g.pool[i]);
+    h=`<div class="mwrap gut" style="padding-top:16px"><button class="back" data-a="m_ngd2">← Ton niveau</button>${ngSteps(3)}<h2>Tes 2 premiers boxeurs</h2>
+      <p class="small" style="margin:0"><span class="grp e">Espoir</span> faible mais peut devenir une légende · <span class="grp c">Confirmé</span> solide tout de suite · <span class="grp v">Vétéran</span> gagne maintenant, ne progresse plus.</p>
+      ${segH('m_flt',[['all','Tous'],['Espoir','Espoirs'],['Confirmé','Confirmés'],['Vétéran','Vétérans']],flt)}
+      <div class="stack" style="gap:8px">${idx.map(i=>pickCard2(g.pool[i],i)).join('')}</div>
+      <div class="mbar ngbar"><div class="tray">${[0,1].map(j=>pk[j]?`<div class="ts on"><div class="av">${avatar(pk[j])}</div><b>${esc(sur(pk[j]))} · ${ovr(pk[j])}</b></div>`:`<div class="ts">Boxeur ${j+1} : touche une carte</div>`).join('')}</div>
+        <div class="row"><button class="btn" data-a="m_rr" ${g.rr?'':'disabled'} style="flex:none">🎲 ${g.rr}</button><button class="btn pri big" style="flex:1" data-a="m_go" ${pk.length===2?'':'disabled'}>${pk.length===2?'🥊 Commencer':'Choisis encore '+(2-pk.length)}</button></div></div></div>`}
   else if(st==='imp'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>Importer</h2>
       <div class="panel"><p class="small" style="margin:0">Sur ton autre appareil : Réglages (l’engrenage) → Exporter ma sauvegarde → Copier le code. Colle-le ici.</p>
         <textarea id="imp-code" rows="6" placeholder="CRZ1:…" aria-label="Code de sauvegarde">${esc(ui.imp||'')}</textarea>
@@ -2399,12 +2452,18 @@ function menuAct(a,t){
     case'm_del':if(ui.mconf==='del'+k){try{localStorage.removeItem(SK(k));localStorage.removeItem(MK(k))}catch(e){}ui.mconf=null}else ui.mconf='del'+k;break;
     case'm_new':{const e=[1,2,3].find(n=>!slotMeta(n));if(e){ui.ng=newNG(e);ui.menu='ng1'}else ui.menu='slot';break}
     case'm_slot':{const n=+k;if(slotMeta(n)&&ui.mconf!=='ow'+n){ui.mconf='ow'+n;break}ui.mconf=null;ui.ng=newNG(n);ui.menu='ng1';break}
-    case'm_nat':ui.ng.home=k;break;
+    case'm_nat':if(k)ui.ng.home=k;break;
+    case'm_ngc':{const g=ui.ng;g.club=(g.club||'').trim();g.mgr=(g.mgr||'').trim();ui.menu='ngc';document.getElementById('menu').scrollTop=0;break}
+    case'm_ngd':ui.menu='ngd';document.getElementById('menu').scrollTop=0;break;
+    case'm_ngd2':ui.menu='ngd';break;
+    case'm_rclub':ui.ng.club=pick(CLUB_A)+' '+pick(CLUB_B);break;
+    case'm_rmgr':ui.ng.mgr=natName(ui.ng.home);break;
+    case'm_flt':ui.ng.flt=k;break;
     case'm_diff':ui.ng.diff=k;break;
     case'm_ng2':{const g=ui.ng;g.club=(g.club||'').trim()||'Coin Rouge';g.mgr=(g.mgr||'').trim()||'Gérant';worldGen(g);genPool();ui.menu='ng2';document.getElementById('menu').scrollTop=0;break}
     case'm_pick':{const i=+k,p=ui.ng.picks;if(p.includes(i))ui.ng.picks=p.filter(x=>x!==i);else{if(p.length>=2)p.shift();p.push(i)}break}
     case'm_rr':if(ui.ng.rr>0){ui.ng.rr--;genPool()}break;
-    case'm_back1':ui.menu='ng1';break;
+    case'm_back1':case'm_ng1':ui.menu='ng1';break;
     case'm_go':ui.menu=null;finishNew();return;
     case'm_imp':ui.menu='imp';ui.impErr='';ui.impSlot=ui.impSlot||([1,2,3].find(n=>!slotMeta(n))||1);break;
     case'm_impslot':ui.impSlot=+k;break;
@@ -2508,7 +2567,7 @@ function start(data){
   openMenu('home');
 }
 document.addEventListener('change',e=>{if(e.target.id==='pickb'){ui.bookFor=e.target.value;render()}});
-document.addEventListener('input',e=>{const id=e.target.id;if(id==='gn-name'&&ui.gn)ui.gn.name=e.target.value;if(id==='ng-club'&&ui.ng)ui.ng.club=e.target.value;else if(id==='ng-mgr'&&ui.ng)ui.ng.mgr=e.target.value;else if(id==='imp-code')ui.imp=e.target.value});
+document.addEventListener('input',e=>{const id=e.target.id;if(id==='ng-club'){const v=e.target.value.trim()||'Coin Rouge',n=document.getElementById('ng-cn'),c=document.getElementById('ng-ci');if(n)n.textContent=v;if(c)c.textContent=initials(v)}if(id==='ng-mgr'){const m=document.getElementById('ng-cm');if(m)m.textContent=e.target.value.trim()||'toi'}if(id==='gn-name'&&ui.gn)ui.gn.name=e.target.value;if(id==='ng-club'&&ui.ng)ui.ng.club=e.target.value;else if(id==='ng-mgr'&&ui.ng)ui.ng.mgr=e.target.value;else if(id==='imp-code')ui.imp=e.target.value});
 try{window.claude?.hot?.snapshot?.(()=>({S,menu:!!ui.menu}))}catch(e){}
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
 </script>
