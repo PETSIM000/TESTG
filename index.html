@@ -939,7 +939,7 @@ function weeklyLoyalty(b){
 function leave(b,why){b.mine=false;b.salary=0;b.raiseAsk=0;log(`${b.name} quitte le club : ${why}.`,'bad');toast(`${b.name} quitte le club`)}
 
 /* ================= COMBAT ================= */
-let FORM=.3;
+let FORM=.2,KOD=.75,KOP=.62;
 function rollForm(X){const nd=1+(R()+R()-1)*FORM,k=nd/(X.df||1);X.pow*=k;X.spd*=k;X.def*=k;X.sta*=k;X.df=nd;return X}
 function fighter(b){const fm=(1-b.fatigue/250)*(.92+b.morale/800);
   return rollForm({b,pow:b.pow*fm,spd:b.spd*fm,def:b.def*fm,sta:b.sta*fm,chin:b.chin+(has(b,'fer')?12:0)-(has(b,'verre')?12:0),hp:100,en:100,kd:0,land:0,thr:0})}
@@ -952,10 +952,10 @@ function exchange(A,B,sa,sb,k=1){
   const lx=att*acc,landed=Math.floor(lx)+(R()<lx%1?1:0);
   const js=sa.j||.5,thr=Math.round(att),jT=Math.round(thr*js),jL=Math.min(landed,Math.round(landed*js*1.15/(js*1.15+(1-js)*.85)));
   A.thr+=thr;A.land+=landed;A.jT=(A.jT||0)+jT;A.jL=(A.jL||0)+jL;A.pT=(A.pT||0)+thr-jT;A.pL=(A.pL||0)+landed-jL;
-  const dmg=landed*(.62+A.pow/95)*(.8+R()*.4)*ef*(sa.body?.8:1)*(1.2-B.chin/220)*(has(A.b,'finisseur')&&B.hp<40?1.25:1)*(.85+(1-js)*.3)*(1+(A.bp||0)*.04);
+  const dmg=KOD*landed*(.62+A.pow/95)*(.8+R()*.4)*ef*(sa.body?.8:1)*(1.2-B.chin/220)*(has(A.b,'finisseur')&&B.hp<40?1.25:1)*(.85+(1-js)*.3)*(1+(A.bp||0)*.04);
   B.hp-=dmg;
   if(sa.body)B.en-=landed*.25;
-  const p=Math.pow(A.pow/100,2)*.012*(1+(100-Math.max(B.hp,0))/45)*(1.35-B.chin/140)*(sa.body?.7:1)*(has(A.b,'bombe')?1.4:1)*(.8+(1-js)*.4);
+  const p=KOP*Math.pow(A.pow/100,2)*.012*(1+(100-Math.max(B.hp,0))/45)*(1.35-B.chin/140)*(sa.body?.7:1)*(has(A.b,'bombe')?1.4:1)*(.8+(1-js)*.4);
   let kd=0,cut=0;
   if(R()<1-Math.pow(1-p,landed)){kd=1;B.hp-=5;if(B.hp<35&&R()<.3){kd=2;B.hp-=5}}
   if(!sa.body&&(B.cut||0)<3&&R()<dmg*.0055*(has(B.b,'verre')?1.3:1)){B.cut=(B.cut||0)+1;cut=1}
@@ -1038,7 +1038,7 @@ function endRound(F){
 }
 function stepRound(F,sa,sb){do{stepPhase(F,sa,sb)}while(F.ph!==0&&!F.done)}
 function cloneF(F){return{...F,A:{...F.A},B:{...F.B},cards:F.cards.map(c=>c.slice()),rs:[],rst:[],log:[],rd:F.rd?{...F.rd,L:[]}:null}}
-function oddsFrom(F,n){let w=0,d=0;for(let i=0;i<n;i++){const G=cloneF(F);if(!F.r){rollForm(G.A);rollForm(G.B)}while(!G.done)stepPhase(G,aiStrat(G.A,G.B,G),aiStrat(G.B,G.A,G));if(!G.res.w)d++;else if(G.res.w==='A')w++}return{w:Math.round(w/n*100),d:Math.round(d/n*100),l:Math.round((n-w-d)/n*100)}}
+function oddsFrom(F,n,keep){let w=0,d=0;for(let i=0;i<n;i++){const G=cloneF(F);if(!F.r&&!keep){rollForm(G.A);rollForm(G.B)}while(!G.done)stepPhase(G,aiStrat(G.A,G.B,G),aiStrat(G.B,G.A,G));if(!G.res.w)d++;else if(G.res.w==='A')w++}return{w:Math.round(w/n*100),d:Math.round(d/n*100),l:Math.round((n-w-d)/n*100)}}
 const GP={pression:{n:'Pression',d:'Avancer et couper le ring.',beats:'pru'},contre:{n:'Contre-attaque',d:'Laisser venir et punir ses entrées.',beats:'agr'},corps:{n:'Travail au corps',d:'User l’adversaire pour le ralentir.',beats:'eq'},distance:{n:'Boxe à distance',d:'Jab, mobilité, le garder loin.',beats:'corps'}};
 const bestGP=st=>Object.keys(GP).find(k=>GP[k].beats===st);
 const CINT={recup:{n:'Récupération',m:.35,plan:'leger',fat:-14,d:'Récupère la forme, prépare peu.'},leger:{n:'Léger',m:.75,plan:'leger',fat:-4,d:'Préparation lente, il arrive frais.'},normal:{n:'Normal',m:1,plan:'normal',fat:5,d:'Bon équilibre préparation et fatigue.'},intense:{n:'Intense',m:1.35,plan:'intense',fat:12,d:'Prépare vite, mais fatigue et blessures.'}};
@@ -1547,8 +1547,8 @@ function checkCtr(){if(!S.ctr)return;for(const id of S.ctr.list){if(S.ctr.done.i
 
 /* ================= v7 : % DE VICTOIRE EN ARRIÈRE-PLAN ================= */
 function oddsKey(a,b,rounds,f){return[a.id,b.id,ovr(a),ovr(b),Math.round(a.fatigue/8),Math.round(b.fatigue/8),rounds,f?[f.proj?'p':'',f.camp,Math.round((f.prep??10)/5),f.gp,JSON.stringify(f.bon||{})].join(','):'',S.t].join('|')}
-const projF=f=>({...f,prep:Math.min(100,(f.prep??10)+Math.max(0,f.week-S.t)*12),proj:1});
-function oddsF(a,b,rounds,f){const F=newFight(a,b,rounds,false);if(f)applyCamp(F,f);if(!f||f.proj)for(const[k,o]of[['A',a],['B',b]])if(o.fatigue>20){const Y=fighter({...o,fatigue:20});Y.b=o;Y.camp='';F[k]=Y}return F}
+const projF=f=>{const wl=Math.max(0,f.week-S.t),o=getB(f.b),bo={...(f.bon||{})},add=Math.floor(wl/2);for(const k of['car','spa','tec','pow'])bo[k]=Math.min(3,(bo[k]||0)+add);return{...f,prep:Math.min(97,(f.prep??10)+wl*30),gp:f.gp||(o&&bestGP(o.style))||null,bon:bo,proj:1}};
+function oddsF(a,b,rounds,f){const F=newFight(a,b,rounds,false);if(!f||f.proj)for(const[k,o]of[['A',a],['B',b]])if(o.fatigue>20){const Y=fighter({...o,fatigue:20});Y.b=o;Y.camp='';F[k]=Y}applyCamp(F,f||{prep:95,gp:bestGP(b.style),bon:{car:2,spa:2,tec:2,pow:2},camp:''});return F}
 function matchOdds(a,b,rounds,f){ui.oc=ui.oc||{};const k=oddsKey(a,b,rounds,f);if(ui.oc[k])return ui.oc[k];
   if(ui.syncOdds)return ui.oc[k]=oddsFrom(oddsF(a,b,rounds,f),100);
   ui.oq=ui.oq||new Map();if(!ui.oq.has(k))ui.oq.set(k,[a.id,b.id,rounds,f?{...f}:null]);if(!ui.oqT)ui.oqT=setTimeout(runOdds,40);return{w:null}}
@@ -1716,7 +1716,7 @@ function setDisp(F){F.disp={hp:[F.A.hp,F.B.hp],en:[F.A.en,F.B.en]}}
 const coachName=()=>S.staff.coach?S.staff.coach.name.split(' ')[0]:'Ton coin';
 function beginFight(F){
   F.stage='intro';F.adv=advise(F);if(F.adv.s)F.strat=F.adv.s;
-  F.odds=S.set.odds?oddsFrom(F,120):null;F.speed=S.set.speed||1;F.clock=0;
+  F.odds=S.set.odds?oddsFrom(F,150,true):null;F.speed=S.set.speed||1;F.clock=0;
   setDisp(F);F.vis={A:mkVis(),B:mkVis()};AN=null;FX=[];
   ui.fight=F;buildFight();
 }
@@ -1733,15 +1733,15 @@ function nextPhase(){
 function afterPhase(){
   const F=ui.fight;if(!F)return;setDisp(F);
   if(F.done){F.stage='done';F.odds=null;updateFight();return}
-  if(F.ph===0){F.stage='between';F.vis.A.kdT=F.vis.B.kdT=-1;if(S.set.odds)F.odds=oddsFrom(F,60);updateFight();return}
-  if(S.set.odds)F.odds=oddsFrom(F,40);
+  if(F.ph===0){F.stage='between';F.vis.A.kdT=F.vis.B.kdT=-1;if(S.set.odds)F.odds=oddsFrom(F,60,true);updateFight();return}
+  if(S.set.odds)F.odds=oddsFrom(F,40,true);
   nextPhase();
 }
 function settle(F){F.vis={A:mkVis(),B:mkVis()};if(F.done&&F.res.m!=='DEC'){const v=F.vis[F.res.w==='A'?'B':'A'];v.ko=true;v.kdT=performance.now()-2000;F.koTxt=F.res.m}setDisp(F)}
 function skipRound(){
   const F=ui.fight;if(!F||F.done)return;AN=null;
   do{stepPhase(F,curStrat(F),aiStrat(F.B,F.A,F));if(!F.done)F.adv=advise(F)}while(F.ph!==0&&!F.done);
-  settle(F);F.stage=F.done?'done':'between';F.odds=!F.done&&S.set.odds?oddsFrom(F,60):null;updateFight();
+  settle(F);F.stage=F.done?'done':'between';F.odds=!F.done&&S.set.odds?oddsFrom(F,60,true):null;updateFight();
 }
 function simAll(){
   const F=ui.fight;if(!F)return;AN=null;
@@ -2515,7 +2515,8 @@ function hudHTML(F){
   return`<div class="hud">${side(F.A,0,'red')}<div class="clk"><b>${rn}</b><span id="clk" class="num">${clockTxt(F)}</span></div>${side(F.B,1,'blue')}
     ${o?`<div class="odds"><div class="ob"><i style="width:${o.w}%"></i><i class="d" style="width:${o.d}%"></i></div><div class="row small" style="justify-content:space-between"><span>Victoire <b style="color:var(--green)">${o.w} %</b></span><span>Nul ${o.d} %</span><span>Défaite <b style="color:#ff7b8b">${o.l} %</b></span></div></div>`:''}</div>`;
 }
-function faceOff(a,b,f){const kg=(DIVS.find(d=>d.id===a.div)||{}).kg||'';return`<div class="fo"><div class="fo-s"><div class="av lg">${avatar(a,'red')}</div><b>${flag(a.nat)} ${esc(sur(a))}</b><span>${a.w}-${a.l}-${a.d} · ${a.age} ans</span></div><div class="fo-v"><span>VS</span><small>${kg}</small></div><div class="fo-s r"><div class="av lg">${avatar(b,'blue')}</div><b>${flag(b.nat)} ${esc(sur(b))}</b><span>${b.w}-${b.l}-${b.d} · ${b.age} ans</span></div></div>`}
+const formChip=X=>!X||!X.df?'':X.df>=1.08?'<span class="chip gold">🔥 En feu ce soir</span>':X.df<=.92?'<span class="chip red">😓 Soir difficile</span>':'<span class="chip">Forme normale</span>';
+function faceOff(a,b,f,F){const kg=(DIVS.find(d=>d.id===a.div)||{}).kg||'';return`<div class="fo"><div class="fo-s"><div class="av lg">${avatar(a,'red')}</div><b>${flag(a.nat)} ${esc(sur(a))}</b><span>${a.w}-${a.l}-${a.d} · ${a.age} ans</span>${F?formChip(F.A):''}</div><div class="fo-v"><span>VS</span><small>${kg}</small></div><div class="fo-s r"><div class="av lg">${avatar(b,'blue')}</div><b>${flag(b.nat)} ${esc(sur(b))}</b><span>${b.w}-${b.l}-${b.d} · ${b.age} ans</span>${F?formChip(F.B):''}</div></div>`}
 function segStrat(F){return`<div class="seg">${Object.entries(STRAT).map(([k,s])=>`<button data-a="fstrat" data-k="${k}" aria-pressed="${F.strat===k}">${s.n}${F.adv&&F.adv.s===k?'<span class="dot" title="Conseillé"></span>':''}</button>`).join('')}</div>`}
 function statsHTML(F){
   const A=F.A,B=F.B,pc=(l,t)=>t?Math.round(l/t*100)+' %':'–';
@@ -2527,7 +2528,7 @@ function statsHTML(F){
 }
 function ctlHTML(F){
   const coach=`<div class="adv"><b>${esc(coachName())} :</b> ${F.adv?F.adv.why:''}</div>`,A=F.A;
-  if(F.stage==='intro')return`${faceOff(F.A.b,F.B.b,F.f)}${F.wi?`<div class="rstat ${F.wi.ok?'':'bad'}"><span>⚖ Pesée</span><span>${F.wi.ok?'✓':'✗'} ${F.wi.txt}</span></div>`:''}
+  if(F.stage==='intro')return`${faceOff(F.A.b,F.B.b,F.f,F)}<p class="small" style="margin:-4px 0 8px;text-align:center">Le % tient compte de la forme du soir de chacun : un boxeur en feu peut créer la surprise.</p>${F.wi?`<div class="rstat ${F.wi.ok?'':'bad'}"><span>⚖ Pesée</span><span>${F.wi.ok?'✓':'✗'} ${F.wi.txt}</span></div>`:''}
     ${A.prep!=null&&!F.ex&&!F.trial&&!F.tour?`<div class="rstat"><span>Préparation ${A.prep} %${A.gpb?' · plan de match efficace':''}</span><span>${A.camp&&A.camp!=='std'?CAMPS[A.camp].n:''}</span></div>`:''}
     ${coach}<div><div class="lab" style="margin-bottom:6px">Plan de départ</div>${segStrat(F)}</div>
     <div class="row" style="flex-wrap:nowrap"><button class="btn pri big" style="flex:2" data-a="fround">Combattre !</button><button class="btn" style="flex:1" data-a="fsim">Simuler</button></div>${tapeBox(F.A.b,F.B.b)}`;
