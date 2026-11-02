@@ -1,4 +1,4 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<!doctype html><html lang="fr"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://hlqhasvorjdutyhyibao.supabase.co; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'none'"><meta name="referrer" content="no-referrer"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#07080c"><meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
@@ -411,6 +411,8 @@ textarea{font-family:var(--f-mono);font-size:12px;resize:vertical;margin:10px 0;
 .err{color:#ff7b8b;font-weight:700;font-size:13px}
 /* v13 belts, wall, age */
 [hidden]{display:none!important}
+.onmode #tabs{display:none!important}.onmode .next{display:none!important}
+.mbtn.mon{background:linear-gradient(135deg,rgba(79,128,255,.35),rgba(79,128,255,.12));border-color:rgba(120,160,255,.45)}
 .pickb{display:flex;gap:6px;align-items:center;margin-bottom:10px}.pickb select{flex:1;min-width:0;height:46px;border-radius:14px;background:var(--s2);color:var(--ink);border:1px solid var(--line2);padding:0 12px;font-weight:800;font-size:16px;font-family:inherit}.pickb .btn{flex:none;width:46px;height:46px;padding:0;font-size:22px}
 .bsvg{display:inline-block;vertical-align:middle;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45));flex:none}
 .blts{display:inline-flex;gap:3px;align-items:center;flex-wrap:wrap}
@@ -1783,110 +1785,144 @@ function setCamp(fid,k){
 }
 
 
-/* ================= v35 : EN LIGNE (Supabase) ================= */
-const SB_URL='https://hlqhasvorjdutyhyibao.supabase.co',SB_KEY='sb_publishable_PiCmbjESB8hXaSfsFVdAmQ_yVeO34Ci',ONK='cr_online';
-let ON=null;try{ON=JSON.parse(localStorage.getItem(ONK)||'null')}catch(e){}
-const onSave=()=>{try{localStorage.setItem(ONK,JSON.stringify(ON))}catch(e){}};
-const ONERR={auth:'Profil introuvable sur ce téléphone.',code:'Aucun joueur avec ce code.',self:'C’est ton propre code 😅',max:'Tu as déjà 100 amis.',notfriend:'Ajoute d’abord ce joueur en ami.',slow:'Attends quelques secondes entre deux combats.',daily:'Maximum 15 défis par jour contre le même ami.',roster:'Écurie trop grosse pour être envoyée.'};
+/* ================= v36 : MODE EN LIGNE (comptes Supabase) ================= */
+const SB_URL='https://hlqhasvorjdutyhyibao.supabase.co',SB_KEY='sb_publishable_PiCmbjESB8hXaSfsFVdAmQ_yVeO34Ci',ONK='cr_acct';
+let ON=null;try{ON=JSON.parse(localStorage.getItem(ONK)||'null');if(!ON||typeof ON.token!=='string'||!/^[0-9a-f]{64}$/.test(ON.token))ON=null}catch(e){ON=null}
+try{localStorage.removeItem('cr_online')}catch(e){}
+const onSave=()=>{try{ON?localStorage.setItem(ONK,JSON.stringify(ON)):localStorage.removeItem(ONK)}catch(e){}};
+const ONERR={session:'Ta session a expiré. Reconnecte-toi.',login:'Nom d’utilisateur ou mot de passe incorrect.',locked:'Trop d’essais ratés. Réessaie dans 15 minutes.',username:'Nom d’utilisateur : 3 à 16 caractères (lettres, chiffres, _ . -).',password:'Mot de passe : au moins 8 caractères, différent du nom.',taken:'Ce nom d’utilisateur est déjà pris.',captcha:'Vérification anti-robot échouée. Réessaie.',rate:'Trop de tentatives. Réessaie plus tard.',code:'Aucun joueur avec ce code.',self:'C’est ton propre code 😅',max:'Tu as déjà 100 amis.',opp:'Cet adversaire n’est plus disponible.',slow:'Attends quelques secondes entre deux combats.',daily:'Maximum 10 combats par jour contre le même gérant.',dailyall:'Maximum 60 combats en ligne par jour.',roster:'Écurie trop grosse pour être envoyée.'};
 async function rpc(fn,body){
-  let r;try{r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{})})}catch(e){throw new Error('Pas de connexion Internet.')}
+  let r;try{r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{}),cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer'})}catch(e){throw new Error('Pas de connexion Internet.')}
   const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
-  if(!r.ok){const m=(j&&j.message)||'';throw new Error(ONERR[m]||('Erreur du serveur'+(m?' ('+m+')':'')))}
+  if(!r.ok){const m=(j&&j.message)||'';if(m==='session'){ON=null;onSave()}throw new Error(ONERR[m]||'Le serveur ne répond pas. Réessaie.')}
+  if(j&&j.error)throw new Error(ONERR[j.error]||'Erreur.');
   return j;
 }
-const onAuth=()=>({p_id:ON.id,p_secret:ON.secret});
-const onUi=()=>ui.on||(ui.on={sub:'amis',home:null,top:null,busy:false,err:'',fr:null,mb:null,last:0});
+/* preuve de travail anti-robot (calcul SHA-256 dans un worker) */
+function powSolve(nonce,bits){const K=new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);const W=new Uint32Array(64),M=new Uint8Array(64),mask=(0xffffffff<<(32-bits))>>>0;for(let i=0;i<nonce.length;i++)M[i]=nonce.charCodeAt(i);for(let c=0;c<6e7;c++){const s=String(c),L=nonce.length+s.length;for(let i=0;i<s.length;i++)M[nonce.length+i]=s.charCodeAt(i);M[L]=0x80;for(let i=L+1;i<62;i++)M[i]=0;M[62]=(L*8)>>>8;M[63]=(L*8)&255;for(let i=0;i<16;i++)W[i]=(M[i*4]<<24)|(M[i*4+1]<<16)|(M[i*4+2]<<8)|M[i*4+3];for(let i=16;i<64;i++){const a=W[i-15],b=W[i-2];W[i]=(((a>>>7|a<<25)^(a>>>18|a<<14)^(a>>>3))+W[i-7]+((b>>>17|b<<15)^(b>>>19|b<<13)^(b>>>10))+W[i-16])|0}let A=0x6a09e667,B=0xbb67ae85,C=0x3c6ef372,D=0xa54ff53a,E=0x510e527f,F=0x9b05688c,G=0x1f83d9ab,H=0x5be0cd19;for(let i=0;i<64;i++){const t1=(H+((E>>>6|E<<26)^(E>>>11|E<<21)^(E>>>25|E<<7))+((E&F)^(~E&G))+K[i]+W[i])|0,t2=(((A>>>2|A<<30)^(A>>>13|A<<19)^(A>>>22|A<<10))+((A&B)^(A&C)^(B&C)))|0;H=G;G=F;F=E;E=(D+t1)|0;D=C;C=B;B=A;A=(t1+t2)|0}if((((A+0x6a09e667)>>>0)&mask)===0)return s}return null};
+function powRun(nonce,bits){return new Promise(res=>{
+  try{const u=URL.createObjectURL(new Blob([powSolve.toString()+';onmessage=e=>postMessage(powSolve(e.data[0],e.data[1]))'],{type:'text/javascript'})),w=new Worker(u);
+    w.onmessage=e=>{w.terminate();URL.revokeObjectURL(u);res(e.data)};w.onerror=()=>{w.terminate();res(powSolve(nonce,bits))};w.postMessage([nonce,bits])}
+  catch(e){setTimeout(()=>res(powSolve(nonce,bits)),30)}})}
+async function onCaptcha(kind){const c=await rpc('cr_challenge',{p_kind:kind});const sol=await powRun(c.nonce,c.bits);if(sol==null)throw new Error(ONERR.captcha);return{p_ch:c.id,p_sol:sol}}
+/* nettoyage des données reçues (défense en profondeur) */
+const ON_DIV=['mouche','coq','plume','leger','sleger','welter','moyen','milourd','lourd'];
+const onI=(v,a,b,d)=>typeof v==='number'&&isFinite(v)?Math.max(a,Math.min(b,Math.round(v))):d;
+const onT=(v,n)=>String(v==null?'':v).replace(/[<>&"'`\\/=(){}\[\];]/g,'').slice(0,n).trim();
+function onClean(o){o=o||{};const L=o.look||{};return{id:/^[A-Za-z0-9_]{1,24}$/.test(o.id)?o.id:'x',name:onT(o.name,40)||'Boxeur',nick:onT(o.nick,30),nat:/^[A-Z]{2}$/.test(o.nat)&&NAT[o.nat]?o.nat:'CA',div:ON_DIV.includes(o.div)?o.div:'moyen',age:onI(o.age,16,50,25),
+  pow:onI(o.pow,1,99,50),spd:onI(o.spd,1,99,50),def:onI(o.def,1,99,50),sta:onI(o.sta,1,99,50),chin:onI(o.chin,1,99,50),w:onI(o.w,0,999,0),l:onI(o.l,0,999,0),d:onI(o.d,0,999,0),ko:onI(o.ko,0,999,0),fame:onI(o.fame,0,100,1),
+  style:['agr','eq','pru','corps'].includes(o.style)?o.style:'eq',traits:(Array.isArray(o.traits)?o.traits:[]).filter(t=>typeof t==='string'&&TRAITS[t]).slice(0,6),belts:(Array.isArray(o.belts)?o.belts:[]).filter(t=>BELTS.includes(t)).slice(0,5),
+  look:{skin:onI(L.skin,0,5,2),hair:onI(L.hair,0,5,1),hc:onI(L.hc,0,5,1),beard:onI(L.beard,0,3,0),scar:L.scar===true,tr:onI(L.tr,0,6,0)}}}
+const onP=p=>p&&Object.assign({},p,{name:onT(p.name,16),club:onT(p.club,30),code:onT(p.code,8),elo:onI(p.elo,0,9999,1000),w:onI(p.w,0,99999,0),l:onI(p.l,0,99999,0),d:onI(p.d,0,99999,0),kos:onI(p.kos,0,99999,0),hw:onI(p.hw,0,9999,0),hl:onI(p.hl,0,9999,0),hd:onI(p.hd,0,9999,0),roster:(Array.isArray(p.roster)?p.roster:[]).slice(0,6).map(onClean)});
+const onUi=()=>ui.on||(ui.on={sub:'adv',auth:'signup',home:null,top:null,busy:false,msg:'',err:'',fr:null,mb:null,last:0,acct:false});
 function onSnap(b){const o={};for(const k of['id','name','nick','nat','age','div','pow','spd','def','sta','chin','w','l','d','ko','style','traits','look','fame'])if(b[k]!==undefined)o[k]=b[k];o.belts=beltsOf(b);return o}
 function onRoster(){return sortB(club().filter(b=>!b.retired)).slice(0,6).map(onSnap)}
+const onR=()=>{if(ui.tab==='online'&&!ui.fight&&!ui.menu)render()};
 async function onLoad(force){
-  const u=onUi();if(!ON||u.busy)return;if(!force&&u.home&&Date.now()-u.last<60000)return;
-  u.busy=true;u.err='';if(ui.tab==='defis')render();
-  try{if(S){ON.club=S.club;await rpc('cr_sync',{...onAuth(),p_name:ON.name,p_club:S.club,p_roster:onRoster()})}
-    u.home=await rpc('cr_home',onAuth());u.last=Date.now();ON.code=u.home.me.code;onSave()}
+  const u=onUi();if(!ON||u.busy)return;if(!force&&u.home&&Date.now()-u.last<45000)return;
+  u.busy=true;u.err='';onR();
+  try{if(S)await rpc('cr_sync',{p_token:ON.token,p_club:S.club,p_roster:onRoster()});
+    const h=await rpc('cr_home',{p_token:ON.token});u.home={me:onP(h.me),friends:(h.friends||[]).map(onP),opps:(h.opps||[]).map(onP),feed:h.feed||[]};u.last=Date.now()}
   catch(e){u.err=e.message}
-  u.busy=false;if(ui.tab==='defis'&&ui.dsub==='on'&&!ui.fight)render();
+  u.busy=false;onR();
 }
-async function onTop(){const u=onUi();try{u.top=await rpc('cr_top',{})}catch(e){u.err=e.message}if(ui.tab==='defis'&&!ui.fight)render()}
-async function onRegister(){
-  const u=onUi(),el=document.getElementById('on-name'),nm=((el&&el.value)||'').trim();
-  if(nm.length<2){toast('Choisis un pseudo (2 lettres min.)');return}
-  const a=new Uint8Array(24);crypto.getRandomValues(a);const secret=[...a].map(x=>x.toString(16).padStart(2,'0')).join('');
-  u.busy=true;render();
-  try{const me=await rpc('cr_register',{p_name:nm.slice(0,20),p_club:S.club,p_secret:secret});ON={id:me.id,secret,code:me.code,name:me.name};onSave();toast('🌐 Profil en ligne créé !');u.busy=false;await onLoad(true)}
-  catch(e){u.busy=false;u.err=e.message;render()}
+async function onTop(){const u=onUi();try{u.top=((await rpc('cr_top',{}))||[]).map(onP)}catch(e){u.err=e.message}onR()}
+const onVal=id=>{const e=document.getElementById(id);return e?e.value:''};
+async function onAuth(kind){
+  const u=onUi(),user=onVal('on-user').trim(),pass=onVal('on-pass'),hp=onVal('on-web');
+  if(!/^[A-Za-z0-9_.-]{3,16}$/.test(user)){u.err=ONERR.username;onR();return}
+  if(pass.length<8){u.err=ONERR.password;onR();return}
+  if(kind==='signup'&&pass!==onVal('on-pass2')){u.err='Les deux mots de passe ne sont pas pareils.';onR();return}
+  u.busy=true;u.err='';u.msg='🤖 Vérification anti-robot…';onR();
+  try{const cap=await onCaptcha(kind);u.msg=kind==='signup'?'Création du compte…':'Connexion…';onR();
+    const r=kind==='signup'?await rpc('cr_signup',{p_user:user,p_pass:pass,p_club:S?S.club:'',p_hp:hp,...cap}):await rpc('cr_login',{p_user:user,p_pass:pass,...cap});
+    ON={token:r.token,name:onT(r.me.name,16)};onSave();u.busy=false;u.msg='';u.home=null;toast(kind==='signup'?'🎉 Compte créé !':'👋 Content de te revoir !');await onLoad(true)}
+  catch(e){u.busy=false;u.msg='';u.err=e.message;onR()}
 }
+async function onLogout(){const t=ON&&ON.token;ON=null;onSave();ui.on=null;onR();try{if(t)await rpc('cr_logout',{p_token:t})}catch(e){}toast('Déconnecté')}
+async function onPass(){const o=onVal('on-old'),n=onVal('on-new');if(n.length<8){toast(ONERR.password);return}
+  try{await rpc('cr_password',{p_token:ON.token,p_old:o,p_new:n});toast('🔒 Mot de passe changé');onUi().acct=false;onR()}catch(e){toast(e.message)}}
 async function onAddFriend(){
-  const el=document.getElementById('on-code'),c=((el&&el.value)||'').trim().toUpperCase();if(c.length<4){toast('Entre le code de ton ami');return}
-  try{const f=await rpc('cr_add_friend',{...onAuth(),p_code:c});toast(`🤝 ${f.name} est ton ami !`);await onLoad(true)}catch(e){toast(e.message)}
+  const c=onVal('on-code').trim().toUpperCase();if(c.length<4){toast('Entre le code de ton ami');return}
+  try{const f=onP(await rpc('cr_add_friend',{p_token:ON.token,p_code:c}));toast(`🤝 ${f.name} est ton ami !`);await onLoad(true)}catch(e){toast(e.message)}
 }
 async function onShareCode(){
-  const txt=`Viens boxer contre moi sur Coin Rouge 🥊 ! Mon code ami : ${ON.code}\nhttps://petsim000.github.io/TESTG/`;
+  const code=onUi().home&&onUi().home.me.code;if(!code)return;const txt=`Viens boxer contre moi sur Coin Rouge 🥊 ! Mon code ami : ${code}\nhttps://petsim000.github.io/TESTG/`;
   try{if(navigator.share){await navigator.share({text:txt});return}}catch(e){return}
-  try{await navigator.clipboard.writeText(txt);toast('Code copié !')}catch(e){toast('Ton code : '+ON.code)}
+  try{await navigator.clipboard.writeText(txt);toast('Code copié !')}catch(e){toast('Ton code : '+code)}
 }
 function onFighters(){return sortB(club().filter(b=>!b.retired&&!b.inj))}
+const onFind=id=>{const H=onUi().home;return H&&(H.friends.find(x=>x.id===id)||H.opps.find(x=>x.id===id))};
 function onStart(fid,idx){
-  const u=onUi(),f=u.home&&u.home.friends.find(x=>x.id===fid),snap=f&&f.roster[idx],mb=getB(u.mb);
+  const u=onUi(),f=onFind(fid),snap=f&&f.roster[idx],mb=getB(u.mb);
   if(!f||!snap||!mb){toast('Choisis ton boxeur');return}
-  if(mb.inj){toast(`${sur(mb)} est blessé.`);return}
   const me=JSON.parse(JSON.stringify(mb));delete me.hist;me.fatigue=10;me.morale=70;
-  const op=Object.assign({},snap,{id:'on_'+snap.id,mine:false,fatigue:10,morale:70,salary:0,hist:[],look:snap.look||{skin:2,hair:1,hc:1,beard:0,scar:false,tr:0},traits:snap.traits||[],style:snap.style||'eq',w:snap.w||0,l:snap.l||0,d:snap.d||0});
+  const op=Object.assign(onClean(snap),{id:'on_'+snap.id,mine:false,fatigue:10,morale:70,salary:0,hist:[],pot:0,lvl:1,xp:0,sp:0,champ:false,pts:0});
   const F=newFight(me,op,10,false);F.online={fid,n:f.name,b1:onSnap(mb),b2:snap};beginFight(F);
 }
 async function onDone(F){
   const r=F.res,res=r.w==='A'?'W':r.w==='B'?'L':'D',o=F.online;
-  try{const x=await rpc('cr_report',{...onAuth(),p_opp:o.fid,p_res:res,p_method:r.m||'DEC',p_rnd:r.r||0,p_b1:o.b1,p_b2:o.b2});
+  try{const x=await rpc('cr_report',{p_token:ON.token,p_opp:o.fid,p_res:res,p_method:r.m==='KO'||r.m==='TKO'?r.m:'DEC',p_rnd:r.r||0,p_b1:o.b1,p_b2:o.b2});
     toast(`${res==='W'?'🏆 Victoire':res==='L'?'❌ Défaite':'🤝 Nul'} contre ${o.n} · ELO ${x.d>=0?'+':''}${x.d}`)}
   catch(e){toast('Résultat non envoyé : '+e.message)}
-  await onLoad(true);
+  onUi().fr=null;await onLoad(true);
 }
-const onDiv=d=>(DIVS.find(x=>x.id===d)||{n:d||'?'}).n;
+const onDiv=d=>(DIVS.find(x=>x.id===d)||{n:'?'}).n;
 const onRec=p=>`${p.w}-${p.l}-${p.d}`;
-const onAgo=t=>{const m=Math.round((Date.now()-new Date(t))/60000);return m<1?'à l’instant':m<60?`il y a ${m} min`:m<1440?`il y a ${Math.round(m/60)} h`:`il y a ${Math.round(m/1440)} j`};
+const onAgo=t=>{const m=Math.round((Date.now()-new Date(t))/60000);return!(m>=0)?'':m<2?'en ligne':m<60?`vu il y a ${m} min`:m<1440?`vu il y a ${Math.round(m/60)} h`:`vu il y a ${Math.round(m/1440)} j`};
+const onTag=p=>p.bot?' <span class="chip" style="font-size:10px">IA</span>':'';
+const ONIN='width:100%;font:inherit;font-size:16px;color:var(--ink);background:rgba(0,0,0,.4);border:1px solid var(--line2);border-radius:12px;padding:12px 13px';
+function vOnAuth(){const u=onUi(),su=u.auth==='signup';
+  return`<div class="panel"><div style="margin-bottom:12px">${segH('onauth',[['signup','Créer un compte'],['login','Se connecter']],u.auth)}</div>
+    <p class="lede" style="margin:0 0 12px">${su?'Ton compte garde ton ELO, ton record et tes amis. Tu peux te connecter sur n’importe quel téléphone.':'Content de te revoir !'}</p>
+    <div class="stack" style="gap:10px">
+    <label class="fld"><span>Nom d’utilisateur</span><input id="on-user" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false" style="${ONIN}" placeholder="ex. Max_514"></label>
+    <label class="fld"><span>Mot de passe</span><input id="on-pass" type="password" maxlength="72" autocomplete="${su?'new-password':'current-password'}" style="${ONIN}" placeholder="8 caractères minimum"></label>
+    ${su?`<label class="fld"><span>Confirme le mot de passe</span><input id="on-pass2" type="password" maxlength="72" autocomplete="new-password" style="${ONIN}"></label>`:''}
+    <input id="on-web" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+    </div>
+    <button class="btn pri big" style="margin-top:14px;width:100%" data-a="${su?'onsignup':'onlogin'}" ${u.busy?'disabled':''}>${u.busy?esc(u.msg||'…'):su?'Créer mon compte':'Me connecter'}</button>
+    ${u.err?`<p class="small" style="color:#ff7b8b;margin:10px 0 0">${esc(u.err)}</p>`:''}
+    <p class="small" style="margin:12px 0 0">🔒 Ton mot de passe est chiffré : personne ne peut le lire, même pas nous. On ne demande ni courriel ni numéro de téléphone. Garde ton mot de passe en lieu sûr : sans courriel, on ne peut pas le récupérer.</p></div>`}
 function vOnline(){
-  const u=onUi();
-  if(!ON)return`<div class="panel"><b class="nm" style="font-size:20px">🌐 Joue contre tes amis</b>
-    <p class="lede" style="margin:6px 0 12px">Crée ton profil en ligne : tu reçois un code ami. Tes amis l’entrent dans leur jeu, puis vous pouvez faire combattre vos boxeurs les uns contre les autres. Chaque combat compte pour ton classement ELO.</p>
-    <label class="fld"><span class="lab">Ton pseudo</span><input id="on-name" maxlength="20" placeholder="Ton pseudo" value="${esc(S.mgrName||'')}" autocomplete="off"></label>
-    <button class="btn pri big" style="margin-top:12px;width:100%" data-a="onreg" ${u.busy?'disabled':''}>${u.busy?'Création…':'Créer mon profil en ligne'}</button>
-    ${u.err?`<p class="small" style="color:#ff7b8b">${esc(u.err)}</p>`:''}
-    <p class="small" style="margin:10px 0 0">Ton profil est lié à ce téléphone. Ta sauvegarde de carrière reste sur ton appareil.</p></div>`;
+  const u=onUi(),hdr=`<div class="row" style="justify-content:space-between;margin-bottom:10px;flex-wrap:nowrap"><h2 style="margin:0">🌐 En ligne</h2><button class="btn sm" data-a="onexit">← Menu</button></div>`;
+  if(!ON)return hdr+vOnAuth();
   if(!u.home&&!u.busy&&!u.err)setTimeout(()=>onLoad(),0);
-  const H=u.home,me=H?H.me:{name:ON.name,code:ON.code,elo:1000,w:0,l:0,d:0,kos:0};
+  const H=u.home,me=H?H.me:{name:ON.name,code:'…',elo:'…',w:0,l:0,d:0,kos:0};
+  if(u.acct)return hdr+`<div class="panel"><div class="ph"><b class="nm" style="font-size:20px">Mon compte</b><button class="btn sm" data-a="onacct">← Retour</button></div>
+    <p class="small">Connecté en tant que <b>${esc(me.name)}</b>. Ton écurie en ligne vient de ta carrière <b>${esc(S.club)}</b>.</p>
+    <span class="lab">Changer le mot de passe</span><div class="stack" style="gap:8px;margin-top:6px"><input id="on-old" type="password" autocomplete="current-password" placeholder="Mot de passe actuel" style="${ONIN}"><input id="on-new" type="password" autocomplete="new-password" placeholder="Nouveau mot de passe" style="${ONIN}"><button class="btn" data-a="onpass">Changer</button></div>
+    <button class="btn" style="margin-top:14px;width:100%" data-a="onlogout">Se déconnecter</button></div>`;
   const prof=`<div class="panel"><div class="ph"><div style="min-width:0"><b class="nm" style="font-size:20px">${esc(me.name)}</b><span class="small" style="display:block">${esc(S.club)}</span></div><span class="chip gold">ELO ${me.elo}</span></div>
     <div class="row" style="justify-content:space-between;margin-top:8px"><span><span class="lab">Record en ligne</span><br><b class="num" style="font-size:20px">${onRec(me)}</b> <span class="small">${me.kos||0} KO</span></span>
     <span style="text-align:right"><span class="lab">Ton code ami</span><br><b class="num" style="font-size:22px;letter-spacing:.12em">${esc(me.code||'')}</b></span></div>
-    <div class="row" style="margin-top:10px"><button class="btn pri" data-a="onshare">📤 Envoyer mon code</button><button class="btn" data-a="onref" ${u.busy?'disabled':''}>${u.busy?'…':'↻ Actualiser'}</button></div>
+    <div class="row" style="margin-top:10px"><button class="btn pri" data-a="onshare">📤 Mon code</button><button class="btn" data-a="onref" ${u.busy?'disabled':''}>${u.busy?'…':'↻'}</button><button class="btn" data-a="onacct">⚙️ Compte</button></div>
     ${u.err?`<p class="small" style="color:#ff7b8b;margin:8px 0 0">${esc(u.err)}</p>`:''}</div>`;
-  const add=`<div class="panel"><span class="lab">Ajouter un ami</span><div class="row" style="margin-top:8px;flex-wrap:nowrap"><input id="on-code" maxlength="8" placeholder="CODE" autocomplete="off" autocapitalize="characters" style="flex:1;min-width:0;font:inherit;font-size:16px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:rgba(0,0,0,.4);border:1px solid var(--line2);border-radius:12px;padding:11px 12px"><button class="btn pri" data-a="onadd">Ajouter</button></div></div>`;
-  const sub=u.sub,seg=`<div style="margin:12px 0">${segH('onsub',[['amis','🤝 Amis'],['hist','📜 Historique'],['top','🌍 Top']],sub)}</div>`;
+  if(u.fr){const f=onFind(u.fr);if(f)return hdr+prof+vOnFight(f);u.fr=null}
+  const sub=u.sub,seg=`<div style="margin:12px 0">${segH('onsub',[['adv','⚔️ Adversaires'],['amis','🤝 Amis'],['hist','📜 Historique'],['top','🌍 Top']],sub)}</div>`;
+  const card=(f,rank)=>`<div class="panel" style="padding:13px"><div class="ph"><div style="min-width:0"><b>${rank?rank+'. ':''}${esc(f.name)}</b>${onTag(f)}<span class="small" style="display:block">${esc(f.club||'')} · ${onRec(f)} · ${onAgo(f.seen)}</span></div><span class="chip">ELO ${f.elo}</span></div>
+    <div class="row" style="justify-content:space-between;margin-top:8px"><span class="small">Toi contre lui : <b class="num">${f.hw}-${f.hl}-${f.hd}</b></span><button class="btn pri sm" data-a="onfr" data-id="${esc(f.id)}" ${f.roster.length?'':'disabled'}>🥊 Défier</button></div>
+    ${f.roster.length?'':'<p class="small" style="margin:6px 0 0">Pas encore d’écurie envoyée.</p>'}</div>`;
   let body='';
-  if(sub==='amis'){
-    const L=H?H.friends:[];
-    if(u.fr){const f=L.find(x=>x.id===u.fr);if(f)return prof+vOnFight(f)}
-    body=!H?`<p class="small">${u.busy?'Chargement…':''}</p>`:!L.length?`<div class="panel"><p class="small" style="margin:0">Pas encore d’amis. Envoie ton code à tes amis, ou entre le leur ci-dessus.</p></div>`:
-      `<div class="list" style="grid-template-columns:1fr">${L.map((f,i)=>`<div class="panel"><div class="ph"><div style="min-width:0"><b>${i+1}. ${esc(f.name)}</b><span class="small" style="display:block">${esc(f.club||'')} · ${onRec(f)} · vu ${onAgo(f.seen)}</span></div><span class="chip">ELO ${f.elo}</span></div>
-        <div class="row" style="justify-content:space-between;margin-top:8px"><span class="small">Toi contre lui : <b class="num">${f.hw}-${f.hl}-${f.hd}</b></span><button class="btn pri sm" data-a="onfr" data-id="${f.id}" ${f.roster&&f.roster.length?'':'disabled'}>🥊 Défier</button></div>
-        ${f.roster&&f.roster.length?'':'<p class="small" style="margin:6px 0 0">Il n’a pas encore envoyé son écurie (il doit ouvrir l’onglet En ligne).</p>'}</div>`).join('')}</div>`;
-  }else if(sub==='hist'){
-    const L=H?H.feed:[];
-    body=!L.length?`<div class="panel"><p class="small" style="margin:0">Aucun combat en ligne pour l’instant.</p></div>`:`<div class="list" style="grid-template-columns:1fr">${L.map(m=>{const mine1=m.p1===ON.id,win=m.res===0?'N':((m.res===1)===mine1)?'V':'D',d=mine1?m.d1:m.d2;
-      return`<div class="panel" style="padding:12px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span style="min-width:0"><b style="color:${win==='V'?'var(--green)':win==='D'?'#ff7b8b':'var(--muted)'}">${win==='V'?'Victoire':win==='D'?'Défaite':'Nul'}</b> <span class="small">${m.method==='DEC'?'aux points':m.method+' R'+m.rnd}</span><br><span class="small">${esc(mine1?m.b1:m.b2)} vs ${esc(mine1?m.b2:m.b1)} (${esc(mine1?m.n2:m.n1)})${mine1?'':' · il t’a défié'}</span></span><span class="num" style="text-align:right">${d>=0?'+':''}${d}<br><span class="small">${onAgo(m.at)}</span></span></div></div>`}).join('')}</div>`;
-  }else{
-    if(!u.top)setTimeout(onTop,0);
-    body=!u.top?'<p class="small">Chargement…</p>':!u.top.length?'<div class="panel"><p class="small" style="margin:0">Personne n’a encore combattu en ligne. Sois le premier !</p></div>':
-      `<div class="panel">${u.top.map((p,i)=>`<div class="row" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)"><span style="min-width:0"><b>${i+1}. ${esc(p.name)}</b>${p.id===ON.id?' <span class="chip gold">Toi</span>':''}<br><span class="small">${esc(p.club||'')} · ${onRec(p)}</span></span><b class="num">${p.elo}</b></div>`).join('')}</div>`;
-  }
-  return prof+add+seg+body;
+  if(!H)body=`<p class="small">${u.busy?'Chargement…':''}</p>`;
+  else if(sub==='adv')body=`<p class="small" style="margin:0 0 8px">Des gérants proches de ton ELO. Bats-les pour grimper au classement mondial.</p><div class="list" style="grid-template-columns:1fr">${H.opps.map(f=>card(f)).join('')||'<p class="small">Personne pour l’instant.</p>'}</div>`;
+  else if(sub==='amis')body=`<div class="panel"><span class="lab">Ajouter un ami</span><div class="row" style="margin-top:8px;flex-wrap:nowrap"><input id="on-code" maxlength="8" placeholder="CODE" autocomplete="off" autocapitalize="characters" style="${ONIN};flex:1;min-width:0;letter-spacing:.12em;text-transform:uppercase"><button class="btn pri" data-a="onadd">Ajouter</button></div></div>
+    <div class="list" style="grid-template-columns:1fr;margin-top:8px">${H.friends.map((f,i)=>card(f,i+1)).join('')||'<div class="panel"><p class="small" style="margin:0">Pas encore d’amis. Envoie ton code à tes amis, ou entre le leur ci-dessus.</p></div>'}</div>`;
+  else if(sub==='hist'){const L=H.feed;
+    body=!L.length?`<div class="panel"><p class="small" style="margin:0">Aucun combat en ligne pour l’instant.</p></div>`:`<div class="list" style="grid-template-columns:1fr">${L.map(m=>{const m1=m.p1===H.me.id,win=m.res===0?'N':((m.res===1)===m1)?'V':'D',d=onI(m1?m.d1:m.d2,-99,99,0);
+      return`<div class="panel" style="padding:12px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span style="min-width:0"><b style="color:${win==='V'?'var(--green)':win==='D'?'#ff7b8b':'var(--muted)'}">${win==='V'?'Victoire':win==='D'?'Défaite':'Nul'}</b> <span class="small">${m.method==='DEC'?'aux points':esc(m.method)+' R'+onI(m.rnd,0,12,0)}</span><br><span class="small">${esc(onT(m1?m.b1:m.b2,40))} vs ${esc(onT(m1?m.b2:m.b1,40))} (${esc(onT(m1?m.n2:m.n1,16))})${m1?'':' · il t’a défié'}</span></span><span class="num" style="text-align:right">${d>=0?'+':''}${d}<br><span class="small">${onAgo(m.at).replace('vu ','')}</span></span></div></div>`}).join('')}</div>`}
+  else{if(!u.top)setTimeout(onTop,0);
+    body=!u.top?'<p class="small">Chargement…</p>':`<div class="panel">${u.top.map((p,i)=>`<div class="row" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:nowrap"><span style="min-width:0"><b>${i+1}. ${esc(p.name)}</b>${onTag(p)}${H&&p.id===H.me.id?' <span class="chip gold">Toi</span>':''}<br><span class="small">${esc(p.club||'')} · ${onRec(p)}</span></span><b class="num">${p.elo}</b></div>`).join('')}</div>`}
+  return hdr+prof+seg+body;
 }
 function vOnFight(f){
   const u=onUi(),M=onFighters();if(!u.mb||!M.find(b=>b.id===u.mb))u.mb=M[0]?.id;const mb=getB(u.mb);
   return`<div class="panel" style="margin-top:12px"><div class="ph"><b class="nm" style="font-size:20px">🥊 Défier ${esc(f.name)}</b><button class="btn sm" data-a="onback">← Retour</button></div>
     <span class="lab">Ton boxeur</span><div style="margin:6px 0 4px">${M.length?selH('onmb',M.map(b=>[b.id,`${ovr(b)} · ${esc(b.name)} · ${divN(b.div)}`]),u.mb,'k'):'<p class="small">Aucun boxeur disponible (blessés ?).</p>'}</div>
-    <p class="small" style="margin:4px 0 0">Combat amical en 10 rounds. Les deux boxeurs arrivent frais. Ça ne change rien à ta carrière : seuls ton ELO et ton record en ligne bougent.</p></div>
+    <p class="small" style="margin:4px 0 0">Combat en 10 rounds. Les deux boxeurs arrivent frais. Ta carrière n’est pas touchée : seuls ton ELO et ton record en ligne bougent.</p></div>
     <div class="list" style="grid-template-columns:1fr;margin-top:10px">${f.roster.map((o,i)=>{const same=mb&&o.div===mb.div;
-      return`<div class="panel" style="padding:12px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span style="min-width:0"><b>${flag(o.nat)} ${esc(o.name)}</b>${(o.belts||[]).length?' 🏆':''}<br><span class="small">${ovr(o)} global · ${onDiv(o.div)} · ${o.w}-${o.l}-${o.d} · ${o.age} ans${same?'':' · autre poids'}</span></span>
-      <button class="btn ${same?'pri':''} sm" data-a="ongo" data-id="${f.id}" data-k="${i}" ${mb?'':'disabled'}>Combattre</button></div></div>`}).join('')}</div>`;
+      return`<div class="panel" style="padding:12px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span style="min-width:0"><b>${flag(o.nat)} ${esc(o.name)}</b>${o.belts.length?' 🏆':''}<br><span class="small">${ovr(o)} global · ${onDiv(o.div)} · ${o.w}-${o.l}-${o.d} · ${o.age} ans${same?'':' · autre poids'}</span></span>
+      <button class="btn ${same?'pri':''} sm" data-a="ongo" data-id="${esc(f.id)}" data-k="${i}" ${mb?'':'disabled'}>Combattre</button></div></div>`}).join('')}</div>`;
 }
 
 /* --- événements aléatoires --- */
@@ -2524,8 +2560,7 @@ function ssCard(){const ss=S.ss;if(!ss)return`<div class="panel"><span class="la
     ${rounds}<p class="small" style="margin:8px 0 0">🏆 Les ceintures des champions sont en jeu dans chacun de leurs combats : bats un champion et tu repars avec sa ceinture. Le vainqueur peut finir unifié !<br>Bourses : quarts ${moneyS(SSP[0])} · demies ${moneyS(SSP[1])} · finaliste ${moneyS(SSP[2])} · vainqueur ${moneyS(SSP[3])} + trophée (points GOAT).</p></div>
     ${(S.ssHist||[]).length?`<div class="panel"><span class="lab">Palmarès de la Super Série</span><ul class="log">${S.ssHist.slice(0,8).map(h=>`<li>🏆 <b>${flag(h.nat)} ${esc(h.w)}</b>${h.mine?' <span class="chip red">Ton club</span>':''} <span class="small">${esc(h.n)} · an ${h.y}</span></li>`).join('')}</ul></div>`:''}`}
 function vDefis(){
-  if(ui.dsub!=='ctr'&&ui.dsub!=='on')ui.dsub='ss';const sub=ui.dsub||'ss',head=`<h2>Tournois</h2><div style="margin:8px 0 12px">${segH('dsub',[['ss','🏆 Super Série'],['on','🌐 En ligne'],['ctr',`Missions ${S.ctr?S.ctr.done.length+'/3':''}`]],sub)}</div>`;
-  if(sub==='on')return head+vOnline();
+  if(ui.dsub!=='ctr')ui.dsub='ss';const sub=ui.dsub||'ss',head=`<h2>Tournois</h2><div style="margin:8px 0 12px">${segH('dsub',[['ss','🏆 Super Série'],['ctr',`Missions ${S.ctr?S.ctr.done.length+'/3':''}`]],sub)}</div>`;
   if(sub!=='ctr')return head+ssCard();
   const m=sortB(mine());if(!ui.gymBoxer||!m.find(b=>b.id===ui.gymBoxer))ui.gymBoxer=m[0]?.id;const me=getB(ui.gymBoxer);
   const pickB=`<div style="margin:8px 0 0">${selH('gymboxer',sortB(m).map(b=>[b.id,`${b.inj?'🩹 ':''}${ovr(b)} · ${esc(b.name)} · ${divN(b.div)}`]),ui.gymBoxer,'id')}</div>`;
@@ -2587,7 +2622,7 @@ function vClub(){
 function render(){
   checkAch();
   renderChrome();
-  const v={ecurie:vEcurie,combats:vCombats,rank:()=>`<h2>Classements</h2><div style="height:8px"></div>${vRank()}`,defis:vDefis,staff:vStaff,club:vClub}[ui.tab]();
+  const v={ecurie:vEcurie,combats:vCombats,rank:()=>`<h2>Classements</h2><div style="height:8px"></div>${vRank()}`,defis:vDefis,staff:vStaff,club:vClub,online:vOnline}[ui.tab]();document.body.classList.toggle('onmode',ui.tab==='online');
   const vw=document.getElementById('view'),tk=ui.tab+(ui.csub||'')+(ui.esub||'');if(ui._pt!==tk&&!RM){vw.classList.remove('anim');void vw.offsetWidth;vw.classList.add('anim')}ui._pt=tk;
   document.getElementById('view').innerHTML=(S.money<-15000?'<div class="al bad" style="margin-bottom:12px"><p><b>Le club est lourdement endetté.</b> Libère des salaires ou décroche une grosse bourse.</p></div>':'')+v;
   const sh=document.getElementById('sheet'),sid=ui.sheet||'';let sv='';
@@ -2686,7 +2721,7 @@ document.addEventListener('click',e=>{
   if(!['release','new','fire','cancelf','negno','cdiv','retire','sellpromo'].includes(a))ui.confirm=null;
   const b=id?getB(id):null;
   switch(a){
-    case'onreg':onRegister();return;case'onadd':onAddFriend();return;case'onshare':onShareCode();return;case'onref':onLoad(true);onUi().top=null;return;case'onsub':onUi().sub=k;onUi().fr=null;break;case'onfr':onUi().fr=id;window.scrollTo(0,0);break;case'onback':onUi().fr=null;break;case'onmb':onUi().mb=k;break;case'ongo':onStart(id,+k);return;
+    case'onsignup':onAuth('signup');return;case'onlogin':onAuth('login');return;case'onauth':onUi().auth=k;onUi().err='';break;case'onlogout':onLogout();return;case'onacct':onUi().acct=!onUi().acct;break;case'onpass':onPass();return;case'onexit':save();openMenu('home');return;case'onadd':onAddFriend();return;case'onshare':onShareCode();return;case'onref':onUi().top=null;onLoad(true);return;case'onsub':onUi().sub=k;onUi().fr=null;break;case'onfr':onUi().fr=id;window.scrollTo(0,0);break;case'onback':onUi().fr=null;break;case'onmb':onUi().mb=k;break;case'ongo':onStart(id,+k);return;
     case'tab':ui.tab=k;ui.sheet=null;window.scrollTo(0,0);break;
     case'esub':ui.esub=k;break;
     case'csub':ui.csub=k;break;
@@ -2884,11 +2919,14 @@ function renderMenu(){
     h=`<div class="mstage"><canvas id="mcv" aria-hidden="true"></canvas></div><div class="mwrap gut">
       <div class="logo"><h1>Coin Rouge</h1><span class="tag">Gérant de boxe</span></div>
       ${m?`<button class="mbtn pri" data-a="m_cont"><b>Continuer</b><span>${flag(m.home)} ${esc(m.club)} · ${when(m.t)} · ${$(m.money)}</span></button>`:''}
+      <button class="mbtn mon" data-a="m_online"><b>🌐 En ligne</b><span>${cnt?'Affronte tes amis et des gérants du monde entier avec ton écurie':'Crée d’abord une carrière : ton écurie te suit en ligne'}</span></button>
       <button class="mbtn ${m?'':'pri'}" data-a="m_new"><b>Nouvelle carrière</b><span>Crée ton club, choisis ton pays et tes deux premiers boxeurs</span></button>
       <button class="mbtn" data-a="m_load" ${cnt?'':'disabled'}><b>Charger une partie</b><span>${cnt?`${cnt} sauvegarde${cnt>1?'s':''} sur 3`:'Aucune sauvegarde'}</span></button>
       <button class="mbtn" data-a="m_imp"><b>Importer</b><span>Colle un code de sauvegarde venu d’un autre appareil</span></button>
       <button class="mbtn" onclick="openFB()"><b>💬 Donner mon avis</b><span>Dis-nous ce qui marche et ce qu’il faut améliorer</span></button>
       <p class="mfoot">Aucun achat · Aucune pub · Aucune énergie<br><span class="vtag">VERSION TEST ${GAME_V}</span></p></div>`}
+  else if(st==='onslot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>🌐 En ligne</h2><p class="lede">Avec quelle carrière veux-tu jouer en ligne ? Tes 6 meilleurs boxeurs de ce club formeront ton écurie en ligne.</p>
+      <div class="stack">${[1,2,3].filter(n=>slotMeta(n)).map(n=>{const m=slotMeta(n);return`<button class="mbtn" data-a="m_onld" data-k="${n}"><b>${flag(m.home)} ${esc(m.club)}</b><span>${when(m.t)} · ${$(m.money)}</span></button>`}).join('')}</div></div>`}
   else if(st==='load'||st==='slot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>${st==='load'?'Charger une partie':'Choisis un emplacement'}</h2>
       ${st==='slot'?'<p class="lede">Les 3 emplacements sont pris. Choisis celui à remplacer.</p>':''}<div class="stack">${[1,2,3].map(n=>slotRow(n,st)).join('')}</div></div>`}
   else if(st==='ng1'){const g=ui.ng;h=`<div class="mwrap gut" style="padding-top:16px">${back}${ngSteps(0)}<span class="lab">Nouvelle carrière · emplacement ${g.slot}</span><h2>Fonde ton club</h2>
@@ -2970,6 +3008,8 @@ function menuAct(a,t){
   switch(a){
     case'm_home':ui.menu='home';break;
     case'm_cont':{const n=lastSlot(),s=n&&loadSlot(n);if(s){s.slot=n;ui.menu=null;enterGame(s);return}break}
+    case'm_online':{const sl=[1,2,3].filter(x=>slotMeta(x));if(!sl.length){toast('Crée d’abord une carrière : ton écurie te suit en ligne');return}if(sl.length===1){const n=sl[0],s=loadSlot(n);if(s){s.slot=n;ui.menu=null;enterGame(s);ui.tab='online';render();return}}ui.menu='onslot';break}
+    case'm_onld':{const s=loadSlot(+k);if(s){s.slot=+k;ui.menu=null;enterGame(s);ui.tab='online';render();return}break}
     case'm_load':ui.menu='load';break;
     case'm_ld':{const s=loadSlot(+k);if(s){s.slot=+k;ui.menu=null;enterGame(s);return}break}
     case'm_del':if(ui.mconf==='del'+k){try{localStorage.removeItem(SK(k));localStorage.removeItem(MK(k))}catch(e){}ui.mconf=null}else ui.mconf='del'+k;break;
@@ -3151,7 +3191,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='9c6769dfdc';if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='d4a3461b73';if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b)b.hidden=false;return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),300000)});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});</script>
