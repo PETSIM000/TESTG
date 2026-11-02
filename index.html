@@ -1999,7 +1999,7 @@ const ONAB={fer:['🪨','Menton de fer','Encaisse beaucoup mieux les gros coups.
 const onAbChip=k=>ONAB[k]?`<span class="chip" title="${esc(ONAB[k][2])}">${ONAB[k][0]} ${esc(ONAB[k][1])}</span>`:'';
 async function onReroll(id,slot){const u=onUi();try{const r=await rpc('cr_ob_reroll',{p_token:ON.token,p_box:id,p_slot:slot});const k=onT(r.new,20);toast(ONAB[k]?`🎲 Nouveau pouvoir : ${ONAB[k][0]} ${ONAB[k][1]}`:'🎲 Nouveau pouvoir !');ui.confirm=null;await onLoad(true)}catch(e){toast(e.message)}}
 /* --- contexte neutre : le mode en ligne n'utilise jamais ta carrière --- */
-function onStub(){return{v:2,onStub:1,set:{...DEFSET,events:false,autoAdv:false},staff:{coach:{name:'Coach',stars:2,nat:'CA'},cut:{stars:1},spar:[]},queue:[],event:null,neg:null,theme:null,belts:{},boxers:[],fights:[],fa:[],club:'En ligne',home:'CA',t:1,money:0,mgr:{lvl:1,perks:{},xp:0},stats:{},rivals:[],promos:[],galas:[],uid:1}}
+function onStub(){return{v:2,onStub:1,set:{...DEFSET,events:false,autoAdv:false,speed:2},staff:{coach:{name:'Coach',stars:2,nat:'CA'},cut:{stars:1},spar:[]},queue:[],event:null,neg:null,theme:null,belts:{},boxers:[],fights:[],fa:[],club:'En ligne',home:'CA',t:1,money:0,mgr:{lvl:1,perks:{},xp:0},stats:{},rivals:[],promos:[],galas:[],uid:1}}
 function onEnter(){S=onStub();ui.skipF=null;ui.menu=null;closeMenu();Object.assign(ui,{tab:'online',sheet:null,fight:null,confirm:null});document.getElementById('menu').hidden=true;render()}
 /* --- recherche d'adversaire --- */
 async function onSearch(bid){
@@ -2071,6 +2071,19 @@ nextPhase=function(){const F=ui.fight;
 function onIntro(F){if(!F.online)return'';const a=F.A.b,b=F.B.b;
   return`<div class="rstat" style="display:block"><div class="row" style="justify-content:space-between;gap:6px;align-items:flex-start;flex-wrap:nowrap"><div style="flex:1;min-width:0">${(a.traits||[]).map(onAbChip).join(' ')||'<span class="small">Aucun pouvoir</span>'}</div><div style="flex:1;min-width:0;text-align:right">${(b.traits||[]).map(onAbChip).join(' ')}</div></div>
   <p class="small" style="margin:8px 0 0">🎮 Pendant les rounds, des <b>moments clés</b> apparaissent : choisis vite ce que ton coach crie. Bonne réaction = gros avantage. Suivre la consigne conseillée (point vert) aide aussi.</p></div>`}
+/* --- en ligne : pas de simulation, conseils du coin mis en avant --- */
+const _onCtl=ctlHTML;
+ctlHTML=function(F){let h=_onCtl(F);if(!F.online)return h;
+  h=h.replace(/<button[^>]*data-a="(fsim|fskip)"[^>]*>[\s\S]*?<\/button>/g,'');
+  if(F.stage==='between'){const rec=autoCorner(F.A),c=CORNER[rec];
+    if(c)h=h.replace(`<b>${c.n}</b>`,`<b>⭐ ${c.n}</b>`);
+    const st=F.adv&&F.adv.s&&STRAT[F.adv.s];
+    h=h.replace('<div class="cgrid">',`<p class="small" style="margin:0 0 6px;color:#f5c451">📋 Conseil du coin : ${c?'⭐ '+c.n:''}${st?' puis plan « '+st.n+' »':''}</p><div class="cgrid">`)}
+  if(F.stage==='live')h+=`<p class="small" style="margin:6px 0 0;text-align:center">Pour aller plus vite, utilise ×2 ou ×4 en haut. Les moments clés apparaissent quand même.</p>`;
+  return h};
+const _onSkip=skipRound,_onSimAll=simAll;
+skipRound=function(){if(ui.fight&&ui.fight.online)return;_onSkip()};
+simAll=function(){if(ui.fight&&ui.fight.online)return;_onSimAll()};
 
 /* --- événements aléatoires --- */
 const EVENTS={
@@ -3341,7 +3354,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='7ed0a1ac1b';if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='4cb27f4c9c';if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b)b.hidden=false;return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),300000)});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});</script>
