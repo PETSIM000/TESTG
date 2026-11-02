@@ -2865,6 +2865,7 @@ async function sharePoster(id){const g=(S.galas||[]).find(x=>x.id===id);if(!g)re
   try{await img.decode()}catch(e){toast('Impossible de créer l’image');return}const c=document.createElement('canvas');c.width=1200;c.height=1600;c.getContext('2d').drawImage(img,0,0,1200,1600);
   c.toBlob(async bl=>{if(!bl)return;const file=new File([bl],(g.name||'gala').replace(/[^\w-]+/g,'-')+'.png',{type:'image/png'});
     try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:g.name});return}}catch(e){if(e&&e.name==='AbortError')return}
+    try{const d=window.claude&&window.claude.use?await window.claude.use('downloads'):null;if(d){await d.save({filename:file.name,data:bl});return}}catch(e){if(e&&e.code&&e.code!=='unavailable'){return}}
     const u=URL.createObjectURL(bl),a=document.createElement('a');a.href=u;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Affiche enregistrée')},'image/png')}
 function vGala(g){
   const e=galaEst(g),fs=galaFights(g),line=(l,v,neg)=>`<div class="row" style="justify-content:space-between"><span>${l}</span><b class="num ${neg?'neg':''}">${neg?'−':'+'}${$(v)}</b></div>`;
