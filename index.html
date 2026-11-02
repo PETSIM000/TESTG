@@ -1410,7 +1410,8 @@ function tourAfter(F){const t=S.tour,T=TOURS.find(x=>x.id===t.tid),me=F.A.b;let 
 /* ================= v7 : CONTRATS DU MOIS ================= */
 const CTR=[{id:'w2',n:'Gagner 2 combats officiels',k:'wins',g:2,cash:6000,xp:80},{id:'ko',n:'Gagner un combat par KO',k:'kos',g:1,cash:5000,xp:70},{id:'gym',n:'Gagner un défi de gym',k:'gym',g:1,cash:3000,xp:50},{id:'spar',n:'Faire 3 séances de sparring en camp',k:'spar',g:3,cash:3000,xp:50},{id:'sign',n:'Signer un nouveau boxeur',k:'sign',g:1,cash:4000,xp:60},{id:'gala',n:'Organiser un gala',k:'galas',g:1,cash:8000,xp:100},{id:'tour',n:'Atteindre une demi-finale de tournoi',k:'tourSF',g:1,cash:5000,xp:80},{id:'trial',n:'Réussir une épreuve de palier',k:'trial',g:1,cash:4000,xp:60},{id:'tit',n:'Gagner un combat de titre',k:'titles',g:1,cash:10000,xp:150}];
 function mcAdd(k,n){S.stats=S.stats||{};if(k==='sign'||k==='galas')S.stats[k]=(S.stats[k]||0)+(n||1);if(!S.mc)S.mc={};S.mc[k]=(S.mc[k]||0)+(n||1)}
-function newContracts(){S.mc={};S.ctr={until:S.t+4,list:[...CTR].sort(()=>R()-.5).slice(0,3).map(c=>c.id),done:[]}}
+const CTRX=['gym','tour'];
+function newContracts(){S.mc={};S.ctr={until:S.t+4,list:CTR.filter(c=>!CTRX.includes(c.id)).sort(()=>R()-.5).slice(0,3).map(c=>c.id),done:[]}}
 const ctrMul=()=>1+S.mgr.lvl*.5;
 function checkCtr(){if(!S.ctr)return;for(const id of S.ctr.list){if(S.ctr.done.includes(id))continue;const c=CTR.find(x=>x.id===id);if(c&&(S.mc[c.k]||0)>=c.g){S.ctr.done.push(id);S.money+=Math.round(c.cash*ctrMul());mgrXP(c.xp);log(`Mission réussie : ${c.n}. +${$(Math.round(c.cash*ctrMul()))}.`,'gold');toast(`✓ Contrat : ${c.n}`)}}}
 
@@ -2265,8 +2266,8 @@ function ssCard(){const ss=S.ss;if(!ss)return`<div class="panel"><span class="la
     ${rounds}<p class="small" style="margin:8px 0 0">Bourses : quarts ${moneyS(SSP[0])} · demies ${moneyS(SSP[1])} · finaliste ${moneyS(SSP[2])} · vainqueur ${moneyS(SSP[3])} + trophée (points GOAT).</p></div>
     ${(S.ssHist||[]).length?`<div class="panel"><span class="lab">Palmarès de la Super Série</span><ul class="log">${S.ssHist.slice(0,8).map(h=>`<li>🏆 <b>${flag(h.nat)} ${esc(h.w)}</b>${h.mine?' <span class="chip red">Ton club</span>':''} <span class="small">${esc(h.n)} · an ${h.y}</span></li>`).join('')}</ul></div>`:''}`}
 function vDefis(){
-  const sub=ui.dsub||'ss',head=`<h2>Tournois</h2><div style="margin:8px 0 12px">${segH('dsub',[['ss','🏆 Super Série'],['tour','Tournois'],['ctr',`Missions ${S.ctr?S.ctr.done.length+'/3':''}`],['gyms','Gyms']],sub)}</div>`;
-  if(sub==='ss')return head+ssCard();
+  const sub=ui.dsub||'ss',head=`<h2>Tournois</h2><div style="margin:8px 0 12px">${segH('dsub',[['ss','🏆 Super Série'],['ctr',`Missions ${S.ctr?S.ctr.done.length+'/3':''}`]],sub)}</div>`;
+  if(sub!=='ctr')return head+ssCard();
   const m=sortB(mine());if(!ui.gymBoxer||!m.find(b=>b.id===ui.gymBoxer))ui.gymBoxer=m[0]?.id;const me=getB(ui.gymBoxer);
   const pickB=`<div style="margin:8px 0 0">${selH('gymboxer',sortB(m).map(b=>[b.id,`${b.inj?'🩹 ':''}${ovr(b)} · ${esc(b.name)} · ${divN(b.div)}`]),ui.gymBoxer,'id')}</div>`;
   if(sub==='tour'){S.tcd=S.tcd||{};
@@ -2532,7 +2533,7 @@ async function unpackSave(code){code=(code||'').replace(/\s+/g,'');
   if(code.startsWith('CRZ1:')){const bin=atob(code.slice(5)),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const st=new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'));return JSON.parse(await new Response(st).text())}
   if(code.startsWith('CRJ1:'))return JSON.parse(decodeURIComponent(escape(atob(code.slice(5)))));throw new Error('format')}
 function enterGame(s){
-  S=s;fixup(S);S.set=Object.assign({...DEFSET},S.set||{});if(S.event===undefined)S.event=null;migr7();if(!S.rec25){S.rec25=1;for(const b of S.boxers)if(!b.mine&&!b.retired&&b.l>0&&R()<unbeatP(b)*.8){b.w+=b.l;b.l=0}}ensurePromos();ensureAm();syncPerks();gymInit();
+  S=s;fixup(S);S.set=Object.assign({...DEFSET},S.set||{});if(S.event===undefined)S.event=null;migr7();if(S.ctr&&S.ctr.list.some(id=>CTRX.includes(id)))newContracts();if(!S.rec25){S.rec25=1;for(const b of S.boxers)if(!b.mine&&!b.retired&&b.l>0&&R()<unbeatP(b)*.8){b.w+=b.l;b.l=0}}ensurePromos();ensureAm();syncPerks();gymInit();
   ensureAllNat();
   Object.assign(ui,{tab:'ecurie',esub:'mine',csub:'cal',sheet:null,fight:null,confirm:null,bookFor:null,div:null,oc:{},expCode:null,rsub:'monde',rnat:S.home,bsc:'niv'});
   closeMenu();render();save();
