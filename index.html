@@ -1959,9 +1959,9 @@ function alerts(){
     if(b.inj&&b.booked){const f=upF(b);if(f)out.push({bad:1,t:`<b>${esc(b.name)}</b> est blessé pendant son camp (${b.inj} sem.).`,btn:`<button class="btn sm gold" data-a="opencamp" data-id="${f.id}">Gérer</button>`})}
     if(b.raiseAsk)out.push({bad:1,t:`<b>${esc(b.name)}</b> réclame une augmentation : ${$(b.salary)} → ${$(b.raiseAsk)}/sem.`,btn:`<button class="btn sm gold" data-a="raiseok" data-id="${b.id}">Accepter</button><button class="btn sm" data-a="raiseno" data-id="${b.id}">Refuser</button>`});
     if(b.contract<=8)out.push({bad:1,t:`Contrat de <b>${esc(b.name)}</b> : ${b.contract} sem. restantes.`,btn:`<button class="btn sm gold" data-a="neg" data-id="${b.id}">Négocier</button>`});
-    if(b.gate)out.push({t:`<b>${esc(b.name)}</b> doit réussir l’épreuve du niveau ${b.lvl} pour continuer à progresser.`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}">Voir</button>`});
-    if(b.trOpt)out.push({t:`<b>${esc(b.name)}</b> peut apprendre un nouveau trait !`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}">Choisir</button>`});
-    if(canSpend(b))out.push({t:`<b>${esc(b.name)}</b> a ${b.sp} point${b.sp>1?'s':''} de stats à dépenser.`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}">Améliorer</button>`});
+    if(b.gate)out.push({t:`<b>${esc(b.name)}</b> doit réussir l’épreuve du niveau ${b.lvl} pour continuer à progresser.`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}" data-k="defis">Voir</button>`});
+    if(b.trOpt)out.push({t:`<b>${esc(b.name)}</b> peut apprendre un nouveau trait !`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}" data-k="defis">Choisir</button>`});
+    if(canSpend(b))out.push({t:`<b>${esc(b.name)}</b> a ${b.sp} point${b.sp>1?'s':''} de stats à dépenser.`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}" data-k="stats">Améliorer</button>`});
     if(b.champ&&!b.booked&&S.t-b.lastFight>18)out.push({bad:1,t:`Défense de titre obligatoire pour <b>${esc(b.name)}</b> d’ici ${26-(S.t-b.lastFight)} sem.`,btn:`<button class="btn sm" data-a="book" data-id="${b.id}">Réserver</button>`});
   }
   if(myPromos().length<PRMAX-1)for(const p of promoAlive())if(p.sale)out.unshift({bad:1,t:`💥 <b>${esc(p.n)}</b> a fait faillite ! ${prBoxers(p).length} boxeurs à racheter pour ${$(p.sale.price)} (encore ${p.sale.until-S.t} sem.).`,btn:`<button class="btn sm gold" data-a="openpromo" data-id="${p.id}">Voir</button>`});
@@ -2372,7 +2372,7 @@ document.addEventListener('click',e=>{
     case'esub':ui.esub=k;break;
     case'csub':ui.csub=k;break;
     case'next':nextWeek();return;
-    case'open':ui.backSheet=ui.sheet==='todo'||(ui.sheet||'').startsWith('promo:')||(ui.sheet||'').startsWith('gym:')?ui.sheet:null;ui.stab='apercu';ui.sheet=id;document.getElementById('sheet').scrollTop=0;break;
+    case'open':ui.backSheet=ui.sheet==='todo'||(ui.sheet||'').startsWith('promo:')||(ui.sheet||'').startsWith('gym:')?ui.sheet:null;ui.stab=k||'apercu';ui.sheet=id;document.getElementById('sheet').scrollTop=0;break;
     case'close':if(ui.backSheet&&ui.sheet&&ui.sheet!==ui.backSheet){ui.sheet=ui.backSheet;ui.backSheet=null}else{ui.sheet=null;ui.backSheet=null}break;
     case'plan':if(k!=='sparring'||S.staff.spar.length)b.plan=k;break;
     case'spend':spend(b,k);break;
