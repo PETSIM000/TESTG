@@ -2431,7 +2431,7 @@ updateFight=function(){_annUpd();const F=ui.fight;if(F&&F.stage==='done'&&F.res&
 /* ================= v46 : FICHE BOXEUR, RANGS + RÉCOMPENSES, ACTUALITÉ, REPRISES COMME EN DIRECT ================= */
 const ONBX={};
 const _onB0=onB;
-onB=function(o){const b=_onB0(o);if(b&&b.id)ONBX[b.id]=b;return b};
+onB=function(o){const b=_onB0(o);if(b){if(b.cos&&b.cos.glove!=null)b.glv=GLV[+b.cos.glove]||null;if(b.id)ONBX[b.id]=b}return b};
 const bxL=(b,inner)=>b&&b.id?`<a href="#" class="mgrl" data-a="onbx" data-id="${esc(b.id)}">${inner}</a>`:inner;
 function vOnBx(b){const u=onUi(),k=onRk(b.rating),mine=u.home&&b.pid===u.home.me.id,c=b.cos||{},xg=Object.assign({},b,{glv:c.glove!=null?GLV[+c.glove]:null});
   return`<div class="panel"><div class="ph"><span></span><button class="btn sm" data-a="onbxx">← Retour</button></div>
@@ -3762,7 +3762,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='c86c4ce002';window.BUILD_MSG="Camp : temps restant et annulation (50 % rembours\u00e9) \u00b7 tout relancer les pouvoirs d\u2019un boxeur \u00b7 combat bloqu\u00e9 pendant un camp";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='29aac23041';window.BUILD_MSG="Les gants personnalis\u00e9s s\u2019affichent partout (\u00e9curie, classements, profils)";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
