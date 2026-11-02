@@ -512,6 +512,8 @@ input,select,textarea{font-size:16px}
 .thm{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.thm button{height:44px;border-radius:12px;border:2px solid transparent;font-weight:800;font-size:12px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}.thm button[aria-pressed="true"]{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.25)}
 .poster{border-radius:18px;overflow:hidden;border:1px solid var(--line2);box-shadow:0 20px 50px rgba(0,0,0,.6)}.poster svg{display:block;width:100%;height:auto}
 .vsme{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(0,0,0,.3);border:1px solid var(--line2);font-size:13px}.vsme b{font-size:16px}.vsme i{font-style:normal}.vsme i.g{color:var(--green)}.vsme i.r{color:#ff7b8b}
+.recl{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;margin:2px 0 6px;padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.28);border:1px solid var(--line);font-size:13px;color:var(--muted)}.recl b{color:var(--ink);font-size:14px}
+.recr.me{border-color:rgba(var(--rgb),.5)}
 .pkw{display:grid;gap:0}.pkw .pkc{border-bottom-left-radius:0;border-bottom-right-radius:0}
 .pki{width:100%;padding:8px;border:1px solid var(--line);border-top:0;border-radius:0 0 18px 18px;background:rgba(0,0,0,.35);color:var(--gold);font-weight:800;font-size:12.5px}
 .prw .rowc{border-bottom-left-radius:0;border-bottom-right-radius:0}.pki:disabled{opacity:.4}
@@ -533,6 +535,7 @@ input,select,textarea{font-size:16px}
 <div id="neg" class="modal" hidden></div>
 <div id="menu" class="menu" hidden></div>
 <div id="fb" class="modal" hidden style="z-index:80"></div>
+<div id="warn" class="modal" hidden style="z-index:75"></div>
 
 <script src="vendor/three.min.js"></script>
 <script>
@@ -606,7 +609,7 @@ function syncPerks(){const M=S.mgr;if(!M.legacy){M.legacy={...M.perks};M.pts=0}f
 const PERKS={neg:{n:'Négociateur',d:'+8 % sur la part des bourses par niveau.'},mot:{n:'Motivateur',d:'La loyauté monte plus vite chaque semaine.'},rec:{n:'Promoteur',d:'+10 % sur les revenus de tes galas par niveau.'},res:{n:'Réseau',d:'Agents libres et staff de meilleure qualité.'},ges:{n:'Gestionnaire',d:'−7 % sur les salaires et l’entretien par niveau.'}};
 const GYMS=[["Club Saint-Henri","Montréal",48],["Boxe Limoilou","Québec",52],["Garage de l’Outaouais","Gatineau",56],["Académie des Mille-Îles","Laval",60],["Iron Works","Toronto",64],["Gimnasio El Toro","Mexico",68],["Southbank Elite","Londres",72],["Le Temple","Paris",77]];
 const SKIN=['#f2cba9','#e3b08a','#c98c63','#a3693f','#7c4b2b','#56331e'], HAIRC=['#17110d','#3a2416','#6b4a2b','#a5784a','#d8bd86','#8b9099'], TRUNK=['#ff3d52','#4f80ff','#f4c34f','#3fd88a','#a77bff','#e9e9e9','#16181f'];
-const DEFSET={anim:true,td:true,odds:true,autoAdv:false,events:true,speed:1};
+const DEFSET={anim:true,td:true,odds:true,autoAdv:false,events:true,speed:1,warn:true};
 const CAMPS={std:{n:'Standard',c:0,d:'Préparation normale, sans frais.'},video:{n:'Étude vidéo',c:1500,d:'+3 % de précision contre cet adversaire. Non remboursable.'},alt:{n:'Altitude',c:4000,d:'S’essouffle 20 % moins vite pendant le combat. Non remboursable.'}};
 const SAL=[0,160,320,600,1000,1500], COST=[0,15000,40000,90000,180000], SHARE=.33, KEY='coin-rouge-v2';
 const ACH=[
@@ -697,8 +700,8 @@ function promoWeek(){if(!S.promos)return;const sc=promoAlive().map(p=>prScore(p)
   for(const p of promoAlive()){const L=prBoxers(p);
     if(p.own){const n=prNet(p,L);S.money+=n;S.fin&&(S.fin.pro=(S.fin.pro||0)+n);p.lastNet=n;continue}
     if(p.sale){if(S.t>=p.sale.until)dissolvePromo(p);continue}
-    p.cash+=Math.round(1500+(prScore(p,L)-avg)*12+(R()-.5)*36000);
-    if(p.cash<0){p.neg++;if(p.neg>=7)bankrupt(p)}else p.neg=0}
+    p.cash+=Math.round(2500+(prScore(p,L)-avg)*10+(R()-.5)*34000);
+    if(p.cash<0){p.neg++;if(p.neg>=9)bankrupt(p)}else p.neg=0}
   const used=new Set(promoAlive().map(p=>p.n));while(promoAlive().length<14){const q=newPromo(used);used.add(q.n);q.cash=ri(250,500)*1000;q.fresh=S.t;S.promos.push(q);{const pool=S.boxers.filter(b=>!b.mine&&!b.retired&&!b.champ&&b.pr!==q.id&&(()=>{const o=prOf(b);return o&&!o.own&&!o.sale})());for(let i=0;i<12&&pool.length;i++){const b=pool.splice(ri(0,pool.length-1),1)[0];b.pr=q.id}}log(`🏢 Nouvelle promotion : ${q.n} (${flag(q.nat)} ${NAT[q.nat].n}).`)}}
 function bankrupt(p){p.sale={price:prPrice(p),until:S.t+6};p.cash=0;if(myPromos().length>=PRMAX-1){log(`${p.n} fait faillite.`);return}
   log(`💥 ${p.n} fait faillite ! Ses ${prBoxers(p).length} boxeurs sont à vendre : rachète la promotion pour ${$(p.sale.price)} d’ici 6 semaines.`,'gold');toast(`💥 Faillite : ${p.n}`)}
@@ -1090,6 +1093,9 @@ function applyResult(F,f){
   for(const[X,fx]of[[A,F.A],[B,F.B]])if(fx.hp<30&&!X.inj&&R()<.3)X.inj=ri(1,3);
   for(const[X,Y]of[[A,B],[B,A]])if(!X.mine){X.hist=X.hist||[];X.hist.unshift({t:S.t,opp:Y.name,res:!res.w?'N':(W===X?'V':'D'),m:res.m,r:res.r,title});if(X.hist.length>5)X.hist.length=5}
   if(!f&&res.w&&S.promos){const pw=prOf(W),pl=prOf(L),pu=purse(W,L,title);let g=0;if(pw&&pw.own)g+=pu*.15;if(pl&&pl.own)g+=pu*.07;if(g){S.money+=Math.round(g);S.fin&&(S.fin.pro=(S.fin.pro||0)+Math.round(g))}}
+  for(const X of[A,B])if(X.mine&&!X.brand&&S.rec){const r=!res.w?'d':(W===X?'w':'l');S.rec[r]++;if(r==='w'&&stop)S.rec.ko++}
+  if(W&&W.mine&&W.spons){if(W.spons.gk==='wins'||(W.spons.gk==='kos'&&stop))W.spons.prog=(W.spons.prog||0)+1}
+  {const pu=purse(A,B,title);const big=pu>=purse(B,A,title)?A:B;recHit('purse',Math.max(pu,purse(B,A,title)),big)}
   if(res.w!==undefined&&(A.mine||B.mine)&&!(A.mine&&B.mine)){const me=A.mine?A:B,op=me===A?B:A,r=!res.w?'d':(W===me?'w':'l');h2hAdd(op,r)}
   if(f&&f.ss&&S.ss){const Wn=W||(ovr(A)>=ovr(B)?A:B);ssRecord(f.ss.k,f.ss.i,Wn.id)}
   if(f){
@@ -1119,14 +1125,16 @@ function quickFight(a,b,title,nt){
 function aiWeek(){
   for(const d of DIVS){
     for(let k=0;k<4;k++){
-      if(R()>.6)continue;
+      if(R()>.42)continue;
       const list=rankList(d.id).filter(b=>(!b.mine||(b.brand&&(prOf(b)||{}).auto&&!upF(b)))&&!b.booked&&!b.inj&&S.t-b.lastFight>=6);
       if(list.length<2)continue;
-      const i=ri(0,list.length-2),j=Math.min(list.length-1,i+ri(1,3));
-      quickFight(list[i],list[j],false);
+      const i=ri(0,list.length-2),A=list[i];let j=Math.min(list.length-1,i+ri(1,3));
+      if(A.l===0&&A.age<=28&&R()<.85){const soft=list.slice(i+1).filter(o=>ovr(o)<=ovr(A)-7&&!(o.l===0&&o.age<=28));if(soft.length)j=list.indexOf(soft[ri(0,Math.min(4,soft.length-1))])}
+      const Bj=list[j];if(Bj.l===0&&Bj.age<=28&&ovr(A)>ovr(Bj)-7&&R()<.85)continue;
+      quickFight(A,Bj,false);
     }
     const B=S.belts[d.id]||{};
-    for(const k of BELTS){const h=getB(B[k]);if(!h||h.mine||h.booked||h.inj||S.t-h.lastFight<10||R()>.12)continue;
+    for(const k of BELTS){const h=getB(B[k]);if(!h||h.mine||h.booked||h.inj||S.t-h.lastFight<12||R()>.08)continue;
       const uni=R()<.05,ch=bodyList(d.id,k).filter(b=>!b.mine&&!b.booked&&!b.inj&&b!==h&&(uni?b.champ:!b.champ)).slice(0,4);if(!ch.length)continue;const c=pick(ch);
       quickFight(h,c,[...new Set([...beltsOf(h),...beltsOf(c)])])}
     for(const c of champsOf(d.id))if(c.mine&&!c.booked&&S.t-c.lastFight>26){const bl=beltsOf(c);for(const k of bl)B[k]=null;log(`${c.name} est déchu de ${bl.join(', ')} : aucune défense depuis 26 semaines.`,'bad');ensureBelts(d.id)}
@@ -1174,7 +1182,7 @@ function nextWeek(quiet){
     if(b.loy<=5)leave(b,'il ne fait plus confiance au club');
     else if(b.contract<=0)leave(b,'fin de contrat');
   }
-  aiWeek();aiNational();offersWeek();promoWeek();ensureAllNat();amWeekTick();syncPerks();gymInit();ssWeek();interimWeek();mandWeek();rivalWeek();careerEvents();acadWeek();tvWeek();for(const d in(S.belts||{}))for(const c of champsOf(d))crOf(c).cw++;
+  aiWeek();aiNational();offersWeek();promoWeek();ensureAllNat();amWeekTick();syncPerks();gymInit();ssWeek();sponsWeek();interimWeek();mandWeek();rivalWeek();careerEvents();acadWeek();tvWeek();for(const d in(S.belts||{}))for(const c of champsOf(d))crOf(c).cw++;
   if((S.t-1)%52===0&&S.t>1){awards();S.ageL=[];newYear();amNewYear();ensureAllNat();if(S.ageL.length){if(S.notice)S.notice.lines.push('<b>Anniversaires</b>',...S.ageL);else S.notice={t:'Anniversaires',lines:S.ageL}}S.ageL=null}
   rivalsWeek();
   if(S.t%4===0){S.fa=genFA();S.market=genStaff();for(let i=0;i<((S.fac&&S.fac.acad)||0);i++){const p=makeBoxer({div:pick(DIVS).id,nat:S.home,ovr:ri(38,45),age:ri(17,19),pot:ri(28,40)+5*S.fac.acad});seedRecord(p);p.pts=0;p.fame=1;p.salary=marketSal(p);p.fa=true;p.acad=1;S.fa.unshift(p)}}
@@ -1209,6 +1217,46 @@ function canBook(me,op){
   if(ro<15&&ro<rm-6)return'Trop haut classé';
   return null;
 }
+/* ================= v30 ================= */
+/* fiche du club depuis la fondation */
+function recInit(){if(!S.rec){const L=club();S.rec={w:L.reduce((a,b)=>a+b.w,0),l:L.reduce((a,b)=>a+b.l,0),d:L.reduce((a,b)=>a+b.d,0),ko:L.reduce((a,b)=>a+b.ko,0)}}}
+const recTxt=()=>{const r=S.rec||{w:0,l:0,d:0,ko:0};return`${r.w}-${r.l}-${r.d} (${r.ko} KO)`};
+/* #14 livre pour livre */
+function p4pScore(b){return ovr(b)*1.5+beltsOf(b).length*4+(isUndisp(b)?8:0)+(S.lineal&&isLineal(b)?4:0)+(b.l===0&&b.w>=10?4:0)+Math.min(8,crOf(b).wc*2)+Math.min(6,multiDiv(b)*2)}
+function p4pList(){return S.boxers.filter(b=>!b.retired&&(b.champ||rankIdx(b)<15)).map(b=>({b,s:p4pScore(b)})).sort((x,y)=>y.s-x.s).slice(0,25)}
+/* #15 records */
+function recHit(k,v,b,extra){S.records=S.records||{};const r=S.records[k];if(!r||(k==='young'?v<r.v:v>r.v))S.records[k]={v,nm:b.name,nat:b.nat,mine:!!b.mine,id:b.id,t:S.t,...(extra||{})}}
+function recordsList(){const all=S.boxers.filter(b=>!b.retired),H=S.hof||[],best=(f,lab,fmt)=>{let bb=null,bv=-1;for(const b of all){const v=f(b);if(v>bv){bv=v;bb=b}}for(const h of H){const v=f.h?f.h(h):-1;if(v>bv){bv=v;bb={name:h.nm,nat:h.nat,hof:1}}}return{lab,v:bv,b:bb,fmt}};
+  const cw=b=>crOf(b).cw;cw.h=h=>h.cw||0;const df=b=>crOf(b).def;df.h=h=>h.def||0;const ko=b=>b.ko;ko.h=h=>h.ko||0;const st=b=>crOf(b).st;st.h=h=>h.st||0;const tw=b=>crOf(b).tw;tw.h=h=>h.tw||0;const fo=b=>fol(b);fo.h=h=>h.fol||0;const om=b=>Math.max(b.ovrMax||0,ovr(b));om.h=h=>h.best||0;const gt=b=>goat(b);gt.h=h=>h.g||0;
+  const L=[best(cw,'Plus long règne',v=>v+' semaines'),best(df,'Plus de défenses de titre',v=>v+' défenses'),best(tw,'Plus de titres mondiaux',v=>v+' titres'),best(ko,'Plus de KO',v=>v+' KO'),best(st,'Plus longue série de victoires',v=>v+' victoires'),best(fo,'Plus d’abonnés',v=>fmtK(v)),best(om,'Meilleure note atteinte',v=>v),best(gt,'Plus de points GOAT',v=>v)];
+  const R=S.records||{};if(R.young)L.push({lab:'Plus jeune champion du monde',v:R.young.v,b:{name:R.young.nm,nat:R.young.nat,mine:R.young.mine},fmt:v=>v+' ans'});if(R.old)L.push({lab:'Plus vieux champion du monde',v:R.old.v,b:{name:R.old.nm,nat:R.old.nat,mine:R.old.mine},fmt:v=>v+' ans'});if(R.purse)L.push({lab:'Plus grosse bourse',v:R.purse.v,b:{name:R.purse.nm,nat:R.purse.nat,mine:R.purse.mine},fmt:v=>moneyS(v)});return L}
+/* #16 commanditaires personnels */
+const BRANDS=[['Volt','boisson énergisante'],['Kodiak','vêtements de sport'],['Atlas','montres'],['Vortex','équipement de boxe'],['Nordik','eau minérale'],['Titan Auto','concessionnaire auto'],['Pixel Arena','jeux vidéo'],['MaplePay','paiement mobile'],['Ironclad','suppléments'],['Lumen','téléphones']];
+const SGOAL={wins:{n:g=>`Gagner ${g} combat${g>1?'s':''}`},kos:{n:g=>`Gagner ${g} combat${g>1?'s':''} par KO`},keep:{n:()=>'Garder toutes ses ceintures'},fol:{n:g=>`Gagner ${fmtK(g)} abonnés`}};
+function sponsWeek(){S.sOff=(S.sOff||[]).filter(o=>o.exp>=S.t&&getB(o.b)&&getB(o.b).mine&&!getB(o.b).spons);
+  for(const b of club()){if(b.spons){b.sTaken=(b.sTaken||0)+1;const c=b.spons;S.money+=c.pay;
+      if(S.t>=c.until){const ok=sponsDone(b);if(ok){S.money+=c.bonus;b.morale=cl(b.morale+5,0,100);log(`🤝 ${c.brand} : objectif réussi par ${b.name} ! Bonus ${$(c.bonus)}.`,'gold');toast(`🤝 Bonus ${c.brand} : +${moneyS(c.bonus)}`)}else{b.fame=cl(b.fame-2,1,100);log(`🤝 ${c.brand} ne renouvelle pas ${b.name} : objectif raté.`,'bad')}b.spons=null}continue}
+    if(S.sOff.length>=2||S.sOff.some(o=>o.b===b.id)||R()>.01+Math.min(.05,fol(b)/2e8)+beltsOf(b).length*.01)continue;
+    const[br,cat]=pick(BRANDS),pay=Math.round((3000+fol(b)*.004+beltsOf(b).length*8000+b.fame*60)/500)*500,gk=beltsOf(b).length&&R()<.4?'keep':R()<.25?'kos':R()<.3?'fol':'wins';
+    const g=gk==='wins'?ri(2,3):gk==='kos'?ri(1,2):gk==='fol'?Math.max(1000,Math.round(fol(b)*.15/1000)*1000):0;
+    S.sOff.push({id:'so'+(S.uid++),b:b.id,brand:br,cat,pay,weeks:26,gk,g,bonus:pay*12,exp:S.t+3})}}
+function sponsDone(b){const c=b.spons;if(!c)return false;return c.gk==='keep'?beltsOf(b).length>=c.base:c.gk==='fol'?fol(b)-c.base>=c.g:(c.prog||0)>=c.g}
+function sponsAccept(id){const o=(S.sOff||[]).find(x=>x.id===id),b=o&&getB(o.b);if(!b)return;S.sOff=S.sOff.filter(x=>x!==o);b.spons={brand:o.brand,cat:o.cat,pay:o.pay,gk:o.gk,g:o.g,bonus:o.bonus,until:S.t+o.weeks,prog:0,base:o.gk==='keep'?beltsOf(b).length:o.gk==='fol'?fol(b):0};addFol(b,fol(b)*.02);log(`🤝 ${b.name} signe avec ${o.brand} (${o.cat}) : ${$(o.pay)}/sem. pendant ${o.weeks} sem.`,'good');toast(`🤝 ${sur(b)} × ${o.brand}`)}
+function sponsPanel(b){const c=b.spons;if(!c)return'';const p=c.gk==='keep'?(beltsOf(b).length>=c.base?1:0):c.gk==='fol'?Math.max(0,fol(b)-c.base):(c.prog||0),g=c.gk==='keep'?1:c.g;
+  return`<div class="panel"><div class="ph"><span class="lab">🤝 Commanditaire · ${esc(c.brand)}</span><b>${moneyS(c.pay)}/sem.</b></div><p class="small" style="margin:0 0 6px">${esc(c.cat)} · objectif : <b>${SGOAL[c.gk].n(c.g)}</b> d’ici ${when(c.until)} · bonus ${moneyS(c.bonus)}</p><div class="trk gold"><i style="width:${Math.min(100,p/Math.max(1,g)*100)}%"></i></div><span class="small">${c.gk==='keep'?(p?'Ceintures conservées pour l’instant':'Ceinture perdue'):c.gk==='fol'?`${fmtK(p)} / ${fmtK(g)}`:`${p}/${g}`}</span></div>`}
+/* avertissements avant d'avancer */
+function preChecks(){const L=[],up=S.fights.filter(f=>{const a=getB(f.a);return a&&a.mine&&f.week-S.t<=2});
+  for(const f of up){const a=getB(f.a);if(!f.gp)L.push({ic:'📋',t:`${esc(sur(a))} combat ${f.week===S.t?'cette semaine':'dans '+(f.week-S.t)+' sem.'} sans plan de match`,a:`data-a="opencamp" data-id="${f.id}"`});if(a.inj)L.push({ic:'🩹',t:`${esc(sur(a))} est blessé avant son combat`,a:`data-a="opencamp" data-id="${f.id}"`});if((f.prep??10)<35&&f.week-S.t<=1)L.push({ic:'⚠️',t:`${esc(sur(a))} n’est préparé qu’à ${f.prep??10} %`,a:`data-a="opencamp" data-id="${f.id}"`})}
+  for(const b of club())if(b.contract<=2&&!b.brand)L.push({ic:'📝',t:`Contrat de ${esc(sur(b))} : ${b.contract} sem.`,a:`data-a="neg" data-id="${b.id}"`});
+  if(S.ss&&(S.ss.inv||[]).length)L.push({ic:'📩',t:'Invitation à la Super Série sans réponse',a:`data-a="tab" data-k="defis"`});
+  if(S.cvc&&!S.cvc.acc)L.push({ic:'⚔️',t:'Défi Club contre Club sans réponse',a:`data-a="todolist"`});
+  for(const m of Object.values(S.mand||{}))if(m.until-S.t<=3){const b=getB(m.ch);if(b)L.push({ic:'📜',t:`Combat obligatoire ${m.k} de ${esc(sur(b))} : ${Math.max(0,m.until-S.t)} sem. pour signer`,a:`data-a="todolist"`})}
+  const sp=club().filter(canSpend).length;if(sp)L.push({ic:'⬆️',t:`${sp} boxeur${sp>1?'s ont':' a'} des points de stats à dépenser`,a:`data-a="spall"`,fix:'⚡ Auto'});
+  const ex=(S.offers||[]).filter(o=>o.exp<=S.t).length;if(ex)L.push({ic:'📨',t:`${ex} offre${ex>1?'s':''} de combat expire${ex>1?'nt':''} cette semaine`,a:`data-a="gooff"`});
+  return L}
+function showWarn(L,act){ui.warnFor=act;const el=document.getElementById('warn');el.innerHTML=`<div class="mcard nt" role="dialog" aria-label="Avant de continuer"><span class="lab">Avant de continuer</span><h3>Il reste des choses à faire</h3><div class="mbody">${L.map(x=>`<div class="tli"><p>${x.ic} ${x.t}</p><button class="btn sm gold" ${x.a} data-wfix="1">${x.fix||'Voir'}</button></div>`).join('')}</div>
+  <div class="row" style="gap:8px;margin-top:12px;flex-wrap:nowrap"><button class="btn" data-a="warnx" style="flex:none">Retour</button><button class="btn pri" data-a="warngo" style="flex:1;margin:0">Continuer quand même</button></div></div>`;el.hidden=false}
+function guardAdvance(act){if(S.set.warn===false||ui.warnOk===S.t+':'+act.a){ui.warnOk=null;return true}const L=preChecks();if(!L.length)return true;showWarn(L,act);return false}
 /* ================= v27 : MONDE PLUS PROFOND ================= */
 /* #20 thème du club */
 const THEMES={rouge:{n:'Rouge',c:'#ff3b50',c2:'#c8102e'},bleu:{n:'Bleu',c:'#4f80ff',c2:'#2d55d6'},vert:{n:'Vert',c:'#38d98a',c2:'#1f9e60'},violet:{n:'Violet',c:'#a46bff',c2:'#7a4cd6'},or:{n:'Or',c:'#f5c451',c2:'#b8860b'},orange:{n:'Orange',c:'#ff9f43',c2:'#d9731c'},rose:{n:'Rose',c:'#ff5fa2',c2:'#c2186b'},argent:{n:'Argent',c:'#c9d1e0',c2:'#7c8699'}};
@@ -1364,7 +1412,7 @@ function titleDef(me,op){if(!me.champ||op.champ||op.booked||op.inj||me.inj||me.b
 function transferBelts(W,L,stake,stop){const lb=beltsOf(L).filter(k=>stake.includes(k));if(!lb.length)return[];
   for(const k of lb){S.belts[W.div][k]=W.id;S.champHist.unshift({t:S.t,div:W.div,nm:W.name,nat:W.nat,mine:W.mine,belt:k,how:'Bat '+L.name+(stop?' par arrêt':' aux points')})}
   if(S.champHist.length>120)S.champHist.length=120;syncChamp();
-  if(W.mine){W.tw=(W.tw||0)+lb.length;log(`${W.name} remporte ${lb.join(', ')} !${isUndisp(W)?' CHAMPION UNDISPUTED !':''}`,'gold');toast(`🏆 ${sur(W)} : ${lb.join(' · ')}`)}
+  recHit('young',W.age,W);if(!(S.records&&S.records.old)||W.age>S.records.old.v)recHit('old',W.age,W);if(W.mine){W.tw=(W.tw||0)+lb.length;log(`${W.name} remporte ${lb.join(', ')} !${isUndisp(W)?' CHAMPION UNDISPUTED !':''}`,'gold');toast(`🏆 ${sur(W)} : ${lb.join(' · ')}`)}
   else if(L.mine)log(`${L.name} perd ${lb.join(', ')}.`,'bad');
   else if(mine().some(m=>m.div===W.div))log(`${divN(W.div)} : ${W.name} prend ${lb.join(', ')} à ${L.name}.`);
   return lb}
@@ -1580,7 +1628,7 @@ function changeDiv(b,dir){const i=DIVS.findIndex(d=>d.id===b.div),j=i+dir;if(!b|
   if(dir>0){b.pow=cl(b.pow+2,1,99);b.spd=cl(b.spd-2,1,99);b.chin=cl(b.chin-1,1,99)}else{b.spd=cl(b.spd+2,1,99);b.sta=cl(b.sta-3,1,99);b.chin=cl(b.chin-2,1,99)}
   b.pts=Math.round(b.pts*.6);b.fatigue=cl(b.fatigue+15,0,100);ensureBelts(old);ensureAllNat();
   log(`${b.name} ${dir>0?'monte':'descend'} en ${DIVS[j].n}.${lost.length?` Il laisse ${lost.join(', ')} vacant.`:''}`,'gold');toast(`⚖️ ${sur(b)} passe en ${DIVS[j].n}`)}
-function hofAdd(b){S.hof=S.hof||[];S.hof.unshift({g:goat(b),nm:b.name,nat:b.nat,rec:`${b.w}-${b.l}-${b.d}`,ko:b.ko,tw:b.tw||0,fol:fol(b),t:S.t,tro:(b.troph||[]).length,best:Math.max(b.ovrMax||0,ovr(b)),div:b.div,look:b.look})}
+function hofAdd(b){S.hof=S.hof||[];S.hof.unshift({g:goat(b),cw:crOf(b).cw,def:crOf(b).def,st:crOf(b).st,nm:b.name,nat:b.nat,rec:`${b.w}-${b.l}-${b.d}`,ko:b.ko,tw:b.tw||0,fol:fol(b),t:S.t,tro:(b.troph||[]).length,best:Math.max(b.ovrMax||0,ovr(b)),div:b.div,look:b.look})}
 function retireB(b){if(!b||!b.mine||b.booked||b.age<30)return;hofAdd(b);
   for(const k of beltsOf(b))S.belts[b.div][k]=null;b.mine=false;b.retired=true;S.boxers=S.boxers.filter(x=>x!==b);ensureBelts(b.div);ensureAllNat();
   const st=Math.min(5,2+((b.tw||0)>0?2:0)+(ovr(b)>=80?1:0));S.market.unshift({id:'s'+(S.uid++),role:'coach',name:b.name,stars:st,salary:SAL[st],legend:1});
@@ -2088,6 +2136,7 @@ function alerts(){
     if(b.champ&&!b.booked&&S.t-b.lastFight>18)out.push({bad:1,t:`Défense de titre obligatoire pour <b>${esc(b.name)}</b> d’ici ${26-(S.t-b.lastFight)} sem.`,btn:`<button class="btn sm" data-a="book" data-id="${b.id}">Réserver</button>`});
   }
   for(const[key,m]of Object.entries(S.mand||{})){const b=getB(m.ch),o=getB(m.op);if(b&&o)out.unshift({bad:1,t:`📜 Combat obligatoire <b>${m.k}</b> : ${esc(sur(b))} doit affronter ${esc(o.name)} d’ici ${Math.max(0,m.until-S.t)} sem., sinon il perd la ceinture.`,btn:`<button class="btn sm gold" data-a="mand" data-k="${key}">Signer</button>`})}
+  for(const o of S.sOff||[]){const b=getB(o.b);if(b)out.push({t:`🤝 <b>${esc(o.brand)}</b> (${esc(o.cat)}) veut commanditer ${esc(sur(b))} : ${moneyS(o.pay)}/sem. pendant ${o.weeks} sem. · objectif : ${SGOAL[o.gk].n(o.g)} · bonus ${moneyS(o.bonus)}`,btn:`<button class="btn sm gold" data-a="sok" data-id="${o.id}">Signer</button><button class="btn sm" data-a="sno" data-id="${o.id}">Non</button>`})}
   if(S.ss&&(S.ss.inv||[]).length)out.unshift({bad:1,t:`📩 Invitation à la <b>${esc(S.ss.n)}</b> pour ${S.ss.inv.map(id=>esc(sur(getB(id)||{name:'?'}))).join(', ')}. Accepte ou refuse.`,btn:`<button class="btn sm gold" data-a="tab" data-k="defis">Voir</button>`});
   if(S.cvc&&!S.cvc.acc){const p=(S.promos||[]).find(x=>x.id===S.cvc.pid);out.unshift({bad:1,t:`⚔️ <b>${esc(p?p.n:'Un rival')}</b> te défie : Club contre Club, 3 combats, ${$(S.cvc.pot)} au gagnant (le perdant paie la moitié).`,btn:`<button class="btn sm gold" data-a="cvcok">Accepter</button><button class="btn sm" data-a="cvcno">Refuser</button>`})}
   if(myPromos().length<PRMAX-1)for(const p of promoAlive())if(p.sale)out.unshift({bad:1,t:`💥 <b>${esc(p.n)}</b> a fait faillite ! ${prBoxers(p).length} boxeurs à racheter pour ${$(p.sale.price)} (encore ${p.sale.until-S.t} sem.).`,btn:`<button class="btn sm gold" data-a="openpromo" data-id="${p.id}">Voir</button>`});
@@ -2187,7 +2236,7 @@ const tapeBox=(a,b)=>`<div class="panel tape">${tapeRow('Note',ovr(a),ovr(b))}${
 function vMyClub(){const L=sortB(club()),R=prRec(L),bl=L.reduce((a,b)=>a+beltsOf(b).length,0),sc=prScore(null,L),rk=promoAlive().map(x=>prScore(x)).filter(v=>v>sc).length+1,MP=myPromos();
   const val=Math.round(L.reduce((s,b)=>s+buyPrice(b),0)*.3/1000)*1000;
   return`<div class="in"><button class="back" data-a="close">← Retour</button>
-  <div class="panel" style="border-color:rgba(255,59,80,.5)"><span class="lab">Ton club · #${rk} des promotions</span><h2 style="margin:4px 0 2px;overflow-wrap:anywhere">${esc(S.club)}</h2><div class="small">${flag(S.home)} ${NAT[S.home].n} · ${L.length} boxeurs · ${bl} ceinture${bl>1?'s':''} mondiale${bl>1?'s':''} · fondé ${when(1)}</div>
+  <div class="panel" style="border-color:rgba(255,59,80,.5)"><span class="lab">Ton club · #${rk} des promotions</span><h2 style="margin:4px 0 2px;overflow-wrap:anywhere">${esc(S.club)}</h2><div class="small">${flag(S.home)} ${NAT[S.home].n} · ${L.length} boxeurs · ${bl} ceinture${bl>1?'s':''} mondiale${bl>1?'s':''} · fondé ${when(1)}</div><div class="vsme"><span>🥊 Fiche du club depuis la fondation</span><b>${recTxt()}</b></div>
     <div class="s4" style="margin-top:12px">${[[sc,'Points'],[moneyS(val),'Valeur'],[moneyS(S.money),'Caisse'],[L.filter(b=>b.champ).length,'Champions']].map(([v,l])=>`<div><b>${v}</b><small>${l}</small></div>`).join('')}</div></div>
   <div class="panel"><span class="lab">Promoteur</span><div class="row" style="gap:12px;margin-top:8px;flex-wrap:nowrap;align-items:center"><div class="crest" style="width:54px;height:60px;font-size:18px">${esc(initials(S.mgrName))}</div><div style="min-width:0"><b>${flag(S.home)} ${esc(S.mgrName)}</b><div class="small">C’est toi ! Gérant niveau ${S.mgr.lvl}</div><div class="small">${Object.entries(S.mgr.perks).filter(([,v])=>v).map(([k,v])=>`${PERKS[k].n} ${v}`).join(' · ')||'Aucun atout encore'}</div></div></div>
     <div class="s4" style="margin-top:12px">${[[`${R.w}-${R.l}-${R.d}`,'Fiche de l’écurie'],[R.ko,'KO'],[L.filter(b=>b.nchamp).length,'Champ. nationaux'],[L.length?Math.round(L.reduce((s,b)=>s+ovr(b),0)/L.length):0,'Note moyenne']].map(([v,l])=>`<div><b style="font-size:15px">${v}</b><small>${l}</small></div>`).join('')}</div></div>
@@ -2208,7 +2257,7 @@ function vPromo(p){const L=sortB(prBoxers(p)),sc=prScore(p,L),rk=promoAlive().ma
     ${p.own?'':`<div class="vsme"><span>⚔️ Toi contre ${esc(p.n)}</span><b>${(()=>{const v=p.vsMe||{w:0,l:0,d:0};return`<i class="g">${v.w}V</i> <i class="r">${v.l}D</i> <i>${v.d}N</i>`})()}</b></div>`}</div>`;
   return`<div class="in"><button class="back" data-a="close">← Retour</button>${head}${boss}${goBtn}${act}<span class="lab">Boxeurs de ${esc(p.n)} · champions puis note</span><div class="list">${rows||'<div class="panel small">Aucun boxeur.</div>'}</div></div>`}
 /* --- écurie --- */
-const ALK=[[/points de stats/,'⬆️','Points de stats'],[/trait/,'✨','Nouveaux traits'],[/épreuve/,'🏅','Épreuves'],[/Contrat de/,'📝','Contrats'],[/augmentation/,'💰','Augmentations'],[/blessé/,'🩹','Blessures'],[/Défense de titre/,'🏆','Défenses obligatoires'],[/faillite/,'💥','Faillites'],[/offre/,'📨','Offres']];
+const ALK=[[/commanditer/,'🤝','Commanditaires'],[/obligatoire/,'📜','Combats obligatoires'],[/Club contre Club/,'⚔️','Défis de rivaux'],[/Super Série/,'📩','Invitations'],[/points de stats/,'⬆️','Points de stats'],[/trait/,'✨','Nouveaux traits'],[/épreuve/,'🏅','Épreuves'],[/Contrat de/,'📝','Contrats'],[/augmentation/,'💰','Augmentations'],[/blessé/,'🩹','Blessures'],[/Défense de titre/,'🏆','Défenses obligatoires'],[/faillite/,'💥','Faillites'],[/offre/,'📨','Offres']];
 const alKind=a=>ALK.find(k=>k[0].test(a.t.replace(/<[^>]+>/g,'')))||[null,'•','Autres'];
 function todoBar(al){if(!al.length)return'';const g={};for(const a of al){const k=alKind(a);g[k[1]]=(g[k[1]]||0)+1}const urg=al.filter(a=>a.bad).length,sp=club().filter(canSpend).length;
   return`<div class="tbar"><button class="tmain ${urg?'urg':''}" data-a="todolist"><span class="tn">${al.length}</span><span class="tl">${urg?'urgent'+(urg>1?'s':'')+' · ':''}à faire</span><span class="tic">${Object.entries(g).map(([ic,n])=>`${ic}${n>1?n:''}`).join(' ')}</span><span class="tgo">›</span></button>${sp?`<button class="btn gold tqa" data-a="spall">⚡ Points auto</button>`:''}</div>`}
@@ -2220,7 +2269,7 @@ function vEcurie(){
   const MP=myPromos(),bp=MP.find(p=>p.id===ui.ebrand)||null;if(!bp)ui.ebrand=null;
   const m=bp?mine().filter(b=>b.brand===bp.id):club(),al=bp?[]:alerts(),full=club().length>=rosterCap();
   const bsw=MP.length?`<div style="margin:6px 0 2px">${selH('ebrand',[['',`🥊 ${esc(S.club)} · ${club().length}/${rosterCap()}`],...MP.map(p=>[p.id,`🏢 ${esc(p.n)} · ${mine().filter(b=>b.brand===p.id).length} boxeurs`])],ui.ebrand||'')}</div>`:'';
-  const head=`<h2>Écurie</h2>${bsw}<div style="margin:8px 0 12px">${segH('esub',[['mine',bp?`Boxeurs ${m.length}`:`Mes boxeurs ${m.length}/${rosterCap()}`],['fa',`Agents libres ${S.fa.length}`],['am','🥇 Amateurs']],ui.esub)}</div>`
+  const head=`<h2>Écurie</h2>${bp?'':`<button class="recl" data-a="openclub">🥊 Fiche du club <b>${recTxt()}</b> ›</button>`}${bsw}<div style="margin:8px 0 12px">${segH('esub',[['mine',bp?`Boxeurs ${m.length}`:`Mes boxeurs ${m.length}/${rosterCap()}`],['fa',`Agents libres ${S.fa.length}`],['am','🥇 Amateurs']],ui.esub)}</div>`
     +(bp&&ui.esub!=='fa'?`<div class="panel" style="border-color:${bp.c};margin-bottom:10px"><div class="row" style="justify-content:space-between;gap:8px"><div style="min-width:0"><b>🏢 ${esc(bp.n)}</b><div class="small">Profit ${(()=>{const v=prNet(bp);return(v>=0?'+':'−')+$(Math.abs(v))})()}/sem. · salaires réduits (contrats de promotion)</div></div><button class="btn sm" data-a="openpromo" data-id="${bp.id}">Fiche</button></div>
       <div class="perk" style="margin-top:10px"><div><b>Gestion automatique</b><div class="small">${bp.auto?'La promotion réserve elle-même des combats pour ses boxeurs libres. Tu peux quand même réserver ceux que tu veux.':'Tu réserves toi-même tous les combats de cette promotion.'}</div></div><button class="sw" data-a="prauto" data-id="${bp.id}" aria-pressed="${!!bp.auto}" aria-label="Gestion automatique"><i></i></button></div></div>`:'');
   if(ui.esub==='am')return head+vAm();
@@ -2242,7 +2291,7 @@ function vSheet(b){
     ${b.inj||b.fatigue>=5?`<div class="panel"><span class="lab">Soins</span><div class="row" style="margin-top:8px">${b.inj?`<button class="btn gold" data-a="heal" data-id="${b.id}" ${S.money>=15000*b.inj?'':'disabled'}>🩺 Soins d’élite · ${$(15000*b.inj)}</button>`:''}${b.fatigue>=5?`<button class="btn" data-a="cryo" data-id="${b.id}" ${S.money>=8000?'':'disabled'}>❄️ Cryothérapie · 8 000 $</button>`:''}</div><p class="small" style="margin:6px 0 0">Soins d’élite : guérison immédiate. Cryothérapie : forme remise à 100.</p></div>`:''}
     <div class="panel"><div class="ph"><span class="lab">Réseaux sociaux</span><b>👥 ${fmtK(fol(b))} abonnés</b></div><div class="row" style="margin:0 0 8px;gap:6px">${MKT.map((m,i)=>`<button class="btn sm ${i===2?'gold':''}" data-a="mkt" data-id="${b.id}" data-k="${i}" ${(b.mkt||0)>S.t||S.money<m.c?'disabled':''}>📣 ${m.n} · ${$(m.c)}</button>`).join('')}</div>${(b.mkt||0)>S.t?`<p class="small" style="margin:0 0 6px">Prochaine campagne dans ${b.mkt-S.t} sem.</p>`:''}<p class="small" style="margin:0 0 8px">Les abonnés suivent la popularité : victoires, KO, titres, galas et publications. Plus d’abonnés = plus de commandites et de billets vendus.</p>${b.post===S.t?'<p class="small" style="margin:0">Déjà publié cette semaine.</p>':`<div class="og3">${Object.entries(POSTS).map(([k,p])=>`<button class="opt" data-a="post" data-id="${b.id}" data-k="${k}"><b>${p.ic} ${p.n}</b><span>${p.d}</span></button>`).join('')}</div>`}</div>
     ${f?fightMini(f):''}
-    ${agePanel(b)}
+    ${sponsPanel(b)}${agePanel(b)}
     <div class="panel"><span class="lab">Entraînement</span>${f?'<p class="small" style="margin:6px 0 0">Il est en camp : l’intensité se règle dans l’écran du camp.</p>':`<div class="seg" style="margin-top:8px">${P.map(([k,p])=>`<button data-a="plan" data-id="${b.id}" data-k="${k}" aria-pressed="${b.plan===k}">${p.n}</button>`).join('')}</div><p class="small" style="margin:6px 0 0">${PLANS[b.plan].d}</p>`}</div>
     ${b.booked?'':`<button class="btn pri big" data-a="book" data-id="${b.id}" ${b.inj?'disabled':''}>${b.inj?`Blessé (${b.inj} sem.) : pas de combat`:'Réserver un combat'}</button>`}`;
   else if(tab==='stats')body=statsPanel(b,true)+`<p class="small">L’XP se mérite : beaucoup contre un adversaire plus fort, presque rien contre un plus faible. Chaque niveau donne 5 points.</p>`;
@@ -2503,7 +2552,7 @@ function vSettings(){
   const s=S.set,tg=(k,n,d)=>`<div class="perk"><div><b>${n}</b><div class="small">${d}</div></div><button class="sw" data-a="set" data-k="${k}" aria-pressed="${!!s[k]}" aria-label="${n}"><i></i></button></div>`;
   return`<div class="in"><button class="back" data-a="close">← Retour</button><h2>Réglages</h2><button class="btn gold big" onclick="openFB()">💬 Donner mon avis sur le jeu</button>
   <div class="panel"><span class="lab">🎨 Couleur de ton club</span><div class="thm">${Object.entries(THEMES).map(([k,t])=>`<button data-a="theme" data-k="${k}" aria-pressed="${(S.theme||'rouge')===k}" style="background:linear-gradient(180deg,${t.c},${t.c2})">${t.n}</button>`).join('')}</div><p class="small" style="margin:6px 0 0">Change les couleurs du jeu et les gants de tes boxeurs.</p></div>
-  <div class="panel">${tg('anim','Combats animés','Voir les deux boxeurs s’affronter sur le ring, coup par coup.')}
+  <div class="panel">${tg('warn','Avertir avant d’avancer','Avant de passer une semaine ou d’aller au combat, te prévenir s’il reste des choses importantes à faire.')}${tg('anim','Combats animés','Voir les deux boxeurs s’affronter sur le ring, coup par coup.')}
     ${tg('td','Combats en 3D','Ring et boxeurs en 3D. Désactive si ton téléphone ralentit.')}
     ${tg('odds','Chances de victoire','Afficher le % de victoire à la réservation, dans le camp et pendant les combats.')}
     ${tg('autoAdv','Suivre les conseils du coin','Ton boxeur applique automatiquement la consigne conseillée.')}
@@ -2516,7 +2565,7 @@ function vSettings(){
 
 /* ================= ÉVÉNEMENTS ================= */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-a]');if(!t)return;
+  const t=e.target.closest('[data-a]');if(!t)return;if(t.dataset.wfix){const w=document.getElementById('warn');if(w)w.hidden=true}
   const a=t.dataset.a,id=t.dataset.id,k=t.dataset.k;
   if(a.startsWith('m_')){menuAct(a,t);return}
   if(!S)return;
@@ -2526,7 +2575,7 @@ document.addEventListener('click',e=>{
     case'tab':ui.tab=k;ui.sheet=null;window.scrollTo(0,0);break;
     case'esub':ui.esub=k;break;
     case'csub':ui.csub=k;break;
-    case'next':nextWeek();return;
+    case'next':if(!guardAdvance({a:'next'}))return;nextWeek();return;case'warnx':document.getElementById('warn').hidden=true;return;case'warngo':{document.getElementById('warn').hidden=true;const w=ui.warnFor||{a:'next'};ui.warnOk=S.t+':'+w.a;if(w.a==='skipf'){if(guardAdvance(w))skipTo(w.id)}else{if(guardAdvance(w))nextWeek()}return}case'sok':sponsAccept(id);break;case'sno':S.sOff=(S.sOff||[]).filter(x=>x.id!==id);break;
     case'open':ui.backSheet=ui.sheet==='todo'||ui.sheet==='myclub'||(ui.sheet||'').startsWith('promo:')||(ui.sheet||'').startsWith('gym:')?ui.sheet:null;ui.stab=k||'apercu';ui.sheet=id;document.getElementById('sheet').scrollTop=0;break;
     case'close':if(ui.backSheet&&ui.sheet&&ui.sheet!==ui.backSheet){ui.sheet=ui.backSheet;ui.backSheet=null}else{ui.sheet=null;ui.backSheet=null}break;
     case'plan':if(k!=='sparring'||S.staff.spar.length)b.plan=k;break;
@@ -2574,7 +2623,7 @@ document.addEventListener('click',e=>{
     case'ggcity':case'ggtv':case'ggppvp':case'ggx':{const g=(S.galas||[]).find(x=>'gala:'+x.id===ui.sheet);if(g){if(a==='ggcity'){const C=GCITY.find(c=>c.id===k);if(C&&S.mgr.lvl>=C.lvl)g.city=k;else toast('Gérant niveau '+(C?C.lvl:'?')+' requis')}else if(a==='ggtv'){g.tv=k;g.ppv=k==='ppv'}else if(a==='ggppvp')g.ppvp=+k;else{g.x=g.x||{};g.x[k]=!g.x[k]}}break}
     case'gpr':case'gpm':case'gppv':{const g=(S.galas||[]).find(x=>'gala:'+x.id===ui.sheet);if(g){if(a==='gpr')g.price=+k;else if(a==='gpm')g.promo=+k;else g.ppv=!g.ppv}break}
     case'galaadd':ui.bev=id;ui.tab='combats';ui.csub='book';ui.sheet=null;window.scrollTo(0,0);break;
-    case'skipf':skipTo(id);return;
+    case'skipf':if(!guardAdvance({a:'skipf',id}))return;skipTo(id);return;
     case'cauto':{const f=S.fights.find(x=>'camp:'+x.id===ui.sheet);if(f){f.auto=k==='auto';ui.cw=f.wk||0}break}
     case'cwk':ui.cw=+k;break;
     case'cfoc':{const f=S.fights.find(x=>x.id===id);if(f){f.plan=f.plan||[];const i=ui.cw??(f.wk||0);f.plan[i]=k;const tot=f.week-(f.start??f.week-4);if(i+1<tot)ui.cw=i+1}break}
@@ -2633,7 +2682,7 @@ async function unpackSave(code){code=(code||'').replace(/\s+/g,'');
   if(code.startsWith('CRZ1:')){const bin=atob(code.slice(5)),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const st=new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'));return JSON.parse(await new Response(st).text())}
   if(code.startsWith('CRJ1:'))return JSON.parse(decodeURIComponent(escape(atob(code.slice(5)))));throw new Error('format')}
 function enterGame(s){
-  S=s;fixup(S);S.set=Object.assign({...DEFSET},S.set||{});if(S.event===undefined)S.event=null;applyTheme();migr7();if(S.ctr&&S.ctr.list.some(id=>CTRX.includes(id)))newContracts();if(!S.rec25){S.rec25=1;for(const b of S.boxers)if(!b.mine&&!b.retired&&b.l>0&&R()<unbeatP(b)*.8){b.w+=b.l;b.l=0}}ensurePromos();h2hInit();ensureAm();syncPerks();gymInit();
+  S=s;fixup(S);S.set=Object.assign({...DEFSET},S.set||{});if(S.event===undefined)S.event=null;applyTheme();recInit();migr7();if(S.ctr&&S.ctr.list.some(id=>CTRX.includes(id)))newContracts();if(!S.rec25){S.rec25=1;for(const b of S.boxers)if(!b.mine&&!b.retired&&b.l>0&&R()<unbeatP(b)*.8){b.w+=b.l;b.l=0}}ensurePromos();h2hInit();ensureAm();syncPerks();gymInit();
   ensureAllNat();
   Object.assign(ui,{tab:'ecurie',esub:'mine',csub:'cal',sheet:null,fight:null,confirm:null,bookFor:null,div:null,oc:{},expCode:null,rsub:'monde',rnat:S.home,bsc:'niv'});
   closeMenu();render();save();
@@ -2927,11 +2976,13 @@ function vRivals(){S.rivals=S.rivals||genRivals();return`<p class="lede">Les aut
 function vHof(){const H=S.hof||[];return`<p class="lede">Tes boxeurs retraités. Un ancien champion peut revenir comme entraîneur (onglet Staff, candidats).</p>${H.length?`<div class="list">${H.map(h=>`<div class="panel"><div class="bx-h"><div class="av md">${avatar({look:h.look},'red')}</div><div class="bx-id"><span class="chip gold">🏛️ Légende</span><div class="nm" style="margin-top:6px">${flag(h.nat)} ${esc(h.nm)}</div><div class="sub">${divN(h.div)} · ${h.rec} (${h.ko} KO) · ${h.tw} ceinture${h.tw>1?'s':''} gagnée${h.tw>1?'s':''}${h.tro?` · ${h.tro} trophée${h.tro>1?'s':''}`:''}</div><span class="small">👥 ${fmtK(h.fol)} abonnés · retraite ${when(h.t)}</span></div><div class="ovr"><b>${h.best}</b><small>MAX</small></div></div></div>`).join('')}</div>`:'<div class="panel"><p class="small" style="margin:0">Personne pour l’instant. Dans la fiche d’un boxeur de 30 ans ou plus : Contrat → Prendre sa retraite.</p></div>'}`}
 function vRank(){
   if(!ui.div)ui.div=mine()[0]?.div||'welter';ui.rsub=ui.rsub||'belts';ui.rnat=ui.rnat||S.home;ui.rbody=ui.rbody||'WBC';
-  const sub=`<div ${segG(6)} style="margin-bottom:10px">${[['belts','Ceintures'],['monde','Mondial'],['pays','Pays'],['goat','🐐 GOAT'],['promo','🏢 Promos'],['palm','Palmarès']].map(([k,n])=>`<button data-a="rsub" data-k="${k}" aria-pressed="${ui.rsub===k}">${n}</button>`).join('')}</div>`;
+  const sub=`<div ${segG(8)} style="margin-bottom:10px">${[['belts','Ceintures'],['monde','Mondial'],['pays','Pays'],['p4p','P4P'],['goat','🐐 GOAT'],['promo','🏢 Promos'],['rec','📈 Records'],['palm','Palmarès']].map(([k,n])=>`<button data-a="rsub" data-k="${k}" aria-pressed="${ui.rsub===k}">${n}</button>`).join('')}</div>`;
+  if(ui.rsub==='p4p'){const L=p4pList();return sub+`<p class="small" style="margin:0 0 10px">Livre pour livre : les meilleurs boxeurs du monde, toutes catégories confondues (note, ceintures, invaincu, victoires contre des champions, titres dans plusieurs divisions).</p><div class="panel tw"><table><thead><tr><th>#</th><th>Boxeur</th><th>P4P</th></tr></thead><tbody>${L.map((x,i)=>{const b=x.b;return`<tr class="${b.mine?'me':''} tap" data-a="${b.mine?'open':'scout'}" data-id="${b.id}"><td class="rk">${i+1}</td><td><div class="opp"><div class="av sm ${tcls(b)}">${avatar(b,b.mine?'red':'blue')}</div><div><b>${flag(b.nat)} ${esc(b.name)}</b>${b.mine?' <span class="chip red">Ton club</span>':''}<div class="small">${divN(b.div)} · ${b.w}-${b.l}-${b.d}${b.champ?' · '+beltsOf(b).join(' '):''}</div></div></div></td><td class="num"><b>${ovr(b)}</b></td></tr>`}).join('')}</tbody></table></div>`}
+  if(ui.rsub==='rec'){const L=recordsList();return sub+`<p class="small" style="margin:0 0 10px">Les records de tous les temps de ton univers, Temple de la renommée compris.</p><div class="stack" style="gap:8px">${L.map(r=>`<div class="panel recr ${r.b&&r.b.mine?'me':''}"><span class="lab">${r.lab}</span><div class="row" style="justify-content:space-between;gap:8px;margin-top:4px"><b>${r.b?`${r.b.hof?'🏛️ ':''}${flag(r.b.nat)} ${esc(r.b.name)}${r.b.mine?' <span class="chip red">Ton club</span>':''}`:'—'}</b><b class="num" style="color:var(--gold)">${r.v>=0?r.fmt(r.v):'—'}</b></div></div>`).join('')}</div>`}
   if(ui.rsub==='promo'){const M=club(),me={me:1,n:S.club,nat:S.home,sc:prScore(null,M),cnt:M.length,bl:M.reduce((a,b)=>a+beltsOf(b).length,0)};
     const L=promoAlive().map(p=>{const B=prBoxers(p);return{p,sc:prScore(p,B),cnt:B.length,bl:B.reduce((a,b)=>a+beltsOf(b).length,0)}});L.push(me);L.sort((a,b)=>b.sc-a.sc);
     return sub+`<p class="small" style="margin:0 0 10px">Les promotions rivales et leurs écuries. Touche une promotion pour voir ses boxeurs. Si une promotion fait faillite, tu peux la racheter (maximum ${PRMAX} promotions : ton club + ${PRMAX-1}).</p>
-    <div class="panel tw"><table><thead><tr><th>#</th><th>Promotion</th><th>Points</th></tr></thead><tbody>${L.map((x,i)=>x.me?`<tr class="me tap" data-a="openclub"><td class="rk">${i+1}</td><td><b>${flag(S.home)} ${esc(S.club)}</b> <span class="chip red">Ton club</span><div class="small">${x.cnt} boxeurs · ${x.bl} ceinture${x.bl>1?'s':''}</div></td><td class="num"><b>${x.sc}</b></td></tr>`
+    <div class="panel tw"><table><thead><tr><th>#</th><th>Promotion</th><th>Points</th></tr></thead><tbody>${L.map((x,i)=>x.me?`<tr class="me tap" data-a="openclub"><td class="rk">${i+1}</td><td><b>${flag(S.home)} ${esc(S.club)}</b> <span class="chip red">Ton club</span><div class="small">${recTxt()} · ${x.cnt} boxeurs · ${x.bl} ceinture${x.bl>1?'s':''}</div></td><td class="num"><b>${x.sc}</b></td></tr>`
       :`<tr class="tap ${x.p.own?'me':''}" data-a="openpromo" data-id="${x.p.id}"><td class="rk">${i+1}</td><td><b><span class="bdot" style="--bc:${x.p.c}"></span>${flag(x.p.nat)} ${esc(x.p.n)}</b>${x.p.own?' <span class="chip gold">👑 À toi</span>':''}${x.p.sale?' <span class="chip bad">💥 Faillite · à vendre</span>':''}${x.p.fresh&&S.t-x.p.fresh<12?' <span class="chip">Nouvelle</span>':''}<div class="small">${x.p.own?'Toi':esc(prBoss(x.p).name)}${x.p.vsMe&&!x.p.own?` · ⚔️ ${h2hTxt(x.p.vsMe)}`:''} · ${x.cnt} boxeurs · ${x.bl} ceinture${x.bl>1?'s':''}</div></td><td class="num"><b>${x.sc}</b></td></tr>`).join('')}</tbody></table></div>`}
   if(ui.rsub==='goat'){const G=goatBoard().slice(0,40);
     return sub+`<div class="panel tw"><table><thead><tr><th>#</th><th>Boxeur</th><th>GOAT</th></tr></thead><tbody>${G.map((x,i)=>{const b=x.b,h=x.h;return b?`<tr class="${b.mine?'me':''} tap" data-a="${b.mine?'open':'scout'}" data-id="${b.id}"><td class="rk">${i+1}</td><td><div class="opp"><div class="av sm ${tcls(b)}">${avatar(b,b.mine?'red':'blue')}</div><div><b>${flag(b.nat)} ${esc(b.name)}</b>${b.mine?' <span class="chip red">Ton club</span>':''}<div class="small">${divN(b.div)} · ${b.w}-${b.l}-${b.d} · ${crOf(b).tw} titre${crOf(b).tw>1?'s':''}${crOf(b).und?' · 👑 undisputed':''}</div>${b.champ?`<div style="margin-top:3px">${beltChips(b,26)}</div>`:''}</div></div></td><td class="num"><b>${x.g}</b><div class="small">${gTier(x.g)}</div></td></tr>`
