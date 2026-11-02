@@ -501,6 +501,10 @@ input,select,textarea{font-size:16px}
 .tmain.urg{border-color:rgba(255,123,139,.55)}.tn{flex:none;min-width:26px;height:26px;padding:0 6px;border-radius:13px;display:grid;place-items:center;font-weight:900;font-size:13px;background:var(--gold);color:#2a1c00}.tmain.urg .tn{background:var(--red);color:#fff}
 .tl{flex:none;font-weight:800;font-size:13px}.tic{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}.tgo{flex:none;font-size:20px;color:var(--muted)}.tqa{flex:none;white-space:nowrap}
 .tli{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.tli:last-child{border-bottom:0}.tli p{margin:0;font-size:13.5px;min-width:0}.tli.bad p{color:#ffb3bd}
+.bk-r{display:grid;gap:6px;margin-top:10px}.bk-m{display:grid;gap:2px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.bk-p{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:8px 10px;background:rgba(0,0,0,.25);border:0;text-align:left;font-size:13.5px;min-height:38px}
+.bk-p span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bk-p.w{background:linear-gradient(90deg,rgba(245,196,81,.22),rgba(0,0,0,.2));font-weight:800}.bk-p.w b{color:var(--gold)}.bk-p.l{opacity:.45}.bk-p.me span{color:#ff8a98;font-weight:800}
+.mis{display:flex;gap:12px;align-items:center}.mis .ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:rgba(245,196,81,.12)}.mis.done{opacity:.6}.mis .rw{text-align:right;flex:none}
 .pkw{display:grid;gap:0}.pkw .pkc{border-bottom-left-radius:0;border-bottom-right-radius:0}
 .pki{width:100%;padding:8px;border:1px solid var(--line);border-top:0;border-radius:0 0 18px 18px;background:rgba(0,0,0,.35);color:var(--gold);font-weight:800;font-size:12.5px}
 .prw .rowc{border-bottom-left-radius:0;border-bottom-right-radius:0}.pki:disabled{opacity:.4}
@@ -1070,6 +1074,7 @@ function applyResult(F,f){
   for(const[X,fx]of[[A,F.A],[B,F.B]])if(fx.hp<30&&!X.inj&&R()<.3)X.inj=ri(1,3);
   for(const[X,Y]of[[A,B],[B,A]])if(!X.mine){X.hist=X.hist||[];X.hist.unshift({t:S.t,opp:Y.name,res:!res.w?'N':(W===X?'V':'D'),m:res.m,r:res.r,title});if(X.hist.length>5)X.hist.length=5}
   if(!f&&res.w&&S.promos){const pw=prOf(W),pl=prOf(L),pu=purse(W,L,title);let g=0;if(pw&&pw.own)g+=pu*.15;if(pl&&pl.own)g+=pu*.07;if(g){S.money+=Math.round(g);S.fin&&(S.fin.pro=(S.fin.pro||0)+Math.round(g))}}
+  if(f&&f.ss&&S.ss){const Wn=W||(ovr(A)>=ovr(B)?A:B);ssRecord(f.ss.k,f.ss.i,Wn.id)}
   if(f){
     const me=A.mine?A:B,op=me===A?B:A,won=W===me;
     const share=f.own?0:Math.round(f.purse*SHARE*(won?1.25:1)*(1+.08*S.mgr.perks.neg)*(f.wi&&!f.wi.ok?.8:1));
@@ -1149,7 +1154,7 @@ function nextWeek(quiet){
     if(b.loy<=5)leave(b,'il ne fait plus confiance au club');
     else if(b.contract<=0)leave(b,'fin de contrat');
   }
-  aiWeek();aiNational();offersWeek();promoWeek();ensureAllNat();amWeekTick();syncPerks();gymInit();for(const d in(S.belts||{}))for(const c of champsOf(d))crOf(c).cw++;
+  aiWeek();aiNational();offersWeek();promoWeek();ensureAllNat();amWeekTick();syncPerks();gymInit();ssWeek();for(const d in(S.belts||{}))for(const c of champsOf(d))crOf(c).cw++;
   if((S.t-1)%52===0&&S.t>1){awards();S.ageL=[];newYear();amNewYear();ensureAllNat();if(S.ageL.length){if(S.notice)S.notice.lines.push('<b>Anniversaires</b>',...S.ageL);else S.notice={t:'Anniversaires',lines:S.ageL}}S.ageL=null}
   rivalsWeek();
   if(S.t%4===0){S.fa=genFA();S.market=genStaff();for(let i=0;i<((S.fac&&S.fac.acad)||0);i++){const p=makeBoxer({div:pick(DIVS).id,nat:S.home,ovr:ri(38,45),age:ri(17,19),pot:ri(28,40)+5*S.fac.acad});seedRecord(p);p.pts=0;p.fame=1;p.salary=marketSal(p);p.fa=true;p.acad=1;S.fa.unshift(p)}}
@@ -1184,12 +1189,38 @@ function canBook(me,op){
   if(ro<15&&ro<rm-6)return'Trop haut classé';
   return null;
 }
+/* ================= v23 : SUPER SÉRIE (tournoi de la saison) ================= */
+const SSP=[250000,750000,2000000,5000000];const SSRN=['Quarts de finale','Demi-finales','Finale'];
+function ssSeeds(d){const L=[...champsOf(d),...rankList(d)].filter((b,i,a)=>a.indexOf(b)===i&&!b.retired);return L.slice(0,8)}
+function ssStart(){const y=amYear(),used=(S.ssHist||[]).slice(0,4).map(h=>h.div),cands=DIVS.filter(d=>!used.includes(d.id)),d=(cands.find(x=>mine().some(b=>b.div===x.id&&ssSeeds(x.id).includes(b)))||pick(cands.length?cands:DIVS));
+  const sd=ssSeeds(d.id);if(sd.length<8)return;S.ss={y,div:d.id,n:`Super Série ${d.n}`,slots:sd.map(b=>b.id),r:[[null,null,null,null],[null,null],[null]],wk:[S.t+8,S.t+20,S.t+32],cur:0,done:false,sched:{}};
+  const mi=sd.filter(b=>b.mine);log(`🏆 ${S.ss.n} ${y} : 8 boxeurs, ${$(SSP[3])} au vainqueur.${mi.length?` ${mi.map(b=>b.name).join(', ')} ${mi.length>1?'sont invités':'est invité'} !`:''}`,'gold');
+  if(mi.length){const t={t:`🏆 ${S.ss.n}`,lines:[`Tu es invité à la ${S.ss.n} ! 8 boxeurs, 3 tours sur la saison.`,...mi.map(b=>`🥊 <b>${esc(b.name)}</b> affrontera ${esc((getB(ssOpp(b.id))||{}).name||'?')} en quarts (${when(S.ss.wk[0])}).`),`Bourses : ${moneyS(SSP[0])} en quarts, ${moneyS(SSP[1])} en demies, ${moneyS(SSP[2])} pour le finaliste, ${moneyS(SSP[3])} + le trophée pour le vainqueur.`]};if(S.notice)S.notice.lines.push(...t.lines);else S.notice=t}}
+const SEEDP=[[0,7],[3,4],[1,6],[2,5]];
+function ssPairs(k){const ss=S.ss;if(!ss)return[];if(k===0)return SEEDP.map(([a,b])=>[ss.slots[a],ss.slots[b]]);const prev=ss.r[k-1];const out=[];for(let i=0;i<prev.length;i+=2)out.push([prev[i],prev[i+1]]);return out}
+function ssPair(k,i){return ssPairs(k)[i]||[]}
+function ssOpp(id){const ss=S.ss;if(!ss)return null;const P=ssPairs(ss.cur);for(const[a,b]of P){if(a===id)return b;if(b===id)return a}return null}
+function ssMine(){const ss=S.ss;if(!ss||ss.done)return[];return ssPairs(ss.cur).flat().map(getB).filter(b=>b&&b.mine)}
+function ssPay(b,place){if(!b)return;const p=SSP[place];if(b.mine){const c=Math.round(p*SHARE);S.money+=c;log(`🏆 ${b.name} touche ${$(p)} à la ${S.ss.n} (ta part : ${$(c)}).`,'gold')}addFol(b,fol(b)*.03*(place+1));b.fame=cl(b.fame+2*(place+1),1,100)}
+function ssRecord(k,i,w){const ss=S.ss;if(!ss||ss.r[k][i])return;ss.r[k][i]=w;const[a,b]=ssPair(k,i),l=w===a?b:a;ssPay(getB(l),k);
+  if(ss.r[k].every(Boolean)){if(k===2){const W=getB(w);ss.done=true;ssPay(W,3);if(W){W.troph=W.troph||[];W.troph.push({n:ss.n+' '+ss.y,t:S.t});crOf(W).aw++}(S.ssHist=S.ssHist||[]).unshift({y:ss.y,n:ss.n,div:ss.div,w:W?W.name:'?',nat:W?W.nat:'CA',mine:!!(W&&W.mine)});
+      log(`🏆 ${W?W.name:'?'} remporte la ${ss.n} ${ss.y} !`,'gold');if(W&&W.mine){toast(`🏆 ${sur(W)} gagne la Super Série !`);S.notice={t:`🏆 ${ss.n} ${ss.y}`,lines:[`<b>${esc(W.name)}</b> remporte la Super Série ! ${$(SSP[3])} de bourse et le trophée.`]}}}
+    else{ss.cur=k+1;ss.sched={};log(`🏆 ${ss.n} : ${SSRN[k+1].toLowerCase()} ${when(ss.wk[k+1])}.`)}}}
+function ssWeek(){const y=amYear(),w=amWeek();if(w===3&&(!S.ss||S.ss.y!==y))ssStart();const ss=S.ss;if(!ss||ss.done)return;const k=ss.cur,P=ssPairs(k);
+  if(S.t>=ss.wk[k]-4&&S.t<ss.wk[k])P.forEach(([a,b],i)=>{if(ss.sched[i]||ss.r[k][i])return;const A=getB(a),B=getB(b);if(!A||!B)return;const me=A.mine?A:B.mine?B:null;if(!me)return;const op=me===A?B:A;
+    if(me.booked||op.booked){const cf=S.fights.find(f=>f.a===me.id&&!f.ss);if(cf&&cf.week<ss.wk[k]-1)return;if(cf)cancelFight(cf.id)}
+    const f=propose(me.id,op.id,{force:1,week:ss.wk[k]});if(f){f.ss={k,i};f.rounds=12;ss.sched[i]=f.id;log(`🏆 ${S.ss.n} : ${me.name} vs ${op.name} ${when(f.week)}.`,'gold')}});
+  if(S.t>=ss.wk[k])P.forEach(([a,b],i)=>{if(ss.r[k][i])return;const A=getB(a),B=getB(b);
+    if(!A||!B||A.retired||B.retired){ssRecord(k,i,A&&!A.retired?a:b);return}
+    if(A.mine||B.mine){const f=S.fights.find(x=>x.id===ss.sched[i]);if(f&&S.t<=ss.wk[k]+1)return;ssRecord(k,i,A.mine?b:a);return}
+    if(A.booked||B.booked){ssRecord(k,i,ovr(A)>=ovr(B)?a:b);return}
+    const wa=A.w;quickFight(A,B,false);ssRecord(k,i,A.w>wa?a:b)})}
 function propose(meId,opId,o={}){
   const me=getB(meId),op=getB(opId);if(!me||!op||me.booked||op.booked)return null;if(me.inj){toast('Ton boxeur est blessé : impossible de signer.');return null}
   let title=null;
   if(o.n){if(!canNat(me,op))return null}
   else if(o.belts&&o.belts.length)title=o.belts;
-  else if(op.champ){const t=titleOpts(me,op);if(!t.length)return null;title=t}
+  else if(op.champ&&!o.force){const t=titleOpts(me,op);if(!t.length)return null;title=t}
   else if(!o.force&&canBook(me,op))return null;
   const g=o.ev?(S.galas||[]).find(x=>x.id===o.ev&&!x.done):null,nt=!!o.n,wk=g?g.week:(o.week||S.t+4);
   const p=o.purse||Math.round((purse(me,op,title)+(nt?12000:0))*(wk-S.t<=2?1.1:1)/100)*100;
@@ -1377,7 +1408,8 @@ function tourAfter(F){const t=S.tour,T=TOURS.find(x=>x.id===t.tid),me=F.A.b;let 
 const CTR=[{id:'w2',n:'Gagner 2 combats officiels',k:'wins',g:2,cash:6000,xp:80},{id:'ko',n:'Gagner un combat par KO',k:'kos',g:1,cash:5000,xp:70},{id:'gym',n:'Gagner un défi de gym',k:'gym',g:1,cash:3000,xp:50},{id:'spar',n:'Faire 3 séances de sparring en camp',k:'spar',g:3,cash:3000,xp:50},{id:'sign',n:'Signer un nouveau boxeur',k:'sign',g:1,cash:4000,xp:60},{id:'gala',n:'Organiser un gala',k:'galas',g:1,cash:8000,xp:100},{id:'tour',n:'Atteindre une demi-finale de tournoi',k:'tourSF',g:1,cash:5000,xp:80},{id:'trial',n:'Réussir une épreuve de palier',k:'trial',g:1,cash:4000,xp:60},{id:'tit',n:'Gagner un combat de titre',k:'titles',g:1,cash:10000,xp:150}];
 function mcAdd(k,n){S.stats=S.stats||{};if(k==='sign'||k==='galas')S.stats[k]=(S.stats[k]||0)+(n||1);if(!S.mc)S.mc={};S.mc[k]=(S.mc[k]||0)+(n||1)}
 function newContracts(){S.mc={};S.ctr={until:S.t+4,list:[...CTR].sort(()=>R()-.5).slice(0,3).map(c=>c.id),done:[]}}
-function checkCtr(){if(!S.ctr)return;for(const id of S.ctr.list){if(S.ctr.done.includes(id))continue;const c=CTR.find(x=>x.id===id);if(c&&(S.mc[c.k]||0)>=c.g){S.ctr.done.push(id);S.money+=c.cash;mgrXP(c.xp);log(`Contrat du mois rempli : ${c.n}. +${$(c.cash)}.`,'gold');toast(`✓ Contrat : ${c.n}`)}}}
+const ctrMul=()=>1+S.mgr.lvl*.5;
+function checkCtr(){if(!S.ctr)return;for(const id of S.ctr.list){if(S.ctr.done.includes(id))continue;const c=CTR.find(x=>x.id===id);if(c&&(S.mc[c.k]||0)>=c.g){S.ctr.done.push(id);S.money+=Math.round(c.cash*ctrMul());mgrXP(c.xp);log(`Mission réussie : ${c.n}. +${$(Math.round(c.cash*ctrMul()))}.`,'gold');toast(`✓ Contrat : ${c.n}`)}}}
 
 /* ================= v7 : % DE VICTOIRE EN ARRIÈRE-PLAN ================= */
 function oddsKey(a,b,rounds,f){return[a.id,b.id,ovr(a),ovr(b),Math.round(a.fatigue/8),Math.round(b.fatigue/8),rounds,f?[f.camp,Math.round((f.prep??10)/5),f.gp,JSON.stringify(f.bon||{})].join(','):'',S.t].join('|')}
@@ -1959,9 +1991,9 @@ function alerts(){
     if(b.inj&&b.booked){const f=upF(b);if(f)out.push({bad:1,t:`<b>${esc(b.name)}</b> est blessé pendant son camp (${b.inj} sem.).`,btn:`<button class="btn sm gold" data-a="opencamp" data-id="${f.id}">Gérer</button>`})}
     if(b.raiseAsk)out.push({bad:1,t:`<b>${esc(b.name)}</b> réclame une augmentation : ${$(b.salary)} → ${$(b.raiseAsk)}/sem.`,btn:`<button class="btn sm gold" data-a="raiseok" data-id="${b.id}">Accepter</button><button class="btn sm" data-a="raiseno" data-id="${b.id}">Refuser</button>`});
     if(b.contract<=8)out.push({bad:1,t:`Contrat de <b>${esc(b.name)}</b> : ${b.contract} sem. restantes.`,btn:`<button class="btn sm gold" data-a="neg" data-id="${b.id}">Négocier</button>`});
-    if(b.gate)out.push({t:`<b>${esc(b.name)}</b> doit réussir l’épreuve du niveau ${b.lvl} pour continuer à progresser.`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}">Voir</button>`});
-    if(b.trOpt)out.push({t:`<b>${esc(b.name)}</b> peut apprendre un nouveau trait !`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}">Choisir</button>`});
-    if(canSpend(b))out.push({t:`<b>${esc(b.name)}</b> a ${b.sp} point${b.sp>1?'s':''} de stats à dépenser.`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}">Améliorer</button>`});
+    if(b.gate)out.push({t:`<b>${esc(b.name)}</b> doit réussir l’épreuve du niveau ${b.lvl} pour continuer à progresser.`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}" data-k="defis">Voir</button>`});
+    if(b.trOpt)out.push({t:`<b>${esc(b.name)}</b> peut apprendre un nouveau trait !`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}" data-k="defis">Choisir</button>`});
+    if(canSpend(b))out.push({t:`<b>${esc(b.name)}</b> a ${b.sp} point${b.sp>1?'s':''} de stats à dépenser.`,btn:`<button class="btn sm gold" data-a="open" data-id="${b.id}" data-k="stats">Améliorer</button>`});
     if(b.champ&&!b.booked&&S.t-b.lastFight>18)out.push({bad:1,t:`Défense de titre obligatoire pour <b>${esc(b.name)}</b> d’ici ${26-(S.t-b.lastFight)} sem.`,btn:`<button class="btn sm" data-a="book" data-id="${b.id}">Réserver</button>`});
   }
   if(myPromos().length<PRMAX-1)for(const p of promoAlive())if(p.sale)out.unshift({bad:1,t:`💥 <b>${esc(p.n)}</b> a fait faillite ! ${prBoxers(p).length} boxeurs à racheter pour ${$(p.sale.price)} (encore ${p.sale.until-S.t} sem.).`,btn:`<button class="btn sm gold" data-a="openpromo" data-id="${p.id}">Voir</button>`});
@@ -1984,7 +2016,7 @@ function renderChrome(){
     <button class="gear" data-a="settings" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
     <button class="next ${q||S.event?'fight':''}" data-a="next">${S.event?'Événement':q?'Combat !':'Semaine ▸'}</button></div>`;
   const nA=alerts().length;
-  document.getElementById('tabs').innerHTML=`<div class="in">${[['ecurie','Écurie'],['combats','Combats'],['rank','Rangs'],['defis','Défis'],['staff','Staff'],['club','Club']].map(([k,n])=>
+  document.getElementById('tabs').innerHTML=`<div class="in">${[['ecurie','Écurie'],['combats','Combats'],['rank','Rangs'],['defis','Tournois'],['staff','Staff'],['club','Club']].map(([k,n])=>
     `<button data-a="tab" data-k="${k}" aria-current="${ui.tab===k}"><svg viewBox="0 0 24 24">${ICONS[k]}</svg>${n}${k==='ecurie'&&nA?`<span class="badge">${nA}</span>`:''}${k==='combats'&&S.offers&&S.offers.length?`<span class="badge">${S.offers.length}</span>`:''}</button>`).join('')}</div>`;
 }
 const FOLCAP=5e8;
@@ -2212,8 +2244,17 @@ function vCamp(f){
     <div class="stk">${segH('ctab',[['camp','Camp'],['scout','Repérage']],tab)}</div>${body}</div>`;
 }
 /* --- défis, staff, club --- */
+function ssCard(){const ss=S.ss;if(!ss)return`<div class="panel"><span class="lab">🏆 Super Série</span><p class="small" style="margin:6px 0 0">Chaque saison, les 8 meilleurs boxeurs d’une division s’affrontent sur 3 tours. ${moneyS(SSP[3])} et le trophée au vainqueur. La prochaine commence à la semaine 3 de l’an ${amWeek()<3?amYear():amYear()+1}.</p></div>`;
+  const row=(id,win,lose)=>{const b=getB(id);if(!b)return`<div class="bk-p">${id?'?':'<span class="small">À déterminer</span>'}</div>`;return`<button class="bk-p ${win?'w':''} ${lose?'l':''} ${b.mine?'me':''}" data-a="${b.mine?'open':'scout'}" data-id="${b.id}"><span>${flag(b.nat)} ${esc(sur(b))}</span><b>${ovr(b)}</b></button>`};
+  const rounds=[0,1,2].map(k=>{const P=k<=ss.cur||ss.done?ssPairs(k):Array.from({length:4>>k},()=>[null,null]);return`<div class="bk-r"><span class="lab">${SSRN[k]} · ${ss.done||k<ss.cur?'terminé':k===ss.cur?when(ss.wk[k]):when(ss.wk[k])}</span>${P.map(([a,b],i)=>{const w=ss.r[k]&&ss.r[k][i];return`<div class="bk-m">${row(a,w&&w===a,w&&w!==a)}${row(b,w&&w===b,w&&w!==b)}</div>`}).join('')}</div>`}).join('');
+  const W=ss.done&&getB(ss.r[2][0]);
+  return`<div class="panel bk"><div class="ph"><span class="lab">🏆 ${esc(ss.n)} · an ${ss.y}</span><span class="chip gold">${moneyS(SSP[3])}</span></div>
+    ${W?`<div class="al" style="margin:6px 0 10px"><p>👑 <b>${esc(W.name)}</b> remporte la Super Série !</p></div>`:ssMine().length?`<div class="al" style="margin:6px 0 10px"><p>🥊 ${ssMine().map(b=>`<b>${esc(sur(b))}</b>`).join(', ')} ${ssMine().length>1?'sont':'est'} dans la course ! Son combat se place tout seul dans ton calendrier.</p></div>`:''}
+    ${rounds}<p class="small" style="margin:8px 0 0">Bourses : quarts ${moneyS(SSP[0])} · demies ${moneyS(SSP[1])} · finaliste ${moneyS(SSP[2])} · vainqueur ${moneyS(SSP[3])} + trophée (points GOAT).</p></div>
+    ${(S.ssHist||[]).length?`<div class="panel"><span class="lab">Palmarès de la Super Série</span><ul class="log">${S.ssHist.slice(0,8).map(h=>`<li>🏆 <b>${flag(h.nat)} ${esc(h.w)}</b>${h.mine?' <span class="chip red">Ton club</span>':''} <span class="small">${esc(h.n)} · an ${h.y}</span></li>`).join('')}</ul></div>`:''}`}
 function vDefis(){
-  const sub=ui.dsub||'gyms',head=`<h2>Défis</h2><div style="margin:8px 0 12px">${segH('dsub',[['gyms','Gyms'],['tour','Tournois'],['ctr',`Contrats ${S.ctr?S.ctr.done.length+'/3':''}`]],sub)}</div>`;
+  const sub=ui.dsub||'ss',head=`<h2>Tournois</h2><div style="margin:8px 0 12px">${segH('dsub',[['ss','🏆 Super Série'],['tour','Tournois'],['ctr',`Missions ${S.ctr?S.ctr.done.length+'/3':''}`],['gyms','Gyms']],sub)}</div>`;
+  if(sub==='ss')return head+ssCard();
   const m=sortB(mine());if(!ui.gymBoxer||!m.find(b=>b.id===ui.gymBoxer))ui.gymBoxer=m[0]?.id;const me=getB(ui.gymBoxer);
   const pickB=`<div style="margin:8px 0 0">${selH('gymboxer',sortB(m).map(b=>[b.id,`${b.inj?'🩹 ':''}${ovr(b)} · ${esc(b.name)} · ${divN(b.div)}`]),ui.gymBoxer,'id')}</div>`;
   if(sub==='tour'){S.tcd=S.tcd||{};
@@ -2226,8 +2267,8 @@ function vDefis(){
         ${lock?`<span class="small">Gérant niveau ${T.lvl} requis</span>`:cd?`<span class="small">Prochaine édition dans ${(S.tcd[T.id]||0)-S.t} sem.</span>`:`<button class="btn pri" data-a="tourin" data-k="${T.id}" ${ok?'':'disabled'}>Inscrire ${me?esc(sur(me)):''}</button>`}</div>`}).join('')}</div>
     ${S.stats.trophies?`<p class="small">Trophées remportés : ${S.stats.trophies}</p>`:''}`}
   if(sub==='ctr'){if(!S.ctr)newContracts();
-    return head+`<p class="lede">Trois contrats par mois. Nouveaux contrats ${S.ctr.until>S.t?`dans ${S.ctr.until-S.t+1} sem.`:'la semaine prochaine'}.</p><div class="panel">${S.ctr.list.map(id=>{const c=CTR.find(x=>x.id===id),d=S.ctr.done.includes(id),p=Math.min(c.g,(S.mc||{})[c.k]||0);
-      return`<div class="ms"><div class="ic">${d?'✓':p+'/'+c.g}</div><div style="min-width:0"><b>${c.n}</b><div class="trk gold"><i style="width:${p/c.g*100}%"></i></div></div><div class="rw">+${$(c.cash)}<br>${c.xp} XP</div></div>`}).join('')}</div>`}
+    return head+`<p class="lede">3 missions par mois, avec de l’argent et de l’XP de gérant. Nouvelles missions ${S.ctr.until>S.t?`dans ${S.ctr.until-S.t+1} sem.`:'la semaine prochaine'}.</p><div class="stack" style="gap:8px">${S.ctr.list.map(id=>{const c=CTR.find(x=>x.id===id),d=S.ctr.done.includes(id),p=Math.min(c.g,(S.mc||{})[c.k]||0);
+      return`<div class="panel mis ${d?'done':''}"><div class="ic">${d?'✓':'🎯'}</div><div style="min-width:0;flex:1"><b>${c.n}</b><div class="trk gold" style="margin-top:6px"><i style="width:${p/c.g*100}%"></i></div><span class="small">${d?'Mission réussie !':`${p}/${c.g}`}</span></div><div class="rw"><b>+${moneyS(Math.round(c.cash*ctrMul()))}</b><br><span class="small">${c.xp} XP</span></div></div>`}).join('')}</div>`}
   const unlocked=i=>i===0||S.gyms[i-1].beaten>=3,g=S.gyms[ui.gym],op=g&&g.beaten<3?g.m[g.beaten]:null,tier=ui.gym+1,rounds=g&&g.beaten===2?8:6,od=S.set.odds&&me&&op?matchOdds(me,op,rounds):null;
   return head+`<p class="lede">Bats les 3 boxeurs d’un gym pour son badge. ${S.stats.badges}/8 badges.</p>
     <div class="seg" style="margin-bottom:12px">${S.gyms.map((x,i)=>`<button data-a="gym" data-k="${i}" aria-pressed="${ui.gym===i}" ${unlocked(i)?'':'disabled'}>${x.beaten>=3?'★':unlocked(i)?i+1:'🔒'} ${x.city}</button>`).join('')}</div>
@@ -2372,7 +2413,7 @@ document.addEventListener('click',e=>{
     case'esub':ui.esub=k;break;
     case'csub':ui.csub=k;break;
     case'next':nextWeek();return;
-    case'open':ui.backSheet=ui.sheet==='todo'||(ui.sheet||'').startsWith('promo:')||(ui.sheet||'').startsWith('gym:')?ui.sheet:null;ui.stab='apercu';ui.sheet=id;document.getElementById('sheet').scrollTop=0;break;
+    case'open':ui.backSheet=ui.sheet==='todo'||(ui.sheet||'').startsWith('promo:')||(ui.sheet||'').startsWith('gym:')?ui.sheet:null;ui.stab=k||'apercu';ui.sheet=id;document.getElementById('sheet').scrollTop=0;break;
     case'close':if(ui.backSheet&&ui.sheet&&ui.sheet!==ui.backSheet){ui.sheet=ui.backSheet;ui.backSheet=null}else{ui.sheet=null;ui.backSheet=null}break;
     case'plan':if(k!=='sparring'||S.staff.spar.length)b.plan=k;break;
     case'spend':spend(b,k);break;
