@@ -486,6 +486,24 @@ a.mgrl{color:inherit;text-decoration:underline;text-decoration-color:rgba(245,19
 .bxc-act{display:flex;gap:6px}.bxc-act .btn.pri{flex:1;font-size:15px}
 .btn.ic{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 10px;min-width:56px;line-height:1.1}.btn.ic small{font-size:9px;font-weight:800;opacity:.85;white-space:nowrap}
 .shopit .shic{font-size:30px;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:rgba(245,196,81,.12)}
+
+/* combat : tout tient dans l'écran du téléphone */
+#fx .fxw{height:100%;gap:6px;padding-top:max(6px,env(safe-area-inset-top,0px));padding-bottom:max(6px,env(safe-area-inset-bottom,0px))}
+#fx .fxw .stage{flex:1 1 auto;height:auto;min-height:120px;max-height:48vh}
+#fx .fxctl{flex:0 1 auto;gap:6px;max-height:62vh}
+#fx .hud{padding:7px 9px;gap:4px 8px}#fx .hud .odds .row{font-size:11px}
+#fx .cgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+#fx .cbtn{padding:8px 4px;text-align:center;align-content:center;min-height:42px}#fx .cbtn span{display:none}#fx .cbtn b{font-size:11.5px;line-height:1.15}
+#fx .adv{padding:6px 10px;font-size:12.5px;border-radius:12px}
+#fx .rstat{padding:5px 9px;font-size:11.5px;gap:2px 8px}
+#fx .seg button{padding:8px 4px;font-size:12.5px}
+#fx .fxctl .big{font-size:16px;padding:11px}
+#fx .fxctl>p.small{display:none}
+#fx .fo{padding:8px}#fx .fo-s .av.lg{width:58px;height:58px;border-radius:14px}#fx .fo-v span{font-size:24px}
+#fx.onf .panel.tape{display:none}
+#fx .fxctl p.small[style*="color:#f5c451"]{margin:0!important;font-size:12px}
+#fx .result{padding:10px}#fx .result h3{font-size:30px}
+@media (max-height:760px){#fx .panel.tape{display:none}#fx .fxw .stage{max-height:40vh}}
 .chip.rk{background:rgba(245,196,81,.12);border-color:rgba(245,196,81,.35)}
 .mbtn.mon{background:linear-gradient(135deg,rgba(79,128,255,.35),rgba(79,128,255,.12));border-color:rgba(120,160,255,.45)}
 .pickb{display:flex;gap:6px;align-items:center;margin-bottom:10px}.pickb select{flex:1;min-width:0;height:46px;border-radius:14px;background:var(--s2);color:var(--ink);border:1px solid var(--line2);padding:0 12px;font-weight:800;font-size:16px;font-family:inherit}.pickb .btn{flex:none;width:46px;height:46px;padding:0;font-size:22px}
@@ -2201,7 +2219,7 @@ nextPhase=function(){const F=ui.fight;
 };
 function onIntro(F){if(!F.online)return'';const a=F.A.b,b=F.B.b;
   return`<div class="rstat" style="display:block"><div class="row" style="justify-content:space-between;gap:6px;align-items:flex-start;flex-wrap:nowrap"><div style="flex:1;min-width:0">${(a.traits||[]).map(onAbChip).join(' ')||'<span class="small">Aucun pouvoir</span>'}</div><div style="flex:1;min-width:0;text-align:right">${(b.traits||[]).map(onAbChip).join(' ')}</div></div>
-  <p class="small" style="margin:8px 0 0">🎮 Pendant les rounds, des <b>moments clés</b> apparaissent : choisis vite ce que ton coach crie. Bonne réaction = gros avantage. Suivre la consigne conseillée (point vert) aide aussi.</p></div>`}
+  <p class="small" style="margin:8px 0 0">🎮 Réagis vite aux <b>moments clés</b> et suis le point vert.</p></div>`}
 /* --- en ligne : pas de simulation, conseils du coin mis en avant --- */
 const _onCtl=ctlHTML;
 ctlHTML=function(F){let h=_onCtl(F);if(!F.online)return h;
@@ -2597,6 +2615,15 @@ const _auDone=fightDone;fightDone=function(){_auDone();if(!ui.fight)musStart('me
 const _auAnn=annPlay;annPlay=function(F){const was=F.annDone;_auAnn(F);if(!was&&F.annDone){sfx('bell');const w=setInterval(()=>{if(ui.fight!==F){clearInterval(w);return}if(F.annWin){clearInterval(w);sfx('fanfare')}},200)}};
 const _auRx=rxOpen;rxOpen=function(F){sfx('react');_auRx(F)};
 const _auRxC=rxClose;rxClose=function(F,k){const ok=F&&F.rx&&k===F.rx.s.ok;_auRxC(F,k);if(F&&k!==undefined)sfx(ok?'good':'bad')};
+
+
+/* ================= v52 : COMBAT SANS DÉFILEMENT ================= */
+const _ns_bf=buildFight;buildFight=function(){_ns_bf();const el=document.getElementById('fx');if(el)el.classList.toggle('onf',!!(ui.fight&&ui.fight.online))};
+const _ns_ctl=ctlHTML;ctlHTML=function(F){let h=_ns_ctl(F);
+  h=h.replace(/<div class="lab" style="margin-bottom:6px">Dans le coin \(1 minute\)<\/div>/,'');
+  h=h.replace(/<div class="lab" style="margin-bottom:6px">Plan pour le [^<]*<\/div>/,'');
+  h=h.replace(/<div class="lab" style="margin-bottom:6px">(Plan de départ|Consigne en direct)<\/div>/,'');
+  return h};
 
 /* --- événements aléatoires --- */
 const EVENTS={
@@ -3873,7 +3900,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='08bc9b0204';window.BUILD_MSG="Nouvelle carte de boxeur, boutique (boosts 24 h), musique et sons, suspense avant que l\u2019arbitre l\u00e8ve le bras";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='841bcc7a1d';window.BUILD_MSG="\u00c9cran de combat sans d\u00e9filement sur t\u00e9l\u00e9phone";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
