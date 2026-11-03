@@ -3105,8 +3105,17 @@ function ringMatTex(){const c=document.createElement('canvas');c.width=c.height=
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{_bmC=null;_bmU=null;if(typeof ui!=='undefined'&&ui.menu==='home'&&typeof renderMenu==='function')try{renderMenu()}catch(e){}});
 
 function texTxt(t,bg,fg,w,h,sz){const c=document.createElement('canvas');c.width=w||512;c.height=h||512;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);x.fillStyle=fg;x.font=`900 ${sz||200}px "Big Shoulders Display",Impact,sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillText(t,c.width/2,c.height/2+8);const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;return tx}
+
+/* ===== effets premium (gants & culottes) ===== */
+const isPremG=c=>c==='#ffd23a'||c==='#0d0d0d',isPremT=t=>t===7||t===8;let premN=0;
+function premSpark(c,x,y,r,now,ph){const a=Math.max(0,Math.sin(now/260+ph));if(a<.05)return;c.save();c.globalAlpha=a;c.fillStyle='#fff';c.translate(x,y);c.rotate(now/900+ph);c.beginPath();for(let i=0;i<8;i++){const rr=i%2?r*.25:r,t=i*Math.PI/4;c.lineTo(Math.cos(t)*rr,Math.sin(t)*rr)}c.closePath();c.fill();c.restore()}
+const PREMMATS=new Set();
+function premMat(col){const gold=col!=='#0d0d0d'&&col!=='#0a0a0a';const m=new THREE.MeshStandardMaterial({color:gold?'#e8b82a':'#111',roughness:.22,metalness:.9,emissive:gold?'#7a5200':'#3a2a00',emissiveIntensity:.3});
+  if(typeof WeakRef!=='undefined')PREMMATS.add(new WeakRef(m));return m}
+setInterval(()=>{const t=performance.now();for(const w of PREMMATS){const m=w.deref();if(!m){PREMMATS.delete(w);continue}m.emissiveIntensity=.25+.35*(.5+.5*Math.sin(t/350))}},60);
+
 function mkBoxer3(b,glove){
-  const L=b.look||{},mS=M3(SKIN[L.skin??2],.55),mT=M3(TRUNK[L.tr??0]||'#ff3d52',.45),mG=M3(glove,.28),mSh=M3('#15171c',.7),mH=M3(HAIRC[L.hc??0],.9),mW=M3('#f1f1f1',.8);
+  const L=b.look||{},mS=M3(SKIN[L.skin??2],.55),mT=isPremT(L.tr)?premMat(TRUNK[L.tr]):M3(TRUNK[L.tr??0]||'#ff3d52',.45),mG=isPremG(glove)?premMat(glove):M3(glove,.28),mSh=M3('#15171c',.7),mH=M3(HAIRC[L.hc??0],.9),mW=M3('#f1f1f1',.8);
   const cap=(r,l,m)=>new THREE.Mesh(new THREE.CapsuleGeometry(r,l,4,10),m);
   const root=new THREE.Group(),hips=new THREE.Group();hips.position.y=.98;root.add(hips);
   const shorts=new THREE.Mesh(new THREE.CylinderGeometry(.2,.24,.3,16),mT);hips.add(shorts);
@@ -3318,14 +3327,14 @@ function drawBoxer(c,x,y,h,face,b,glove,v,now){
   const line=(pts,w,col)=>{c.strokeStyle=col;c.lineWidth=w*u;c.beginPath();c.moveTo(pts[0][0]*u,pts[0][1]*u);for(const p of pts.slice(1))c.lineTo(p[0]*u,p[1]*u);c.stroke()};
   const gl=wh=>{const pp=v.arm===wh?pk:0,g=wh?[.1+lean*.6,-.86-blk*.05]:[.2+lean*.6,-.8-blk*.09],t=v.body?[.4,-.6]:[.47,-.86];return[g[0]+(t[0]-g[0])*pp,g[1]+(t[1]-g[1])*pp]};
   const glv=(p,s)=>{const cx=s[0]+(p[0]-s[0])*.8,cy=s[1]+(p[1]-s[1])*.8;c.fillStyle='#eef1f6';c.beginPath();c.arc(cx*u,cy*u,.04*u,0,7);c.fill();
-    const gg=c.createRadialGradient((p[0]-.02)*u,(p[1]-.028)*u,1,p[0]*u,p[1]*u,.075*u);gg.addColorStop(0,shade(glove,.5));gg.addColorStop(.55,glove);gg.addColorStop(1,shade(glove,-.5));c.fillStyle=gg;c.beginPath();c.arc(p[0]*u,p[1]*u,.067*u,0,7);c.fill()};
+    const gg=c.createRadialGradient((p[0]-.02)*u,(p[1]-.028)*u,1,p[0]*u,p[1]*u,.075*u);gg.addColorStop(0,shade(glove,.5));gg.addColorStop(.55,glove);gg.addColorStop(1,shade(glove,-.5));c.fillStyle=gg;c.beginPath();c.arc(p[0]*u,p[1]*u,.067*u,0,7);c.fill();if(isPremG(glove)){const T=now||performance.now();c.save();c.beginPath();c.arc(p[0]*u,p[1]*u,.067*u,0,7);c.clip();const sx=((T/6)%(.5*u))-.2*u;const sh=c.createLinearGradient(p[0]*u+sx-.04*u,0,p[0]*u+sx+.04*u,0);sh.addColorStop(0,'rgba(255,255,255,0)');sh.addColorStop(.5,'rgba(255,255,255,.75)');sh.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=sh;c.fillRect(p[0]*u-.1*u,p[1]*u-.1*u,.2*u,.2*u);c.restore();premSpark(c,(p[0]+.03)*u,(p[1]-.04)*u,.03*u,T,p[0]*9)}};
   line([[-.02,-.46],[-.1,-.24],[-.15,-.06]],.08,skd);
   c.fillStyle='#cfd4de';c.fillRect(-.19*u,-.085*u,.07*u,.05*u);c.fillStyle='#14171f';c.fillRect(-.21*u,-.04*u,.1*u,.04*u);
   const s1=[shx-.03,shy+.01],g1=gl(1);line([s1,g1],.06,skd);glv(g1,s1);
   const tg=c.createLinearGradient(-.1*u,0,.13*u,0);tg.addColorStop(0,skd);tg.addColorStop(.55,sk);tg.addColorStop(1,skl);
   c.fillStyle=tg;c.beginPath();c.moveTo(-.085*u,-.47*u);c.quadraticCurveTo(-.115*u,-.62*u,(shx-.1)*u,(shy+.01)*u);c.lineTo((shx+.1)*u,shy*u);c.quadraticCurveTo(.105*u,-.6*u,.08*u,-.47*u);c.closePath();c.fill();
   c.save();c.globalAlpha=.4;c.strokeStyle=shade(sk,-.35);c.lineWidth=.007*u;c.beginPath();c.moveTo((shx-.02)*u,(shy+.09)*u);c.quadraticCurveTo((shx+.03)*u,(shy+.12)*u,(shx+.08)*u,(shy+.09)*u);for(const yy of[-.62,-.565,-.51]){c.moveTo(.005*u,yy*u);c.lineTo(.055*u,(yy+.004)*u)}c.stroke();c.restore();
-  const tgr=c.createLinearGradient(0,-.53*u,0,-.36*u);tgr.addColorStop(0,shade(tr,.18));tgr.addColorStop(1,shade(tr,-.35));c.fillStyle=tgr;c.beginPath();c.moveTo(-.105*u,-.53*u);c.lineTo(.095*u,-.53*u);c.lineTo(.115*u,-.36*u);c.lineTo(-.12*u,-.36*u);c.closePath();c.fill();
+  const tgr=c.createLinearGradient(0,-.53*u,0,-.36*u);tgr.addColorStop(0,shade(tr,.18));tgr.addColorStop(1,shade(tr,-.35));c.fillStyle=tgr;c.beginPath();c.moveTo(-.105*u,-.53*u);c.lineTo(.095*u,-.53*u);c.lineTo(.115*u,-.36*u);c.lineTo(-.12*u,-.36*u);c.closePath();c.fill();if(isPremT(L.tr)){const T=now||performance.now();c.save();c.clip();const sx=((T/5)%(.5*u))-.25*u;const sh=c.createLinearGradient(sx-.05*u,0,sx+.05*u,0);sh.addColorStop(0,'rgba(255,255,255,0)');sh.addColorStop(.5,'rgba(255,240,180,.7)');sh.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=sh;c.fillRect(-.15*u,-.55*u,.3*u,.2*u);c.fillStyle='#ffd23a';c.fillRect(-.105*u,-.53*u,.2*u,.018*u);c.restore();premSpark(c,.06*u,-.47*u,.025*u,T,1.7)}
   c.fillStyle='rgba(255,255,255,.92)';c.fillRect(-.105*u,-.535*u,.2*u,.026*u);c.fillStyle='#f5c451';c.fillRect(.072*u,-.505*u,.013*u,.145*u);
   line([[.03,-.44],[.1,-.23],[.15,-.06]],.08,sk);
   c.fillStyle='#eef1f6';c.fillRect(.12*u,-.085*u,.07*u,.05*u);c.fillStyle='#14171f';c.fillRect(.11*u,-.04*u,.11*u,.04*u);c.fillStyle='rgba(255,255,255,.3)';c.fillRect(.11*u,-.008*u,.11*u,.008*u);
@@ -3365,6 +3374,16 @@ function drawFight(cv,F,now){
 }
 
 /* ================= RENDU ================= */
+
+function premGloves(col){const n=++premN,gold=col==='#ffd23a';
+  const g=gold?'<stop offset="0" stop-color="#fff6c8"/><stop offset=".35" stop-color="#f4c542"/><stop offset=".7" stop-color="#a87a08"/><stop offset="1" stop-color="#ffe27a"/>':'<stop offset="0" stop-color="#3a3a3a"/><stop offset=".5" stop-color="#050505"/><stop offset="1" stop-color="#1a1a1a"/>';
+  const star=(x,y,d)=>`<path d="M${x} ${y-4}L${x+1} ${y-1}L${x+4} ${y}L${x+1} ${y+1}L${x} ${y+4}L${x-1} ${y+1}L${x-4} ${y}L${x-1} ${y-1}Z" fill="#fff"><animate attributeName="opacity" values="0;1;0" dur="1.6s" begin="${d}s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="rotate" from="0 ${x} ${y}" to="90 ${x} ${y}" dur="1.6s" begin="${d}s" repeatCount="indefinite"/></path>`;
+  return`<defs><linearGradient id="pgl${n}" x1="0" y1="0" x2="1" y2="1">${g}</linearGradient><linearGradient id="pgs${n}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <clipPath id="pgc${n}"><rect x="5" y="75" width="25" height="27" rx="11"/><rect x="70" y="75" width="25" height="27" rx="11"/></clipPath></defs>
+    <rect x="5" y="75" width="25" height="27" rx="11" fill="url(#pgl${n})" stroke="${gold?'#7a5200':'#f4c542'}" stroke-width="1.2"/><rect x="70" y="75" width="25" height="27" rx="11" fill="url(#pgl${n})" stroke="${gold?'#7a5200':'#f4c542'}" stroke-width="1.2"/>
+    <g clip-path="url(#pgc${n})"><rect x="-30" y="70" width="18" height="40" fill="url(#pgs${n})" transform="skewX(-20)"><animate attributeName="x" values="-30;120" dur="2.2s" repeatCount="indefinite"/></rect></g>
+    ${star(26,78,0)}${star(91,80,.8)}`}
+
 function avatar(b,corner){
   const L=b.look||{skin:2,hair:1,hc:0,beard:0,tr:0},sk=SKIN[L.skin],skd=shade(sk,-.2),hc=HAIRC[L.hc],hcd=shade(hc,-.35);
   const glove=b.glv||(corner==='blue'?'#4f80ff':(S&&S.theme?myCol():'#ff3d52')),cap='M33 41C32 20 68 20 67 41C63 30 37 30 33 41Z';
@@ -3388,7 +3407,7 @@ function avatar(b,corner){
   <path d="M50 45L47.4 51.6L51.6 51.6" stroke="${skd}" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   ${beard}<path d="M45 57Q50 59 55 57" stroke="${shade(sk,-.45)}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
   ${L.scar?'<path d="M58.5 34.5L62.5 41" stroke="#b25858" stroke-width="1.3" stroke-linecap="round"/>':''}
-  <rect x="5" y="75" width="25" height="27" rx="11" fill="${glove}"/><rect x="70" y="75" width="25" height="27" rx="11" fill="${glove}"/>
+  ${isPremG(glove)?premGloves(glove):`<rect x="5" y="75" width="25" height="27" rx="11" fill="${glove}"/><rect x="70" y="75" width="25" height="27" rx="11" fill="${glove}"/>`}
   <path d="M10 81Q13 78 18 79M75 81Q78 78 83 79" stroke="#fff" stroke-width="1.6" opacity=".35" fill="none" stroke-linecap="round"/>
   <rect x="7" y="95" width="21" height="7" rx="2" fill="#efefef"/><rect x="72" y="95" width="21" height="7" rx="2" fill="#efefef"/></svg>`;
 }
@@ -4355,7 +4374,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='381b45cccf';window.BUILD_MSG="\ud83c\udfa8 Style : d\u00e9bloqu\u00e9 pour de bon, confirmation avant de payer";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='365730c7f4';window.BUILD_MSG="\u2728 Gants et culottes premium anim\u00e9s";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
