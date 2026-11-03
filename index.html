@@ -3778,9 +3778,9 @@ function vSettings(){
     ${tg('autoAdv','Suivre les conseils du coin','Ton boxeur applique automatiquement la consigne conseillée.')}
     ${tg('events','Événements aléatoires','Interviews, commanditaires, jeunes espoirs, provocations et imprévus.')}
     <div class="perk"><div><b>Vitesse des combats</b><div class="small">Vitesse par défaut de l’animation.</div></div><div class="seg">${[1,2,4].map(v=>`<button data-a="set" data-k="speed" data-v="${v}" aria-pressed="${s.speed===v}">×${v}</button>`).join('')}</div></div></div>
-  <div class="panel"><span class="lab">Sauvegarde · emplacement ${S.slot}</span><p class="small">Sauvegarde automatique dans ce navigateur. Pour un autre appareil : exporte un code ici, puis colle-le dans « Importer » au menu de l’autre appareil.</p>
-    <div class="row"><button class="btn" data-a="exp">Exporter ma sauvegarde</button><button class="btn" data-a="menu">Menu principal</button></div>
-    ${ui.expCode?`<textarea id="exp-code" rows="4" readonly aria-label="Code de sauvegarde">${ui.expCode}</textarea><button class="btn gold" data-a="copyexp">Copier le code</button>`:''}</div></div>`;
+  <div class="panel"><span class="lab">Sauvegarde · emplacement ${S.slot}</span><p class="small">${ON?`☁️ Sauvegarde automatique, reliée à ton compte <b>${esc(ON.name||'')}</b> : tu la retrouves sur n’importe quel appareil.`:'⚠️ Sauvegardée seulement sur ce téléphone. Connecte-toi au mode En ligne pour la relier à ton compte.'}</p>
+    <div class="row"><button class="btn" data-a="menu">Menu principal</button></div>
+    </div></div>`;
 }
 
 /* ================= ÉVÉNEMENTS ================= */
@@ -4027,7 +4027,6 @@ function renderMenu(){
       <button class="mbtn mon" data-a="m_online"><b>🌐 En ligne</b><span>Bâtis ton écurie en ligne : un boxeur par catégorie, monte au classement mondial</span></button>
       <button class="mbtn ${m?'':'pri'}" data-a="m_new"><b>Nouvelle carrière</b><span>Crée ton club, choisis ton pays et tes deux premiers boxeurs</span></button>
       <button class="mbtn" data-a="m_load" ${cnt?'':'disabled'}><b>Charger une partie</b><span>${cnt?`${cnt} sauvegarde${cnt>1?'s':''} sur 3`:'Aucune sauvegarde'}</span></button>
-      <button class="mbtn" data-a="m_imp"><b>Importer</b><span>Colle un code de sauvegarde venu d’un autre appareil</span></button>
       <button class="mbtn" onclick="openFB()"><b>💬 Donner mon avis</b><span>Dis-nous ce qui marche et ce qu’il faut améliorer</span></button>
       <div class="row" style="justify-content:center;gap:8px;margin-top:6px"><button class="btn sm" data-a="m_au" data-k="music">${AU.music?'🎵 Musique':'🎵 Musique (coupée)'}</button><button class="btn sm" data-a="m_au" data-k="sfx">${AU.sfx?'🔊 Sons':'🔇 Sons (coupés)'}</button></div>
       <p class="mfoot">Aucun avantage à acheter · Aucune pub<br><span class="vtag">VERSION TEST ${GAME_V}</span></p></div>`}
@@ -4298,7 +4297,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='d7e73270cd';window.BUILD_MSG="\u2601\ufe0f Tes carri\u00e8res sont maintenant reli\u00e9es \u00e0 ton compte";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='f959626ca3';window.BUILD_MSG="Importer / Exporter retir\u00e9s : tout passe par ton compte \u2601\ufe0f";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
