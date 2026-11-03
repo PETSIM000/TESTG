@@ -2384,9 +2384,9 @@ function vOnStyle(b){const c=b.cos||{};
     <span class="lab">Gants · 200 💰</span><div class="row" style="margin:6px 0 12px;gap:6px">${GLV.map((col,i)=>`<button class="swt" style="background:${col}" data-a="styglv" data-id="${b.id}" data-k="${i}" aria-pressed="${String(c.glove)===String(i)}"></button>`).join('')}</div>
     <span class="lab">Entrée sur le ring · 250 💰</span><div class="row" style="margin:6px 0 4px;gap:6px">${Object.entries(ENT).map(([k,e])=>`<button class="btn sm" data-a="styent" data-id="${b.id}" data-k="${k}" aria-pressed="${c.ent===k}">${e[0]} ${e[1]}</button>`).join('')}</div></div>`}
 /* --- camp --- */
-async function campBuy(bid,k){try{await rpc('cr_ob_camp',{p_token:ON.token,p_box:bid,p_kind:k});toast(`🏋️ Camp ${ONCAMP[k][1].toLowerCase()} lancé : prêt dans 30 min`);onUi().camp=null;await onLoad(true)}catch(e){toast(e.message)}}
+async function campBuy(bid,k){try{await rpc('cr_ob_camp',{p_token:ON.token,p_box:bid,p_kind:k});toast(`🏋️ Camp ${ONCAMP[k][1].toLowerCase()} lancé`);onUi().camp=null;await onLoad(true)}catch(e){toast(e.message)}}
 function vOnCamp(b){return`<div class="panel"><div class="ph"><b class="nm" style="font-size:20px">🏋️ Camp de ${esc(b.name)}</b><button class="btn sm" data-a="oncampx">← Retour</button></div>
-  <p class="small" style="margin:0 0 10px"><b>120 💰</b> : +4 dans une stat pour son <b>prochain combat seulement</b>. Le camp dure <b>30 minutes</b> : ton boxeur ne peut pas se battre pendant ce temps. Un seul camp toutes les <b>12 heures</b>.</p>
+  <p class="small" style="margin:0 0 10px">Niveau ${b.lvl} : <b>${campCost(b.lvl)} 💰</b> et <b>${campMin(b.lvl)} minutes</b> d’entraînement (plus le boxeur est haut niveau, plus le camp est long et cher). +4 dans une stat pour son <b>prochain combat seulement</b>. Pendant le camp, il ne peut pas se battre. Un seul camp toutes les <b>12 heures</b>.</p>
   <div class="cgrid">${Object.entries(ONCAMP).map(([k,c])=>`<button class="cbtn" data-a="oncampgo" data-id="${b.id}" data-k="${k}"><b>${c[0]} ${c[1]}</b><span>${b[k]} → ${b[k]+4}</span></button>`).join('')}</div></div>`}
 
 
@@ -2431,7 +2431,7 @@ updateFight=function(){_annUpd();const F=ui.fight;if(F&&F.stage==='done'&&F.res&
 /* ================= v46 : FICHE BOXEUR, RANGS + RÉCOMPENSES, ACTUALITÉ, REPRISES COMME EN DIRECT ================= */
 const ONBX={};
 const _onB0=onB;
-onB=function(o){const b=_onB0(o);if(b){if(b.cos&&b.cos.glove!=null)b.glv=GLV[+b.cos.glove]||null;if(b.id)ONBX[b.id]=b}return b};
+onB=function(o){const b=_onB0(o);if(b){const t0=Date.now();for(const k of['campleft','inj','campcd']){const end=t0+(b[k]||0)*1000;Object.defineProperty(b,k,{get:()=>Math.max(0,Math.round((end-Date.now())/1000)),set:()=>{},enumerable:true,configurable:true})}b.campdur=onI(o.campdur,60,99999,1800);b.campcost=onI(o.campcost,0,99999,120);if(b.cos&&b.cos.glove!=null)b.glv=GLV[+b.cos.glove]||null;if(b.id)ONBX[b.id]=b}return b};
 const bxL=(b,inner)=>b&&b.id?`<a href="#" class="mgrl" data-a="onbx" data-id="${esc(b.id)}">${inner}</a>`:inner;
 function vOnBx(b){const u=onUi(),k=onRk(b.rating),mine=u.home&&b.pid===u.home.me.id,c=b.cos||{},xg=Object.assign({},b,{glv:c.glove!=null?GLV[+c.glove]:null});
   return`<div class="panel"><div class="ph"><span></span><button class="btn sm" data-a="onbxx">← Retour</button></div>
@@ -2475,22 +2475,25 @@ ctlHTML=function(F){if(F.replay&&F.stage!=='done')return`<div class="rstat"><spa
 
 
 /* ================= v47 : CAMP (temps restant, annulation), TOUT RELANCER ================= */
-async function campCancel(id){try{const r=await rpc('cr_ob_camp_cancel',{p_token:ON.token,p_box:id});ui.confirm=null;toast(`Camp annulé : ${onI(r.back,0,999,0)} 💰 remboursés sur 120`);await onLoad(true);const b=onUi().home.boxers.find(x=>x.id===id);if(b)ONBX[id]=b}catch(e){toast(e.message)}}
+async function campCancel(id){try{const r=await rpc('cr_ob_camp_cancel',{p_token:ON.token,p_box:id});ui.confirm=null;toast(`Camp annulé : ${onI(r.back,0,9999,0)} 💰 remboursés sur ${onI(r.paid,0,9999,0)}`);await onLoad(true);const b=onUi().home.boxers.find(x=>x.id===id);if(b)ONBX[id]=b}catch(e){toast(e.message)}}
 async function rerollAll(id){try{const r=await rpc('cr_ob_reroll_all',{p_token:ON.token,p_box:id});ui.confirm=null;toast(`🎲 Tous les pouvoirs relancés (−${onI(r.cost,0,9999,0)} 💰)`);await onLoad(true);const b=onUi().home.boxers.find(x=>x.id===id);if(b)ONBX[id]=b}catch(e){toast(e.message)}}
 function vOnBxMine(b){const H=onUi().home;if(!H||b.pid!==H.me.id)return'';const cf=ui.confirm;
   const camp=b.camp?`<div class="panel" style="margin-top:10px"><span class="lab">🏋️ Camp ${ONCAMP[b.camp][0]} ${ONCAMP[b.camp][1]}</span>
-      ${b.campleft>0?`<div class="row" style="justify-content:space-between;margin-top:6px"><span>Entraînement en cours</span><b class="num">${onTime(b.campleft)}</b></div>${onBar(1800-b.campleft,1800,'gold')}<p class="small" style="margin:6px 0 0">Il ne peut pas se battre avant la fin du camp. Ensuite : +4 en ${ONCAMP[b.camp][1].toLowerCase()} pour son prochain combat.</p>`
+      ${b.campleft>0?`<div class="row" style="justify-content:space-between;margin-top:6px"><span>Entraînement en cours</span><b class="num">${onTime(b.campleft)}</b></div>${onBar(b.campdur-b.campleft,b.campdur,'gold')}<p class="small" style="margin:6px 0 0">Il ne peut pas se battre avant la fin du camp. Ensuite : +4 en ${ONCAMP[b.camp][1].toLowerCase()} pour son prochain combat.</p>`
         :`<p class="small" style="margin:6px 0 0">✅ Camp terminé : +4 en ${ONCAMP[b.camp][1].toLowerCase()} pour son <b>prochain combat</b>.</p>`}
-      <button class="btn ${cf==='cc'+b.id?'gold':''}" style="width:100%;margin-top:8px" data-a="oncampcancel" data-id="${b.id}">${cf==='cc'+b.id?'Confirmer : tu perds 60 💰 sur 120':'Annuler le camp (50 % remboursé)'}</button></div>`
-    :`<div class="panel" style="margin-top:10px"><span class="lab">🏋️ Camp</span><p class="small" style="margin:6px 0 8px">${b.campcd>0?`Prochain camp possible dans <b>${onTime(b.campcd)}</b>.`:'Aucun camp en cours.'}</p>${b.campcd>0?'':`<button class="btn" style="width:100%" data-a="oncamp" data-id="${b.id}">🏋️ Lancer un camp (120 💰)</button>`}</div>`;
+      <button class="btn ${cf==='cc'+b.id?'gold':''}" style="width:100%;margin-top:8px" data-a="oncampcancel" data-id="${b.id}">${cf==='cc'+b.id?`Confirmer : tu perds ${b.campcost-Math.floor(b.campcost/2)} 💰 sur ${b.campcost}`:'Annuler le camp (50 % remboursé)'}</button></div>`
+    :`<div class="panel" style="margin-top:10px"><span class="lab">🏋️ Camp</span><p class="small" style="margin:6px 0 8px">${b.campcd>0?`Prochain camp possible dans <b>${onTime(b.campcd)}</b>.`:'Aucun camp en cours.'}</p>${b.campcd>0?'':`<button class="btn" style="width:100%" data-a="oncamp" data-id="${b.id}">🏋️ Lancer un camp (${campCost(b.lvl)} 💰 · ${campMin(b.lvl)} min)</button>`}</div>`;
   const ab=`<div class="panel" style="margin-top:10px"><span class="lab">🎲 Relancer les pouvoirs</span><p class="small" style="margin:6px 0 8px">Un pouvoir : 400 💰 · Tous d’un coup : <b>${300*b.slots} 💰</b> (300 par pouvoir), tous différents des actuels.</p>
     <div class="row" style="gap:6px">${b.abil.map((q,i)=>`<button class="btn sm ${cf==='rr'+b.id+i?'gold':''}" data-a="onrr" data-id="${b.id}" data-k="${i}">${cf==='rr'+b.id+i?'400 💰 ?':`🎲 ${ONAB[q]?ONAB[q][1]:'Pouvoir '+(i+1)}`}</button>`).join('')}</div>
     <button class="btn ${cf==='rra'+b.id?'gold':'pri'}" style="width:100%;margin-top:8px" data-a="onrra" data-id="${b.id}">${cf==='rra'+b.id?`Confirmer : ${300*b.slots} 💰`:`🎲 Tout relancer (${300*b.slots} 💰)`}</button></div>`;
   return camp+ab}
 let onTickT=setInterval(()=>{const u=ui.on;if(!u||!u.home||ui.tab!=='online')return;let ch=false;
-  for(const b of u.home.boxers){for(const k of['campleft','inj','campcd'])if(b[k]>0){b[k]=Math.max(0,b[k]-20);ch=true}}
-  if(ch&&!ui.fight&&!(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)))onR()},20000);
+  for(const b of u.home.boxers){for(const k of['campleft','inj','campcd'])if(b[k]>0)ch=true}
+  if(ch&&!ui.fight&&!(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)))onR()},10000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ON&&ui.tab==='online'&&!ui.fight){onR();onLoad(true)}});
 
+
+const campMin=l=>Math.min(100,20+2*l),campCost=l=>80+10*l;
 /* --- événements aléatoires --- */
 const EVENTS={
  ssinv:{b:1,need:()=>false,t:'📩 Invitation : Super Série',x:b=>{const o=getB(ssOpp(b.id)),st=o?ssStake(b,o):[];return`${b.name} est invité à la ${S.ss?S.ss.n:'Super Série'} ! Quart de finale contre ${o?o.name+' ('+ovr(o)+')':'?'}, ${S.ss?when(S.ss.wk[0]):''}${st.length?`, avec ${st.join(', ')} en jeu`:''}. Jusqu’à ${moneyS(SSP[3])} et le trophée au vainqueur. Il participe ?`},
@@ -3762,7 +3765,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='29aac23041';window.BUILD_MSG="Les gants personnalis\u00e9s s\u2019affichent partout (\u00e9curie, classements, profils)";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='484eed2563';window.BUILD_MSG="Minuteries exactes (camp, blessure) \u00b7 camp plus long et plus cher selon le niveau";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
