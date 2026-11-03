@@ -1120,7 +1120,8 @@ function roundNotes(F){
 }
 function endRound(F){
   const A=F.A,B=F.B,rd=F.rd,s0=rd.s0;
-  for(let j=0;j<3;j++){const diff=(rd.dA-rd.dB)+(R()-.5)*6;let sA=diff>=0?10:9,sB=diff>=0?9:10;sA-=rd.kdA;sB-=rd.kdB;const m=10-Math.max(sA,sB);sA+=m;sB+=m;F.cards[j][0]+=sA;F.cards[j][1]+=sB;if(!j)F.rs.push([sA,sB])}
+  const la=A.land-s0[1],lb=B.land-s0[3],pa=(A.pL||0)-s0[4],pb=(B.pL||0)-s0[5],base=(la-lb)*1+(pa-pb)*.6+(rd.dA-rd.dB)*.25;
+  for(let j=0;j<3;j++){const diff=base+(R()-.5)*3.2;let sA=diff>=0?10:9,sB=diff>=0?9:10;if(Math.abs(diff)<.45&&!rd.kdA&&!rd.kdB){sA=10;sB=10}sA-=rd.kdA;sB-=rd.kdB;const m=10-Math.max(sA,sB);sA+=m;sB+=m;F.cards[j][0]+=sA;F.cards[j][1]+=sB;if(!j)F.rs.push([sA,sB])}
   F.rst.push({at:A.thr-s0[0],al:A.land-s0[1],bt:B.thr-s0[2],bl:B.land-s0[3],ap:(A.pL||0)-s0[4],bp:(B.pL||0)-s0[5]});
   A.boost=A.guard=B.boost=B.guard=0;
   F.log.unshift({r:F.r,L:[...rd.L,...roundNotes(F)],s:F.rs[F.rs.length-1]});
@@ -3900,7 +3901,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='841bcc7a1d';window.BUILD_MSG="\u00c9cran de combat sans d\u00e9filement sur t\u00e9l\u00e9phone";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='5e987374e7';window.BUILD_MSG="Juges plus justes : coups port\u00e9s, coups de puissance et d\u00e9g\u00e2ts";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
