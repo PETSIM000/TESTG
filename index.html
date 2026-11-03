@@ -1218,6 +1218,7 @@ function endRound(F){
 }
 function stepRound(F,sa,sb){do{stepPhase(F,sa,sb)}while(F.ph!==0&&!F.done)}
 function cloneF(F){return{...F,A:{...F.A},B:{...F.B},cards:F.cards.map(c=>c.slice()),rs:[],rst:[],log:[],rd:F.rd?{...F.rd,L:[]}:null}}
+function oddsRound(F,n){let w=0;for(let i=0;i<n;i++){const G=cloneF(F);let g=0;while(!G.done&&!G.rs.length&&g++<400)stepPhase(G,aiStrat(G.A,G.B,G),aiStrat(G.B,G.A,G));if(G.rs.length){const[a,b]=G.rs[0];w+=a>b?1:a<b?0:.5}else if(G.done)w+=G.res.w==='A'?1:G.res.w?0:.5}const p=Math.round(w/n*100);return{w:p,d:0,l:100-p,rnd:1}}
 function oddsFrom(F,n,keep){let w=0,d=0;for(let i=0;i<n;i++){const G=cloneF(F);if(!F.r&&!keep){rollForm(G.A);rollForm(G.B)}while(!G.done)stepPhase(G,aiStrat(G.A,G.B,G),aiStrat(G.B,G.A,G));if(!G.res.w)d++;else if(G.res.w==='A')w++}return{w:Math.round(w/n*100),d:Math.round(d/n*100),l:Math.round((n-w-d)/n*100)}}
 const GP={pression:{n:'Pression',d:'Avancer et couper le ring.',beats:'pru'},contre:{n:'Contre-attaque',d:'Laisser venir et punir ses entrées.',beats:'agr'},corps:{n:'Travail au corps',d:'User l’adversaire pour le ralentir.',beats:'eq'},distance:{n:'Boxe à distance',d:'Jab, mobilité, le garder loin.',beats:'corps'}};
 const bestGP=st=>Object.keys(GP).find(k=>GP[k].beats===st);
@@ -1897,7 +1898,7 @@ function setDisp(F){F.disp={hp:[F.A.hp,F.B.hp],en:[F.A.en,F.B.en]}}
 const coachName=()=>S.staff.coach?S.staff.coach.name.split(' ')[0]:'Ton coin';
 function beginFight(F){
   F.stage='intro';F.adv=advise(F);if(F.adv.s)F.strat=F.adv.s;
-  F.odds=S.set.odds?oddsFrom(F,150,true):null;F.speed=S.set.speed||1;F.clock=0;
+  F.odds=S.set.odds?oddsRound(F,95):null;F.speed=S.set.speed||1;F.clock=0;
   setDisp(F);F.vis={A:mkVis(),B:mkVis()};AN=null;FX=[];
   ui.fight=F;buildFight();
 }
@@ -1914,15 +1915,15 @@ function nextPhase(){
 function afterPhase(){
   const F=ui.fight;if(!F)return;setDisp(F);
   if(F.done){F.stage='done';F.odds=null;updateFight();return}
-  if(F.ph===0){F.stage='between';F.vis.A.kdT=F.vis.B.kdT=-1;if(S.set.odds)F.odds=oddsFrom(F,60,true);updateFight();return}
-  if(S.set.odds)F.odds=oddsFrom(F,40,true);
+  if(F.ph===0){F.stage='between';F.vis.A.kdT=F.vis.B.kdT=-1;if(S.set.odds)F.odds=oddsRound(F,50);updateFight();return}
+  if(S.set.odds)F.odds=oddsRound(F,40);
   nextPhase();
 }
 function settle(F){F.vis={A:mkVis(),B:mkVis()};if(F.done&&F.res.m!=='DEC'){const v=F.vis[F.res.w==='A'?'B':'A'];v.ko=true;v.kdT=performance.now()-2000;F.koTxt=F.res.m}setDisp(F)}
 function skipRound(){
   const F=ui.fight;if(!F||F.done)return;AN=null;
   do{stepPhase(F,curStrat(F),aiStrat(F.B,F.A,F));if(!F.done)F.adv=advise(F)}while(F.ph!==0&&!F.done);
-  settle(F);F.stage=F.done?'done':'between';F.odds=!F.done&&S.set.odds?oddsFrom(F,60,true):null;updateFight();
+  settle(F);F.stage=F.done?'done':'between';F.odds=!F.done&&S.set.odds?oddsRound(F,50):null;updateFight();
 }
 function simAll(){
   const F=ui.fight;if(!F)return;AN=null;
@@ -2436,8 +2437,8 @@ function lvPlay(F){F.stage='live';F.live.sent=false;
   if(S.set.anim&&F.ev){lvAnim=true;animatePhase(F.ev,()=>{lvAnim=false;go()});updateFight()}else go()}
 function lvAfter(F){if(ui.fight!==F)return;setDisp(F);
   if(F.done){F.stage='done';F.odds=null;updateFight();if(F.live.side==='A'&&!F.live.fin)lvFinish(F);return}
-  if(F.ph===0){F.stage='between';F.vis.A.kdT=F.vis.B.kdT=-1;if(S.set.odds)F.odds=oddsFrom(F,40,true);F.adv=advise(F);updateFight();return}
-  F.adv=advise(F);if(S.set.odds)F.odds=oddsFrom(F,30,true);updateFight();
+  if(F.ph===0){F.stage='between';F.vis.A.kdT=F.vis.B.kdT=-1;if(S.set.odds)F.odds=oddsRound(F,40);F.adv=advise(F);updateFight();return}
+  F.adv=advise(F);if(S.set.odds)F.odds=oddsRound(F,40);updateFight();
   F.since=(F.since||0)+1;
   if(F.r>0&&F.since>=2&&R()<.45){F.since=0;rxOpen(F);return}
   lvSubmit(F,{strat:F.strat})}
@@ -3855,7 +3856,7 @@ function hudHTML(F){
     <span class="small"><span class="num">${X.land}/${X.thr}</span>${X.kd?` · <b style="color:#ff7b8b">${X.kd} KD</b>`:''}${X.cut?` · <b style="color:#ff7b8b">Coupure ${X.cut}/3</b>`:''}</span></div>`;
   const rn=F.stage==='done'?'FIN':'R'+(F.stage==='live'?F.r:F.r+1);
   return`<div class="hud">${side(F.A,0,'red')}<div class="clk"><b>${rn}</b><span id="clk" class="num">${clockTxt(F)}</span></div>${side(F.B,1,'blue')}
-    ${o?`<div class="odds"><div class="ob"><i style="width:${o.w}%"></i><i class="d" style="width:${o.d}%"></i></div><div class="row small" style="justify-content:space-between"><span>Victoire <b style="color:var(--green)">${o.w} %</b></span><span>Nul ${o.d} %</span><span>Défaite <b style="color:#ff7b8b">${o.l} %</b></span></div></div>`:''}</div>`;
+    ${o?`<div class="odds"><div class="ob"><i style="width:${o.w}%"></i></div><div class="row small" style="justify-content:space-between"><span>Gagne le ${rn==='FIN'?'round':rn.replace('R','round ')} <b style="color:var(--green)">${o.w} %</b></span><span>Perd <b style="color:#ff7b8b">${o.l} %</b></span></div></div>`:''}</div>`;
 }
 const formChip=X=>!X||!X.df?'':X.df>=1.08?'<span class="chip gold">🔥 En feu ce soir</span>':X.df<=.92?'<span class="chip red">😓 Soir difficile</span>':'<span class="chip">Forme normale</span>';
 function faceOff(a,b,f,F){const kg=(DIVS.find(d=>d.id===a.div)||{}).kg||'';return`<div class="fo"><div class="fo-s"><div class="av lg">${avatar(a,'red')}</div><b>${flag(a.nat)} ${esc(sur(a))}</b><span>${a.w}-${a.l}-${a.d} · ${a.age} ans</span>${F?formChip(F.A):''}</div><div class="fo-v"><span>VS</span><small>${kg}</small></div><div class="fo-s r"><div class="av lg">${avatar(b,'blue')}</div><b>${flag(b.nat)} ${esc(sur(b))}</b><span>${b.w}-${b.l}-${b.d} · ${b.age} ans</span>${F?formChip(F.B):''}</div></div>`}
@@ -4420,7 +4421,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='41a6ddc9f7';window.BUILD_MSG="\ud83d\udd25 51 pouvoirs, 19 rangs, ic\u00f4nes maison";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='a9c37e9463';window.BUILD_MSG="Chances par round (plus de nul)";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
