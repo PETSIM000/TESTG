@@ -2,11 +2,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#07080c"><meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Coin Rouge">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Boxing Manager">
 <meta name="format-detection" content="telephone=no"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-180.png">
 <style>html,body{margin:0;background:#07080c;overscroll-behavior:none}body{font:14px system-ui;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea{-webkit-user-select:text;user-select:text}img{max-width:100%}[hidden]{display:none!important}</style>
 </head><body>
-<title>Coin Rouge</title>
+<title>Boxing Manager</title>
 
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
@@ -379,7 +379,8 @@ header{padding-block:8px}
 .mstage::after{content:"";position:absolute;inset:auto 0 0;height:50%;background:linear-gradient(180deg,transparent,var(--bg))}
 .mwrap{max-width:480px;margin:0 auto;display:grid;gap:12px;padding-block:6px 14px}
 .logo{text-align:center;margin-top:-78px;position:relative;z-index:1;margin-bottom:6px}
-.logo h1{font-family:var(--f-disp);font-weight:900;font-size:clamp(56px,17vw,84px);line-height:.85;margin:0;text-transform:uppercase;letter-spacing:.02em;background:var(--gold-g);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 14px rgba(0,0,0,.8))}
+.logo .mlogo{display:block;width:112px;height:112px;margin:0 auto 6px;filter:drop-shadow(0 8px 22px rgba(200,16,46,.55));animation:mlg 4s ease-in-out infinite}@keyframes mlg{50%{transform:translateY(-4px) rotate(-2deg)}}
+.logo h1{font-family:var(--f-disp);font-weight:900;font-size:clamp(46px,14vw,70px);line-height:.85;margin:0;text-transform:uppercase;letter-spacing:.02em;background:var(--gold-g);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 14px rgba(0,0,0,.8))}
 .logo .tag{display:inline-block;margin-top:10px;font-size:12px;font-weight:800;letter-spacing:.32em;text-transform:uppercase;color:#fff;background:var(--red-g);padding:6px 12px 6px 16px;border-radius:6px;transform:skewX(-10deg);box-shadow:0 6px 18px rgba(var(--rgb),.45)}
 .mbtn{display:grid;gap:3px;text-align:left;width:100%;padding:15px 17px;border-radius:18px;border:1px solid var(--line2);background:var(--glass),var(--s1);box-shadow:var(--shadow)}
 .mbtn b{font-family:var(--f-disp);font-weight:900;font-size:23px;text-transform:uppercase;letter-spacing:.03em;line-height:1}
@@ -629,6 +630,86 @@ input,select,textarea{font-size:16px}
 <div id="ev" class="modal" hidden></div>
 <div id="neg" class="modal" hidden></div>
 <div id="menu" class="menu" hidden></div>
+<div id="splash" aria-label="Nomass Studio présente Boxing Manager">
+  <div class="sp-ns">
+    <svg viewBox="0 0 240 240" class="sp-hex" aria-hidden="true">
+      <defs>
+        <linearGradient id="nsg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ef2ff"/><stop offset=".5" stop-color="#7b5cff"/><stop offset="1" stop-color="#ff3dbb"/></linearGradient>
+        <filter id="nsglow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <polygon class="sp-h1" points="120,14 212,67 212,173 120,226 28,173 28,67" fill="none" stroke="url(#nsg)" stroke-width="7" stroke-linejoin="round" filter="url(#nsglow)"/>
+      <polygon class="sp-h2" points="120,40 190,80 190,160 120,200 50,160 50,80" fill="rgba(123,92,255,.08)" stroke="url(#nsg)" stroke-width="2" stroke-opacity=".5"/>
+      <g class="sp-mono" filter="url(#nsglow)" fill="none" stroke="url(#nsg)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M78 156 V84 L120 140 V84"/>
+        <path d="M168 92 Q150 80 136 92 Q126 104 146 118 Q170 132 158 148 Q144 162 124 150"/>
+      </g>
+    </svg>
+    <div class="sp-name">NOMASS</div>
+    <div class="sp-sub">S T U D I O</div>
+    <div class="sp-pres">présente</div>
+  </div>
+  <div class="sp-bm"><canvas id="sp-logo" width="520" height="520"></canvas><div class="sp-title">BOXING<br>MANAGER</div><div class="sp-tag">Gérant de boxe</div></div>
+  <div class="sp-skip">Touche pour passer</div>
+</div>
+<style>
+#splash{position:fixed;inset:0;z-index:9999;background:radial-gradient(90% 60% at 50% 40%,#151026,#05050a 70%);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .6s ease;font-family:"Big Shoulders Display",Impact,system-ui,sans-serif;color:#fff;-webkit-user-select:none;user-select:none}
+#splash.out{opacity:0;pointer-events:none}
+#splash::before{content:"";position:absolute;inset:-50%;background:conic-gradient(from 0deg,transparent,rgba(123,92,255,.12),transparent 30%,rgba(62,242,255,.1),transparent 60%);animation:sprot 8s linear infinite}
+@keyframes sprot{to{transform:rotate(360deg)}}
+.sp-ns,.sp-bm{position:absolute;display:flex;flex-direction:column;align-items:center;text-align:center}
+.sp-hex{width:min(46vw,210px);height:auto}
+.sp-h1{stroke-dasharray:640;stroke-dashoffset:640;animation:spdraw 1.1s .15s cubic-bezier(.6,0,.2,1) forwards}
+.sp-h2{opacity:0;animation:spfade .5s .9s forwards}
+.sp-mono path{stroke-dasharray:260;stroke-dashoffset:260;animation:spdraw .8s .7s ease-out forwards}
+.sp-mono path+path{animation-delay:.95s}
+@keyframes spdraw{to{stroke-dashoffset:0}}
+@keyframes spfade{to{opacity:1}}
+.sp-name{margin-top:18px;font-size:min(13vw,62px);font-weight:900;letter-spacing:.18em;padding-left:.18em;background:linear-gradient(90deg,#3ef2ff,#7b5cff,#ff3dbb,#3ef2ff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;opacity:0;transform:translateY(14px);animation:spup .6s 1.2s forwards,spshine 2.4s 1.2s linear infinite}
+.sp-sub{margin-top:4px;font:700 13px/1 system-ui;letter-spacing:.55em;color:#cfd3ff;opacity:0;animation:spfade .5s 1.5s forwards}
+.sp-pres{margin-top:26px;font:italic 500 14px system-ui;color:#8b8fb0;opacity:0;animation:spfade .5s 1.9s forwards}
+@keyframes spup{to{opacity:1;transform:none}}
+@keyframes spshine{to{background-position:300% 0}}
+.sp-ns{animation:spgone .45s 2.6s forwards}
+@keyframes spgone{to{opacity:0;transform:scale(1.08);filter:blur(6px)}}
+.sp-bm{opacity:0;animation:spin .7s 2.95s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes spin{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+#sp-logo{width:min(56vw,250px);height:auto;filter:drop-shadow(0 10px 30px rgba(200,16,46,.55))}
+.sp-title{margin-top:10px;font-size:min(14vw,64px);font-weight:900;line-height:.86;letter-spacing:.03em;background:linear-gradient(180deg,#fff6c8,#f4c542 45%,#b8860b 70%,#ffe27a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 14px rgba(0,0,0,.8))}
+.sp-tag{margin-top:12px;font:800 12px system-ui;letter-spacing:.32em;text-transform:uppercase;background:linear-gradient(90deg,#ff3d52,#a3101f);padding:6px 12px 6px 16px;border-radius:6px;transform:skewX(-10deg)}
+.sp-skip{position:absolute;bottom:calc(26px + env(safe-area-inset-bottom,0px));font:600 11px system-ui;letter-spacing:.12em;color:rgba(255,255,255,.35);text-transform:uppercase}
+@media (prefers-reduced-motion:reduce){#splash *{animation-duration:.01s!important;animation-delay:0s!important}.sp-ns{display:none}}
+</style>
+<script>
+function bmLogo(c,cx,cy,R,o){o=o||{};c.save();
+  const gold=c.createLinearGradient(cx-R,cy-R,cx+R,cy+R);gold.addColorStop(0,'#fff6c8');gold.addColorStop(.35,'#f4c542');gold.addColorStop(.62,'#a87a08');gold.addColorStop(1,'#ffe27a');
+  if(!o.flat){c.shadowColor='rgba(0,0,0,.45)';c.shadowBlur=R*.08;c.shadowOffsetY=R*.03}
+  c.beginPath();c.arc(cx,cy,R,0,7);c.fillStyle=gold;c.fill();c.shadowColor='transparent';
+  c.beginPath();c.arc(cx,cy,R*.9,0,7);c.fillStyle='#14070a';c.fill();
+  const red=c.createRadialGradient(cx-R*.2,cy-R*.3,R*.05,cx,cy,R*.86);red.addColorStop(0,'#ff4a5e');red.addColorStop(.55,'#b3101f');red.addColorStop(1,'#4a0610');
+  c.beginPath();c.arc(cx,cy,R*.84,0,7);c.fillStyle=red;c.fill();
+  c.beginPath();c.arc(cx,cy,R*.6,0,7);c.lineWidth=R*.018;c.strokeStyle='rgba(255,226,122,.55)';c.stroke();
+  const arcTxt=(t,rad,top,size)=>{c.font=`900 ${size}px "Big Shoulders Display",Impact,"Arial Black",sans-serif`;c.fillStyle=gold;c.textAlign='center';c.textBaseline='middle';
+    const sp=size*.08,ws=[...t].map(ch=>c.measureText(ch).width+sp),tot=ws.reduce((a,b)=>a+b,0)-sp;let acc=-tot/2;
+    for(let i=0;i<t.length;i++){const mid=acc+(ws[i]-sp)/2;acc+=ws[i];const ang=mid/rad,a=top?-Math.PI/2+ang:Math.PI/2-ang;c.save();c.translate(cx+Math.cos(a)*rad,cy+Math.sin(a)*rad);c.rotate(a+(top?Math.PI/2:-Math.PI/2));c.fillText(t[i],0,0);c.restore()}};
+  arcTxt('BOXING',R*.72,true,R*.2);arcTxt('MANAGER',R*.72,false,R*.18);
+  for(const s of[-1,1]){const a=Math.PI+(s>0?0:Math.PI),x=cx+s*R*.72,y=cy;c.save();c.translate(x,y);c.fillStyle=gold;c.beginPath();for(let i=0;i<10;i++){const r=i%2?R*.03:R*.075,t=-Math.PI/2+i*Math.PI/5;c.lineTo(Math.cos(t)*r,Math.sin(t)*r)}c.closePath();c.fill();c.restore()}
+  // gant
+  c.save();c.translate(cx,cy+R*.02);c.rotate(-.32);const s=R/100;
+  const gl=c.createLinearGradient(-30*s,-40*s,30*s,40*s);gl.addColorStop(0,'#fff');gl.addColorStop(.18,'#ffe9a8');gl.addColorStop(.55,'#f4c542');gl.addColorStop(1,'#9c7006');
+  c.lineJoin='round';c.lineWidth=3.2*s;c.strokeStyle='#3a1a02';
+  c.beginPath();c.moveTo(-22*s,26*s);c.bezierCurveTo(-34*s,10*s,-34*s,-30*s,-8*s,-40*s);c.bezierCurveTo(20*s,-48*s,38*s,-26*s,32*s,2*s);c.bezierCurveTo(30*s,18*s,22*s,26*s,16*s,28*s);c.closePath();c.fillStyle=gl;c.fill();c.stroke();
+  c.beginPath();c.moveTo(-24*s,4*s);c.bezierCurveTo(-40*s,0,-40*s,-22*s,-26*s,-22*s);c.bezierCurveTo(-18*s,-22*s,-14*s,-12*s,-14*s,-4*s);c.fillStyle=gl;c.fill();c.stroke();
+  c.beginPath();c.moveTo(-10*s,-30*s);c.quadraticCurveTo(8*s,-36*s,22*s,-22*s);c.lineWidth=2*s;c.strokeStyle='rgba(255,255,255,.75)';c.stroke();
+  c.lineWidth=3.2*s;c.strokeStyle='#3a1a02';c.fillStyle='#f5f5f5';c.beginPath();c.roundRect?c.roundRect(-24*s,26*s,42*s,20*s,4*s):c.rect(-24*s,26*s,42*s,20*s);c.fill();c.stroke();
+  c.fillStyle='#c8102e';c.fillRect(-24*s,33*s,42*s,6*s);c.restore();
+  c.restore()}
+(function(){const sp=document.getElementById('splash');if(!sp)return;let done=false;
+  const cv=document.getElementById('sp-logo');const go=()=>{try{const x=cv.getContext('2d');x.clearRect(0,0,520,520);bmLogo(x,260,260,240)}catch(e){}};go();
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(go);
+  const end=()=>{if(done)return;done=true;sp.classList.add('out');setTimeout(()=>sp.remove(),650)};
+  sp.addEventListener('click',end);setTimeout(end,4300)})();
+</script>
+
 <div id="fb" class="modal" hidden style="z-index:80"></div>
 <div id="warn" class="modal" hidden style="z-index:75"></div>
 
@@ -647,7 +728,7 @@ const FBK='coin-rouge-avis';let FB={n:0,like:'',fix:'',bug:'',nm:''};
 function fbLoad(){try{const v=JSON.parse(localStorage.getItem(FBK)||'null');if(v)FB={...FB,...v}}catch(e){}}
 function fbSave(){try{localStorage.setItem(FBK,JSON.stringify(FB))}catch(e){}}
 function fbText(){const st=typeof S!=='undefined'&&S?(()=>{const m=S.boxers.filter(b=>b.mine);return`Partie : ${S.club||''} · an ${Math.floor((S.t-1)/52)+1}, sem. ${(S.t-1)%52+1} · ${m.length} boxeurs · ${S.stats?S.stats.wins:0} victoires · ${Math.round(S.money).toLocaleString('fr-CA')} $`})():'Pas encore de partie';
-  return`🥊 AVIS COIN ROUGE (v${GAME_V})${FB.nm?' — de '+FB.nm:''}\nNote : ${FB.n?'⭐'.repeat(FB.n)+' ('+FB.n+'/5)':'—'}\n\n👍 J’aime :\n${FB.like||'—'}\n\n🔧 À améliorer :\n${FB.fix||'—'}\n\n🐞 Bugs :\n${FB.bug||'—'}\n\n${st}\nÉcran : ${innerWidth}×${innerHeight}`}
+  return`🥊 AVIS BOXING MANAGER (v${GAME_V})${FB.nm?' — de '+FB.nm:''}\nNote : ${FB.n?'⭐'.repeat(FB.n)+' ('+FB.n+'/5)':'—'}\n\n👍 J’aime :\n${FB.like||'—'}\n\n🔧 À améliorer :\n${FB.fix||'—'}\n\n🐞 Bugs :\n${FB.bug||'—'}\n\n${st}\nÉcran : ${innerWidth}×${innerHeight}`}
 function fbRender(msg){const el=document.getElementById('fb'),e=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   el.innerHTML=`<div class="mcard nt fbf" role="dialog" aria-label="Donner mon avis"><span class="lab">Version test ${GAME_V}</span><h3>Ton avis</h3><div class="mbody">
   <p class="small" style="margin:0 0 6px">Tu testes le jeu avant sa sortie. Dis franchement ce que tu en penses. ${FB_TO.sms||FB_TO.email?`Ton message part directement à ${e(FB_TO.nom)}.`:'Touche Envoyer, puis choisis la personne qui t’a envoyé le jeu (Messages, WhatsApp, Messenger…).'}</p>
@@ -661,8 +742,8 @@ function fbRender(msg){const el=document.getElementById('fb'),e=s=>String(s).rep
 function openFB(){fbLoad();fbRender()}
 async function fbSend(){const t=fbText();
   if(FB_TO.sms){location.href='sms:'+FB_TO.sms+(/iPhone|iPad|Mac/.test(navigator.userAgent)?'&':'?')+'body='+encodeURIComponent(t);return}
-  if(FB_TO.email){location.href='mailto:'+FB_TO.email+'?subject='+encodeURIComponent('Avis Coin Rouge v'+GAME_V)+'&body='+encodeURIComponent(t);return}
-  try{if(navigator.share){await navigator.share({title:'Mon avis sur Coin Rouge',text:t});fbRender('Merci ! Ton avis est envoyé 🙌');return}}catch(e){if(e&&e.name==='AbortError')return}
+  if(FB_TO.email){location.href='mailto:'+FB_TO.email+'?subject='+encodeURIComponent('Avis Boxing Manager v'+GAME_V)+'&body='+encodeURIComponent(t);return}
+  try{if(navigator.share){await navigator.share({title:'Mon avis sur Boxing Manager',text:t});fbRender('Merci ! Ton avis est envoyé 🙌');return}}catch(e){if(e&&e.name==='AbortError')return}
   try{await navigator.clipboard.writeText(t);fbRender('Message copié ! Colle-le dans Messages ou WhatsApp pour l’envoyer.');return}catch(e){}
   location.href='sms:?&body='+encodeURIComponent(t)}
 document.addEventListener('click',e=>{const el=document.getElementById('fb');if(!el||el.hidden||!el.contains(e.target))return;
@@ -1949,7 +2030,7 @@ async function onAddFriend(){
   try{const f=onP(await rpc('cr_add_friend',{p_token:ON.token,p_code:c}));toast(`🤝 ${f.name} est ton ami !`);await onLoad(true)}catch(e){toast(e.message)}
 }
 async function onShareCode(){
-  const code=onUi().home&&onUi().home.me.code;if(!code)return;const txt=`Viens boxer contre moi sur Coin Rouge 🥊 ! Mon code ami : ${code}\nhttps://petsim000.github.io/TESTG/`;
+  const code=onUi().home&&onUi().home.me.code;if(!code)return;const txt=`Viens boxer contre moi sur Boxing Manager 🥊 ! Mon code ami : ${code}\nhttps://petsim000.github.io/TESTG/`;
   try{if(navigator.share){await navigator.share({text:txt});return}}catch(e){return}
   try{await navigator.clipboard.writeText(txt);toast('Code copié !')}catch(e){toast('Ton code : '+code)}
 }
@@ -2952,6 +3033,19 @@ function chooseEvent(i){
 let G3=null,HAS3=null;
 function has3D(){if(HAS3!==null)return HAS3;try{HAS3=!!window.THREE&&!!document.createElement('canvas').getContext('webgl')}catch(e){HAS3=false}return HAS3}
 const M3=(c,r)=>new THREE.MeshStandardMaterial({color:c,roughness:r==null?.6:r,metalness:0});
+
+/* ===== logo Boxing Manager ===== */
+let _bmC=null,_bmU=null;
+function bmCanvas(){if(_bmC)return _bmC;const c=document.createElement('canvas');c.width=c.height=512;bmLogo(c.getContext('2d'),256,256,244);_bmC=c;return c}
+function bmImg(){if(!_bmU){try{_bmU=bmCanvas().toDataURL('image/png')}catch(e){_bmU=''}}return _bmU}
+function ringMatTex(){const c=document.createElement('canvas');c.width=c.height=1024;const x=c.getContext('2d');
+  const g=x.createRadialGradient(512,512,60,512,512,720);g.addColorStop(0,'#f1f4f9');g.addColorStop(1,'#b9c1cf');x.fillStyle=g;x.fillRect(0,0,1024,1024);
+  x.globalAlpha=.05;for(let i=0;i<3000;i++){x.fillStyle=Math.random()<.5?'#000':'#fff';x.fillRect(Math.random()*1024,Math.random()*1024,2,2)}x.globalAlpha=1;
+  x.lineWidth=10;x.strokeStyle='rgba(200,16,46,.35)';x.beginPath();x.arc(512,512,330,0,7);x.stroke();
+  x.globalAlpha=.92;bmLogo(x,512,512,300,{flat:1});x.globalAlpha=1;
+  const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;tx.anisotropy=4;return tx}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{_bmC=null;_bmU=null;if(typeof ui!=='undefined'&&ui.menu==='home'&&typeof renderMenu==='function')try{renderMenu()}catch(e){}});
+
 function texTxt(t,bg,fg,w,h,sz){const c=document.createElement('canvas');c.width=w||512;c.height=h||512;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);x.fillStyle=fg;x.font=`900 ${sz||200}px "Big Shoulders Display",Impact,sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillText(t,c.width/2,c.height/2+8);const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;return tx}
 function mkBoxer3(b,glove){
   const L=b.look||{},mS=M3(SKIN[L.skin??2],.55),mT=M3(TRUNK[L.tr??0]||'#ff3d52',.45),mG=M3(glove,.28),mSh=M3('#15171c',.7),mH=M3(HAIRC[L.hc??0],.9),mW=M3('#f1f1f1',.8);
@@ -3030,9 +3124,9 @@ function init3D(cv){
   const sp=new THREE.SpotLight('#fff1d8',2.6,22,.62,.55,1);sp.position.set(0,9,1);sp.target.position.set(0,.5,0);sc.add(sp,sp.target);
   const kr=new THREE.PointLight('#ff3b50',1.2,11);kr.position.set(-3.6,2.8,3.6);const kb=new THREE.PointLight('#4f80ff',1.2,11);kb.position.set(3.6,2.8,-3.6);sc.add(kr,kb);
   const fillC=new THREE.PointLight('#ffd9a0',.9,14);fillC.position.set(0,5,0);sc.add(fillC);
-  const W=5.8,H=.5,club=S?S.club:'Coin Rouge';
+  const W=5.8,H=.5,club=S?S.club:'Boxing Manager';
   const apron=new THREE.MeshStandardMaterial({map:texTxt(club.toUpperCase(),'#7a0e1f','#f5c451',1024,128,80),roughness:.7});
-  const matTop=new THREE.MeshStandardMaterial({map:texTxt(initials(club),'#d9dee7','rgba(200,16,46,.28)',512,512,240),roughness:.85});
+  const matTop=new THREE.MeshStandardMaterial({map:ringMatTex(),roughness:.85});
   const ring=new THREE.Mesh(new THREE.BoxGeometry(W,H,W),[apron,apron,matTop,M3('#111'),apron,apron]);ring.position.y=H/2;sc.add(ring);
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(80,80),M3('#0b0d14',.95));floor.rotation.x=-Math.PI/2;sc.add(floor);
   for(const[c,x,z]of[['#e0213a',-1,1],['#f2f2f2',1,1],['#3a63e0',1,-1],['#f2f2f2',-1,-1]]){const p=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,1.6,10),M3('#c9ced8',.3));p.position.set(x*W/2,H+.8,z*W/2);sc.add(p);const pad=new THREE.Mesh(new THREE.BoxGeometry(.2,1.1,.2),M3(c,.5));pad.position.set(x*W/2,H+.75,z*W/2);sc.add(pad)}
@@ -3143,9 +3237,9 @@ function drawRing(c,W,H,now){
   for(const lx of[.28,.72]){const g=c.createLinearGradient(0,0,0,H*.85);g.addColorStop(0,'rgba(255,240,205,.22)');g.addColorStop(1,'rgba(255,240,205,0)');c.fillStyle=g;c.beginPath();c.moveTo(W*lx-6,0);c.lineTo(W*lx+6,0);c.lineTo(W*.5+W*.34,H*.85);c.lineTo(W*.5-W*.34,H*.85);c.closePath();c.fill()}
   const ty=H*.32,by=H*.62,l=W*.08,r=W*.92;
   const mg=c.createRadialGradient(W/2,H*.78,10,W/2,H*.78,W*.62);mg.addColorStop(0,'#eef2f8');mg.addColorStop(1,'#8e98ad');c.fillStyle=mg;c.beginPath();c.moveTo(-2,H*.92);c.lineTo(W+2,H*.92);c.lineTo(r,by);c.lineTo(l,by);c.closePath();c.fill();
-  c.save();c.globalAlpha=.2;c.fillStyle='#c8102e';c.beginPath();c.ellipse(W/2,H*.79,W*.16,H*.065,0,0,7);c.fill();c.globalAlpha=.4;c.font=`900 ${Math.round(H*.07)}px "Big Shoulders Display",Impact,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillStyle='#fff';c.fillText(initials(S?S.club:'Coin Rouge'),W/2,H*.795);c.restore();
+  {const r=Math.min(W*.17,H*.2);c.save();c.translate(W/2,H*.785);c.scale(1,.36);c.globalAlpha=.85;c.drawImage(bmCanvas(),-r,-r,r*2,r*2);c.restore()}
   const ap=c.createLinearGradient(0,H*.92,0,H);ap.addColorStop(0,'#8a1022');ap.addColorStop(1,'#3a0610');c.fillStyle=ap;c.fillRect(0,H*.92,W,H*.08);
-  c.save();c.font=`900 ${Math.round(H*.045)}px "Big Shoulders Display",Impact,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillStyle='rgba(245,196,81,.9)';c.fillText(((S?S.club:'Coin Rouge')+' · Boxe').toUpperCase(),W/2,H*.962);c.restore();
+  c.save();c.font=`900 ${Math.round(H*.045)}px "Big Shoulders Display",Impact,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillStyle='rgba(245,196,81,.9)';c.fillText((S?S.club+' · Boxe':'Boxing Manager').toUpperCase(),W/2,H*.962);c.restore();
   const post=(x,col)=>{const g=c.createLinearGradient(x-4,0,x+4,0);g.addColorStop(0,'#2a2f3c');g.addColorStop(.5,'#d8dce4');g.addColorStop(1,'#2a2f3c');c.fillStyle=g;c.fillRect(x-3.5,ty-12,7,by-ty+12);const p=c.createLinearGradient(x-7,0,x+7,0);p.addColorStop(0,shade(col,-.4));p.addColorStop(.5,col);p.addColorStop(1,shade(col,-.4));c.fillStyle=p;c.fillRect(x-6,ty-4,12,by-ty-8)};
   post(l,'#e0213a');post(r,'#3a63e0');
   [['#e0213a',0],['#f5f6fa',.5],['#3a63e0',1]].forEach(([col,k])=>{const y=ty+(by-ty-16)*k;c.strokeStyle='rgba(0,0,0,.45)';c.lineWidth=4;c.beginPath();c.moveTo(l,y+2);c.quadraticCurveTo(W/2,y+8,r,y+2);c.stroke();c.strokeStyle=col;c.lineWidth=3;c.beginPath();c.moveTo(l,y);c.quadraticCurveTo(W/2,y+6,r,y);c.stroke();c.strokeStyle='rgba(255,255,255,.4)';c.lineWidth=1;c.beginPath();c.moveTo(l,y-1);c.quadraticCurveTo(W/2,y+5,r,y-1);c.stroke()});
@@ -3895,7 +3989,7 @@ function renderMenu(){
   const el=document.getElementById('menu'),st=ui.menu,back='<button class="back" data-a="m_home">← Menu</button>';let h='';
   if(st==='home'){const n=lastSlot(),m=n&&slotMeta(n),cnt=[1,2,3].filter(x=>slotMeta(x)).length;
     h=`<div class="mstage"><canvas id="mcv" aria-hidden="true"></canvas></div><div class="mwrap gut">
-      <div class="logo"><h1>Coin Rouge</h1><span class="tag">Gérant de boxe</span></div>
+      <div class="logo"><img class="mlogo" src="${bmImg()}" alt=""><h1>Boxing<br>Manager</h1><span class="tag">Gérant de boxe</span></div>
       ${m?`<button class="mbtn pri" data-a="m_cont"><b>Continuer</b><span>${flag(m.home)} ${esc(m.club)} · ${when(m.t)} · ${$(m.money)}</span></button>`:''}
       <button class="mbtn mon" data-a="m_online"><b>🌐 En ligne</b><span>Bâtis ton écurie en ligne : un boxeur par catégorie, monte au classement mondial</span></button>
       <button class="mbtn ${m?'':'pri'}" data-a="m_new"><b>Nouvelle carrière</b><span>Crée ton club, choisis ton pays et tes deux premiers boxeurs</span></button>
@@ -4171,7 +4265,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='65e4604584';window.BUILD_MSG="Nouveau look en ligne, profil avec titres et badges, ELO de chaque combat \ud83d\udcc8";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='b92e50554c';window.BUILD_MSG="Nouveau nom : Boxing Manager \ud83e\udd4a + \u00e9cran Nomass Studio";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
