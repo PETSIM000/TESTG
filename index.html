@@ -2874,8 +2874,9 @@ const TUT={
   ...TUT_FIGHT,
   {btn:1,t:()=>TT('🏆 Ton premier combat est fait !','🏆 Your first fight is done!'),d:()=>TT('Continue comme ça : réserve d’autres combats, améliore tes installations, engage du staff et vise les ceintures mondiales. Les ⚠️ en haut te disent ce qu’il reste à faire.','Keep going: book more fights, upgrade facilities, hire staff and aim for world belts. The ⚠️ at the top tell you what’s left to do.')}]};
 let TUTS=null;
-function tutStart(k){TUTS={k,i:0};tutTick()}
-function tutEnd(){TUTS=null;const el=document.getElementById('tut');if(el)el.remove()}
+const tutSeen=k=>{try{return localStorage.getItem('bm_tut_'+k)==='done'}catch(e){return false}};
+function tutStart(k){if(tutSeen(k))return;TUTS={k,i:0};tutTick()}
+function tutEnd(){if(TUTS)try{localStorage.setItem('bm_tut_'+TUTS.k,'done')}catch(e){}TUTS=null;const el=document.getElementById('tut');if(el)el.remove()}
 function tutTick(){if(!TUTS)return;const L=TUT[TUTS.k];let st=L[TUTS.i];
   while(st&&!st.btn&&!st.intro&&((st.skip&&st.skip())||(st.done&&st.done()))){TUTS.i++;st=L[TUTS.i]}
   if(!st){tutEnd();return}
@@ -4783,7 +4784,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 </script>
-<script>window.BUILD='698c35e361';window.BUILD_MSG="\ud83c\udf93 Tutoriel refait + l\u00e9gendes r\u00e9par\u00e9es + pays au choix";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+<script>window.BUILD='742084301c';window.BUILD_MSG="\ud83c\udf93 Tutoriel : ne revient plus une fois fait ou refus\u00e9";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
