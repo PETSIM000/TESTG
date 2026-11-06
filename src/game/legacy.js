@@ -1573,10 +1573,10 @@ function vOnline(){
       `<div class="list" style="grid-template-columns:1fr;margin-top:8px">${H.boxers.map(vOnBox).join('')}</div>`+
       (free.length?`<button class="btn ${H.boxers.length?'':'pri big'}" style="width:100%;margin-top:10px" data-a="oncr">➕ Nouveau boxeur (${free.length} catégorie${free.length>1?'s':''} libre${free.length>1?'s':''})</button>`:'')}
   else if(sub==='cls'&&(u.geo==='C'||u.geo==='R'))body=geoSeg()+vOnGeo(u.geo);
-  else if(sub==='cls'){const dv=u.rdiv||(H.boxers[0]&&H.boxers[0].div)||'leger';u.rdiv=dv;
-    if(dv==='news'){body=geoSeg()+`<div style="margin-bottom:8px">${selH('onrdiv',[['news','📰 Actualité'],['mgr','👔 Gérants (ELO)'],['clubs','🏟️ Clubs'],...ON_DIV.map(d=>[d,(H.boxers.some(b=>b.div===d)?'⭐ ':'')+onDiv(d)])],dv,'k')}</div>`+vOnNews()}else{
+  else if(sub==='cls'){const dv=u.rdiv==='clubs'?'clubs':'mgr';u.rdiv=dv;
+    if(dv==='news'){body=geoSeg()+`<div style="margin-bottom:8px">${selH('onrdiv',[['mgr','👔 Gérants (ELO)'],['clubs','🏟️ Clubs']],dv,'k')}</div>`+vOnNews()}else{
     const L=dv==='mgr'?u.top:dv==='clubs'?u.ctop:u.rank[dv];if(!L)setTimeout(()=>dv==='mgr'?onTop():dv==='clubs'?onClubTop():onRankLoad(dv),0);
-    body=geoSeg()+`<div style="margin-bottom:8px">${selH('onrdiv',[['news','📰 Actualité'],['mgr','👔 Gérants (ELO)'],['clubs','🏟️ Clubs'],...ON_DIV.map(d=>[d,(H.boxers.some(b=>b.div===d)?'⭐ ':'')+onDiv(d)])],dv,'k')}</div>`+
+    body=geoSeg()+`<div style="margin-bottom:8px">${selH('onrdiv',[['mgr','👔 Gérants (ELO)'],['clubs','🏟️ Clubs']],dv,'k')}</div>`+
       (!L?'<p class="small">Chargement…</p>':dv==='clubs'?vClubBoard(L):dv==='mgr'?`<div class="panel">${L.map((p,i)=>`<div class="row" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:nowrap"><span style="min-width:0"><b>${i+1}. ${onMgrLink(p.id,p.name)}</b>${onTag(p)}${p.id===me.id?' <span class="chip gold">Toi</span>':''}<br><span class="small">${onRec(p)}</span></span><span class="lbrk">${badgeHTML(onRk(p.elo).id,{size:46,live:true})}<span><b class="num">${rpOf(p.elo)}</b><br><span class="small">${onRk(p.elo).n} ${onRk(p.elo).div||''}</span></span></span></div>`).join('')}</div>`:
       `<div class="panel">${L.map((b,i)=>`<div class="row" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:nowrap;gap:8px"><span style="min-width:0"><b>${i===0?'👑':(i+1)+'.'} ${bxL(b,flag(b.nat)+' '+esc(b.name))}</b>${b.pid===me.id?' <span class="chip gold">Toi</span>':''}<br><span class="small">${b.ovr} global · Niv. ${b.lvl} · ${onRec(b)} · ${onMgrLink(b.pid,b.mgr)}${onTag(b)}</span></span><span style="text-align:right"><b class="num">${b.rating}</b></span></div>`).join('')||'<p class="small">Personne.</p>'}</div>`)}}
   else if(sub==='defis'){const Q=u.quests;if(!Q&&!u.qbusy)setTimeout(onQuests,0);
@@ -2133,11 +2133,14 @@ function vOnClubView(){const u=onUi(),V=u.cview,d=V.d;if(!d)return'<div class="p
 
 
 const CSORT=[['trophies','🏆 Rang'],['crating','📈 Cote'],['ww','⚔️ Guerres'],['elo','👔 ELO'],['n','👥 Membres']];
-function vClubBoard(L){const u=onUi(),k=u.csort||'trophies',S=[...L].sort((a,b)=>(b[k]-a[k])||(b.trophies-a.trophies));
-  const val=c=>k==='trophies'?`🏆 ${c.trophies}`:k==='crating'?`${c.crating}`:k==='ww'?`${c.ww}-${c.wl}`:k==='elo'?`${c.elo}`:`${c.n}/30`;
+function vClubBoard(L){const u=onUi(),k=u.csort||'trophies',S=[...L].sort((a,b)=>(b[k]-a[k])||(b.trophies-a.trophies)),my=u.club&&u.club.id;
+  const val=c=>k==='trophies'?`🏆 ${c.trophies}`:k==='crating'?`📈 ${c.crating}`:k==='ww'?`⚔️ ${c.ww}-${c.wl}`:k==='elo'?`${rpOf(c.elo)} ELO`:`👥 ${c.n}/30`;
+  const rk=c=>onRk(c.elo),pod=S.slice(0,3),rest=S.slice(3),ord=[1,0,2].filter(i=>pod[i]);
+  const podC=i=>{const c=pod[i];return`<a href="#" class="clp clp${i+1} ${c.id===my?'me':''}" data-a="clubview" data-k="${c.id}"><span class="clp-m">${['🥇','🥈','🥉'][i]}</span><div class="clp-em">${clubEm(c.emblem,c.tag,i?52:64)}</div><b class="clp-n">${esc(c.name)}</b><span class="clp-t">[${esc(c.tag)}] · 👥 ${c.n}</span>${badgeHTML(rk(c).id,{size:i?40:48,live:true})}<span class="clp-v">${val(c)}</span></a>`};
+  const row=(c,i)=>`<a href="#" class="clr ${c.id===my?'me':''}" data-a="clubview" data-k="${c.id}"><span class="clr-i">${i+4}</span><div class="clr-em">${clubEm(c.emblem,c.tag,38)}</div><span class="clr-m"><b>${esc(c.name)}</b>${c.id===my?' <span class="chip gold">Ton club</span>':''}<span class="small">[${esc(c.tag)}] · 👥 ${c.n}/30${c.war?' · <b style="color:#ff7b8b">En guerre</b>':''}</span></span><span class="clr-r">${badgeHTML(rk(c).id,{size:34,live:true})}<b>${val(c)}</b></span></a>`;
   return`<div class="csort">${CSORT.map(([x,n])=>`<button data-a="csort" data-k="${x}" aria-pressed="${k===x}">${n}</button>`).join('')}</div>
-    <button class="btn ghost sm" style="width:100%;margin-bottom:8px" data-a="clrkv">${clRkSVG(7,18)} Voir les 8 rangs de club</button>
-    <div class="cllist">${S.map((c,i)=>`<div class="clrow"><span class="clm-r ${i<3?'top':''}">${i<3?['🥇','🥈','🥉'][i]:i+1}</span>${clubCard(c,0)}<span class="csv">${val(c)}</span></div>`).join('')||'<p class="small">Aucun club.</p>'}</div>`}
+    ${S.length?`<div class="clpod">${ord.map(podC).join('')}</div><div class="clrl">${rest.map(row).join('')}</div>`:'<p class="small">Aucun club.</p>'}
+    <button class="btn ghost sm" style="width:100%;margin-top:10px" data-a="clrkv">${clRkSVG(7,18)} Voir les 8 rangs de club</button>`}
 function vClRanks(){const u=onUi(),my=u.club?u.club.trophies:-1;
   return`<div class="abrv" data-a="clrkx" style="align-items:flex-start;overflow:auto;padding:20px 14px"><div class="panel" style="width:100%;max-width:420px;margin:auto"><div class="ph"><b class="nm" style="font-size:19px">Rangs de club</b><button class="btn sm" data-a="clrkx">✕</button></div>
     <p class="small" style="margin:0 0 8px">Les rangs de club se gagnent <b>seulement avec les guerres</b> : victoire +30 trophées (plus contre un club plus fort), égalité +10, défaite −15.</p>

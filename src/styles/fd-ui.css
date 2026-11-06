@@ -258,3 +258,23 @@ nav.tabs button[aria-current="true"]::before {
 .pf-rank { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; padding: 10px; border-radius: 16px; background: radial-gradient(70% 90% at 30% 50%, rgba(245, 196, 81, .12), transparent 70%); }
 .pf-rk { display: grid; gap: 3px; min-width: 0; }
 .pf-rk .me-rkn { font-size: 22px; }
+
+/* Classement des clubs : podium + lignes (rang ELO moyen du club animé) */
+.clpod { display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: end; gap: 8px; margin: 10px 0 8px; }
+.clp { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 6px 12px; border-radius: 16px; text-decoration: none; color: var(--ink);
+  background: linear-gradient(180deg, #1d2230, #0f1219); border: 1px solid rgba(255, 255, 255, .08); text-align: center; min-width: 0; }
+.clp1 { padding-top: 14px; border-color: rgba(245, 196, 81, .55); background: radial-gradient(90% 60% at 50% 0%, rgba(245, 196, 81, .22), transparent 70%), linear-gradient(180deg, #232838, #10131b); box-shadow: 0 8px 22px rgba(245, 196, 81, .15); }
+.clp2 { border-color: rgba(210, 220, 235, .35); }
+.clp3 { border-color: rgba(224, 140, 80, .4); }
+.clp-m { font-size: 22px; line-height: 1; }
+.clp-n { font: 900 15px/1.1 var(--f-disp); text-transform: uppercase; letter-spacing: .03em; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.clp-t { font-size: 11px; color: var(--muted); }
+.clp-v { font: 900 13px var(--f-disp); color: var(--gold); }
+.clp.me, .clr.me { outline: 2px solid var(--gold); outline-offset: -2px; }
+.clrl { display: flex; flex-direction: column; gap: 6px; }
+.clr { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; text-decoration: none; color: var(--ink); background: #141823; border: 1px solid rgba(255, 255, 255, .06); }
+.clr-i { width: 22px; text-align: center; font: 900 14px var(--f-disp); color: var(--muted); flex: none; }
+.clr-em { flex: none; }
+.clr-m { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.clr-m > b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.clr-r { flex: none; display: flex; align-items: center; gap: 6px; font-size: 13px; }
