@@ -1,4 +1,13 @@
 // Outils partagés des tests de parité.
+import { expect } from '@playwright/test';
+
+/** Clique jusqu'à ce que l'écran suivant apparaisse (le jeu re-rend parfois pendant le clic). */
+export async function advance(page, clickSel, nextSel) {
+  await expect(async () => {
+    await page.locator(clickSel).first().click({ timeout: 2000 });
+    await page.locator(nextSel).first().waitFor({ timeout: 2000 });
+  }).toPass({ timeout: 20_000 });
+}
 export const SEED = 12345;
 
 /** Remplace Math.random par mulberry32 (graine fixe) avant le chargement du jeu. */
@@ -35,19 +44,14 @@ export async function bootToMenu(page, lang = 'fr') {
 
 /** Crée une carrière « Test Gym », Canada, Normal, deux premiers boxeurs. */
 export async function newCareer(page) {
-  await page.locator('[data-a="m_new"]').click();
+  await advance(page, '[data-a="m_new"]', '#ng-club');
   await page.locator('#ng-club').fill('Test Gym');
-  await page.locator('[data-a="m_ngc"]').click();
-  await page.locator('[data-a="m_nat"][data-k="CA"]').click();
-  await page.locator('[data-a="m_nat"][data-k="CA"][aria-pressed="true"]').waitFor();
-  await page.locator('[data-a="m_ngd"]').click();
-  await page.locator('[data-a="m_diff"][data-k="normal"]').click();
-  await page.locator('[data-a="m_diff"][data-k="normal"][aria-pressed="true"]').waitFor();
-  await page.locator('[data-a="m_ng2"]').click();
-  await page.locator('[data-a="m_pick"][data-k="0"]').click();
-  await page.locator('[data-a="m_pick"][data-k="0"][aria-pressed="true"]').waitFor();
-  await page.locator('[data-a="m_pick"][data-k="1"]').click();
-  await page.locator('[data-a="m_pick"][data-k="1"][aria-pressed="true"]').waitFor();
-  await page.locator('[data-a="m_go"]').click();
-  await page.locator('[data-a="next"]').waitFor();
+  await advance(page, '[data-a="m_ngc"]', '[data-a="m_nat"][data-k="CA"]');
+  await advance(page, '[data-a="m_nat"][data-k="CA"]', '[data-a="m_nat"][data-k="CA"][aria-pressed="true"]');
+  await advance(page, '[data-a="m_ngd"]', '[data-a="m_diff"][data-k="normal"]');
+  await advance(page, '[data-a="m_diff"][data-k="normal"]', '[data-a="m_diff"][data-k="normal"][aria-pressed="true"]');
+  await advance(page, '[data-a="m_ng2"]', '[data-a="m_pick"][data-k="0"]');
+  await advance(page, '[data-a="m_pick"][data-k="0"]', '[data-a="m_pick"][data-k="0"][aria-pressed="true"]');
+  await advance(page, '[data-a="m_pick"][data-k="1"]', '[data-a="m_pick"][data-k="1"][aria-pressed="true"]');
+  await advance(page, '[data-a="m_go"]', '[data-a="next"]');
 }

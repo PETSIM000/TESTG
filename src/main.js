@@ -2,3 +2,4 @@
 import './styles/base.css';
 import './styles/game.css';
 import './styles/online.css';
+import './game/legacy.js';

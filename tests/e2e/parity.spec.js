@@ -58,3 +58,28 @@ test('langue: English bascule les textes', async ({ page }) => {
   await bootToMenu(page, 'en');
   await expect(page.locator('[data-a="m_new"]')).toContainText(/NEW CAREER/i);
 });
+
+test('aucune erreur console sur le parcours carrière + en ligne', async ({ page }) => {
+  await page.route('**/*.supabase.co/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: 'null' }));
+  const errors = collectErrors(page);
+  await bootToMenu(page);
+  await newCareer(page);
+  for (const t of ['combats', 'rank', 'defis', 'staff', 'club', 'ecurie']) {
+    await page.locator(`[data-a="tab"][data-k="${t}"]`).first().click({ force: true });
+  }
+  await page.locator('[data-a="next"]').click();
+  await expect(page.locator('#hdr')).toContainText('S2');
+  await page.waitForTimeout(500);
+  expect(errors).toEqual([]);
+});
+
+test('langue: le bouton Français/English des réglages change la langue', async ({ page }) => {
+  await bootToMenu(page);
+  await newCareer(page);
+  await page.locator('[data-a="settings"]').click();
+  const en = page.locator('[data-gl="en"]').first();
+  await en.waitFor();
+  await Promise.all([page.waitForEvent('load'), en.click()]);
+  await page.locator('#splash').click({ force: true }).catch(() => {});
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('bm_lang'))).toBe('en');
+});

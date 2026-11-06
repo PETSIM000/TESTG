@@ -5,3 +5,5 @@ playwright-report/
 .superpowers/
 .vercel/
 .env*
+
+.vercel

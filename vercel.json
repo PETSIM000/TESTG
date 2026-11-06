@@ -1,13 +1,12 @@
 {
- "headers": [
-  {
-   "source": "/(sw.js|version.json)",
-   "headers": [
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm ci",
+  "framework": null,
+  "headers": [
     {
-     "key": "Cache-Control",
-     "value": "no-cache"
+      "source": "/(sw.js|version.json)",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
     }
-   ]
-  }
- ]
+  ]
 }
