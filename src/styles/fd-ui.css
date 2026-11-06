@@ -284,3 +284,16 @@ nav.tabs button[aria-current="true"]::before {
 .clm-rk { color: var(--gold); letter-spacing: .02em; }
 .clm-rk[data-rk="bronze"] { color: #e0905a; } .clm-rk[data-rk="argent"] { color: #d6dde8; } .clm-rk[data-rk="platine"] { color: #9fe3f0; }
 .clm-rk[data-rk="diamant"] { color: #6fb8ff; } .clm-rk[data-rk="maitre"] { color: #c58cff; } .clm-rk[data-rk="champion"] { color: #ffcf4a; } .clm-rk[data-rk="dynasty"] { color: #ffd76a; }
+
+/* Photo de profil */
+.ohd-av { overflow: hidden; }
+.ph-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.ph-pick { display: flex; align-items: center; gap: 14px; }
+.ph-now { width: 72px; height: 72px; border-radius: 50%; overflow: hidden; flex: none; border: 2px solid var(--gold); background: #141823; display: grid; place-items: center; }
+.ph-none { font-size: 11px; color: var(--muted); }
+.ph-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.ph-up { cursor: pointer; }
+.ph-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.ph-opt { padding: 0; aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 2px solid transparent; background: #141823; cursor: pointer; }
+.ph-opt.on { border-color: var(--gold); }
+.ph-opt img { width: 100%; height: 100%; display: block; }
