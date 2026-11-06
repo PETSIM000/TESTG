@@ -28,11 +28,11 @@ def radial(size):
     r = min(w, h) / 2
     m = Image.new('L', size, 0)
     d = ImageDraw.Draw(m)
-    # opaque jusqu'à 78 % du rayon, fondu jusqu'à 100 % (comme l'ancien masque CSS)
+    # opaque jusqu'à 62 % du rayon, fondu jusqu'à 72 % : retire les rayons orange autour de l'emblème
     steps = 40
     for s in range(steps, -1, -1):
         t = s / steps
-        rr = r * (0.78 + 0.22 * t)
+        rr = r * (0.62 + 0.10 * t)
         v = int(255 * (1 - t))
         d.ellipse((w / 2 - rr, h / 2 - rr, w / 2 + rr, h / 2 + rr), fill=v)
     return m.filter(ImageFilter.GaussianBlur(r * 0.01))
