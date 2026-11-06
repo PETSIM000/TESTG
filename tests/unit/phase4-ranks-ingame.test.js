@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import './setup-dom.js';
 import { describe, it, expect } from 'vitest';
-import { rpOf, onRk, seasonNow, vOnHead } from '../../src/game/legacy.js';
+import { rpOf, onRk, seasonNow, vOnHead, rankLadder } from '../../src/game/legacy.js';
 
 describe('Phase 4 : rang du gérant sur l’échelle 0 – 10 000', () => {
   it('un nouveau compte (1000 ELO serveur) part de Bronze III à 0', () => {
@@ -36,5 +36,20 @@ describe('Phase 4 : rang du gérant sur l’échelle 0 – 10 000', () => {
     expect(html).toContain('class="fd-badge"');
     expect(html).toContain('6188');
     expect(html).not.toContain('fd-frame');
+  });
+  it('échelle des récompenses : seulement l’ELO du gérant, nouvelle échelle', () => {
+    // Bronze III (1050 ELO serveur = 200 pts) avec un boxeur coté 1100 : rien d'atteint au-dessus de Bronze III.
+    const L = rankLadder({ elo: 1050 }, { best: 1100, done: [], list: [{ r: 850, n: 'Bronze II', c: 50 }, { r: 900, n: 'Bronze I', c: 80 }] });
+    expect(L[0]).toMatchObject({ n: 'Bronze III', got: true, cur: true });
+    expect(L.filter((x) => x.got).map((x) => x.n)).toEqual(['Bronze III']);
+    expect(L.find((x) => x.n === 'Bronze II')).toMatchObject({ rp: 500, got: false, need: 300 });
+  });
+  it('anciennes récompenses du serveur (ancienne échelle) : pas de bouton à réclamer', () => {
+    const L = rankLadder({ elo: 1200 }, { best: 1200, done: [], list: [{ r: 850, n: 'Bronze II', c: 50 }] });
+    expect(L.find((x) => x.n === 'Bronze II')).toMatchObject({ got: true, claim: null });
+  });
+  it('nouvelles récompenses (après migration) : réclamables une fois atteintes', () => {
+    const L = rankLadder({ elo: 1200 }, { best: 1200, done: [], list: [{ r: 1125, rp: 500, n: 'Bronze II', c: 50 }] });
+    expect(L.find((x) => x.n === 'Bronze II')).toMatchObject({ got: true, claim: { r: 1125, c: 50 } });
   });
 });

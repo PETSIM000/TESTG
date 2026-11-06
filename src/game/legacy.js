@@ -2730,15 +2730,20 @@ function vOnBx(b){const u=onUi(),k=onRk(b.rating),mine=u.home&&b.pid===u.home.me
     <div class="list" style="grid-template-columns:1fr">${b.abil.length?b.abil.map(q=>ONAB[q]?abCard(q):'').join(''):'<p class="small">Aucun pouvoir.</p>'}<button class="btn ghost sm" style="width:100%" data-a="abcat">📖 Tous les pouvoirs et leurs chances</button>${onUi().abcat?abCatalog():''}
     ${b.slots<3?`<p class="small" style="margin:0;opacity:.7">🔒 ${b.slots<2?'2e pouvoir au niveau 10 · ':''}3e pouvoir au niveau 20</p>`:''}</div>${vOnBxMine(b)}`}
 /* --- rangs + récompenses --- */
-async function rkLoad(){const u=onUi();try{const r=await rpc('cr_ranks',{p_token:ON.token});u.rk={best:onI(r.best,0,9999,1000),done:(Array.isArray(r.done)?r.done:[]).map(String),list:(r.list||[]).map(x=>({r:onI(x.r,0,9999,0),n:onT(x.n,20),c:onI(x.c,0,99999,0)}))}}catch(e){toast(e.message);u.rk={best:0,done:[],list:[]}}onR()}
+async function rkLoad(){const u=onUi();try{const r=await rpc('cr_ranks',{p_token:ON.token});u.rk={best:onI(r.best,0,9999,1000),done:(Array.isArray(r.done)?r.done:[]).map(String),list:(r.list||[]).map(x=>({r:onI(x.r,0,9999,0),rp:x.rp!=null?onI(x.rp,0,99999,0):undefined,n:onT(x.n,20),c:onI(x.c,0,99999,0)}))}}catch(e){toast(e.message);u.rk={best:0,done:[],list:[]}}onR()}
 async function rkClaim(r){try{const x=await rpc('cr_rank_claim',{p_token:ON.token,p_r:r});toast(`🏅 Récompense de rang : +${onI(x.gain,0,99999,0)} 💰`);await rkLoad();onLoad(true)}catch(e){toast(e.message)}}
+/* Échelle des rangs du GÉRANT (un seul rang par compte, les boxeurs ne comptent pas).
+   Récompenses réclamables seulement quand le serveur fournit la nouvelle échelle (champ rp, migration Phase 4). */
+function rankLadder(me,R){const my=rpOf(me.elo),defs=(R.list||[]).filter(x=>x.rp!=null);let cur=0;
+  RKSTEPS.forEach((s,i)=>{if(my>=s.rp)cur=i});
+  return RKSTEPS.map((s,i)=>{const d=defs.find(x=>x.rp===s.rp),got=my>=s.rp,done=!!d&&R.done.includes(String(d.r));
+    return{id:s.id,n:s.n,rp:s.rp,got,cur:i===cur,need:Math.max(0,s.rp-my),c:d?d.c:0,done,claim:d&&got&&!done?{r:d.r,c:d.c}:null}})}
 function vOnRanks(){const u=onUi(),R=u.rk;if(!R||R.list===undefined){if(!u.rkBusy){u.rkBusy=1;setTimeout(async()=>{await rkLoad();u.rkBusy=0},0)}return`<div class="panel"><p class="small">Chargement…</p></div>`}
-  const all=[{r:0,n:'Bronze III',c:0},...R.list];
+  const me=u.home.me,L=rankLadder(me,R),srv=(R.list||[]).some(x=>x.rp!=null);
   return`<div class="panel"><div class="ph"><b class="nm" style="font-size:20px">🏅 Rangs et récompenses</b><button class="btn sm" data-a="onrkx">← Retour</button></div>
-    <p class="small" style="margin:0">Ton rang vient de ta meilleure cote : celle de ton gérant (ELO) ou de ton meilleur boxeur. Meilleurs points : <b>${rpOf(R.best)}</b> / 10 000. Chaque nouveau rang atteint donne une récompense à réclamer (une seule fois). À partir de Diamant, chaque rang ajoute aussi un trophée à ton profil.</p></div>
-    <div class="list" style="grid-template-columns:1fr;margin-top:8px">${all.map(x=>{const k=onRk(x.r),got=R.best>=x.r,done=!x.c||R.done.includes(String(x.r));
-      return`<div class="panel rkrow ${got?'got':''} ${got&&!(all.find(y=>y.r>x.r&&R.best>=y.r))?'cur':''}" style="padding:12px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;gap:10px"><span class="rkbig">${badgeHTML(k.id,{size:56})}</span><span style="flex:1;min-width:0"><b>${esc(x.n)}</b><br><span class="small">${x.r?`${rpOf(x.r)} pts`:'Départ'}${x.c?` · récompense ${x.c} 💰${rpOf(x.r)>=6000?' + 🏆':''}`:''}</span></span>
-        ${!x.c?'<span class="chip">✅</span>':done?'<span class="chip">✅ Reçu</span>':got?`<button class="btn gold sm" data-a="onrkc" data-k="${x.r}">+${x.c} 💰</button>`:`<span class="chip" style="opacity:.6">🔒 ${rpOf(x.r)-rpOf(R.best)} pts</span>`}</div></div>`}).join('')}</div>`}
+    <p class="small" style="margin:0">Ton rang vient de ton ELO de gérant, gagné en mode Classé. Tes boxeurs ne comptent pas. Tu as <b>${rpOf(me.elo)}</b> / 10 000.${srv?' Chaque nouveau rang donne une récompense à réclamer une seule fois.':' Les récompenses de la nouvelle échelle arrivent bientôt.'}</p></div>
+    <div class="list" style="grid-template-columns:1fr;margin-top:8px">${L.map(x=>`<div class="panel rkrow ${x.got?'got':''} ${x.cur?'cur':''}" style="padding:12px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;gap:10px"><span class="rkbig">${badgeHTML(x.id,{size:56})}</span><span style="flex:1;min-width:0"><b>${esc(x.n)}</b><br><span class="small">${x.rp?`${x.rp} pts`:'Départ'}${x.c?` · récompense ${x.c} 💰${x.rp>=6000?' + 🏆':''}`:''}</span></span>
+        ${x.claim?`<button class="btn gold sm" data-a="onrkc" data-k="${x.claim.r}">+${x.claim.c} 💰</button>`:x.cur?'<span class="chip gold">Ton rang</span>':x.done?'<span class="chip">✅ Reçu</span>':x.got?'<span class="chip">✅</span>':`<span class="chip" style="opacity:.6">🔒 ${x.need} pts</span>`}</div></div>`).join('')}</div>`}
 /* --- actualité (vrais joueurs et IA) --- */
 async function newsLoad(){const u=onUi();try{u.news=((await rpc('cr_news',{}))||[]).slice(0,30).map(m=>({at:m.at,n1:onT(m.n1,16),n2:onT(m.n2,16),b1:onT(m.b1,40),b2:onT(m.b2,40),res:onI(m.res,0,2,0),method:['KO','TKO','DEC'].includes(m.method)?m.method:'DEC',rnd:onI(m.rnd,0,12,0),div:ON_DIV.includes(m.div)?m.div:null,bot1:m.bot1===true,bot2:m.bot2===true}))}catch(e){u.news=[]}onR()}
 function vOnNews(){const u=onUi(),L=u.news;if(!L){setTimeout(newsLoad,0);return'<p class="small">Chargement…</p>'}
@@ -4249,5 +4254,5 @@ addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
 export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList, train, campWeekCost, campTotal, inactivityTick, inactiveWeeks, INACTIVE_MAX, purse, moneyS };
-export { rpOf, onRk, seasonNow, vOnHead };
+export { rpOf, onRk, seasonNow, vOnHead, rankLadder };
 export const getState = () => S;
