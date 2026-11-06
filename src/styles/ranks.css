@@ -1,0 +1,16 @@
+/* Rangs (vidéos de Max) : fond noir et bords déjà fondus dans les clips ; la fusion « screen »
+   les rend invisibles sur l'interface sombre, sans aucune boîte noire. */
+.fd-badge, .fd-frame { position: relative; display: inline-block; flex: none; }
+.fd-badge { width: var(--w); }
+.fd-badge .fd-art { display: block; width: var(--w); height: var(--h); object-fit: cover; mix-blend-mode: screen; }
+.fd-frame { width: var(--w); height: var(--w); }
+.fd-frame .fd-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; mix-blend-mode: screen; z-index: 1; }
+.fd-hole { position: absolute; border-radius: 50%; overflow: hidden; display: grid; place-items: center; z-index: 0; }
+.fd-hole > * { width: 100%; height: 100%; object-fit: cover; }
+.fd-div, .fd-plate {
+  font: 900 calc(var(--w) * .095) / 1 var(--f-disp, Impact, sans-serif);
+  color: var(--c); background: #0b0d14; border: 2px solid var(--c); border-radius: 6px;
+  padding: .2em .45em; letter-spacing: .04em; box-shadow: 0 0 10px color-mix(in srgb, var(--c) 45%, transparent);
+}
+.fd-div { display: block; width: max-content; margin: -.4em auto 0; position: relative; z-index: 2; }
+.fd-plate { position: absolute; transform: translate(-50%, -50%); z-index: 2; min-width: 2.4em; text-align: center; }

@@ -1,0 +1,27 @@
+{
+  "name": "fight-dynasty",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "acorn": "^8.19.0",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
+    "jsdom": "^25.0.1",
+    "vite": "^6.4.5",
+    "vitest": "^3.2.7"
+  },
+  "dependencies": {
+    "three": "^0.149.0"
+  }
+}
