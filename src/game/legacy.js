@@ -439,6 +439,10 @@ function finishNew(){
   log(`${S.mgrName} fonde ${S.club} (${flag(S.home)} ${NAT[S.home].n}). Premiers boxeurs : ${pk.map(b=>b.name).join(' et ')}. Tout se gagne sur le ring.`,'gold');
   const s=S;ui.ng=null;enterGame(s);toast(`Bienvenue chez ${S.club} !`);
 }
+// Règle n° 12 (Max, 2026-11-05) : chaque semaine de camp coûte plus cher que la précédente,
+// pour que la durée du camp redevienne une vraie décision (8 sem. ≈ +3 500 $ par rapport à 6).
+function campWeekCost(i){return Math.round(250*Math.pow(1.35,i)/50)*50}
+function campTotal(n){let s=0;for(let i=0;i<n;i++)s+=campWeekCost(i);return s}
 function train(b){
   const cut=S.staff.cut?S.staff.cut.stars:0,phys=S.staff.phys?S.staff.phys.stars:0,coach=S.staff.coach?S.staff.coach.stars:0,fc=S.fac||{};
   const cf=S.fights.find(z=>z.a===b.id&&z.week>=S.t);
@@ -448,12 +452,9 @@ function train(b){
   if(cf){if(cf.auto!==false&&!cf.gp){const op=getB(cf.b);if(op)cf.gp=bestGP(op.style)}foc=campFocus(b,cf);const Fo=FOC[foc];P={xp:Fo.xp,fat:Fo.fat,inj:Fo.inj}}
   else{if(b.plan==='sparring'&&!S.staff.spar.length)b.plan='normal';P=PLANS[b.plan]||PLANS.normal;if(b.fatigue>=80&&P.xp){P=PLANS.repos;if(!b.autoR)log(`${b.name} est épuisé : repos automatique jusqu’à ce qu’il récupère.`);b.autoR=1}else if(b.fatigue<50)b.autoR=0;
     if(!P.xp){b.fatigue=cl(b.fatigue-25-phys*4-3*(fc.cardio||0),0,100);b.morale=cl(b.morale+3,0,100);return}}
-  const age=ageXp(b);
   const spar=(cf?foc==='spar':b.plan==='sparring')?S.staff.spar.reduce((s,y)=>s+y.stars,0):0;
-  let x=24*P.xp*age*gymXP(b)*chemF(b)*(1+.12*coach)*(1+.08*(S.gym-1))*(1+.15*spar)*(1-b.fatigue/200)*(.85+b.morale/400);
-  if(has(b,'bosseur'))x*=1.2;if(has(b,'paresseux'))x*=.8;if(b.loy>80)x*=1.1;
-  if(x>0)addXP(b,x);
-  if(cf){const Fo=FOC[foc];
+  // Règle n° 11 (Max, 2026-11-05) : l'entraînement prépare (forme, camp), il ne donne plus d'XP.
+  if(cf){const Fo=FOC[foc],cc=campWeekCost(cf.wk||0);S.money-=cc;
     const g=Fo.prep*(1+.08*coach+.05*phys)*(1+.1*(fc.ring||0))*((foc==='cardio'||foc==='repos'||foc==='aff')?1+.15*(fc.cardio||0):1)*(foc==='spar'?1+.1*spar:1)*(1-b.fatigue/220)+(cf.camp==='video'?1:cf.camp==='alt'?2:0);
     cf.prep=cl(Math.round((cf.prep??10)+g),0,100);cf.wk=(cf.wk||0)+1;cf.bon=cf.bon||{};if(Fo.bon)cf.bon[Fo.bon]=(cf.bon[Fo.bon]||0)+1;(cf.log=cf.log||[]).push(foc);
     if(foc==='spar')mcAdd('spar')}
@@ -3434,7 +3435,7 @@ function vScout(o){
   const galas=(S.galas||[]).filter(g=>!g.done&&g.week>=S.t+2),bev=galas.find(g=>g.id===ui.bev)?ui.bev:null,bw=Math.max(ui.bw||4,me&&me.lastFight!=null?me.lastFight+6-S.t:0),wk=bev?galas.find(g=>g.id===bev).week:S.t+bw;
   const t0=tOpt.length?tOpt:null,rounds=t0?12:can?roundsFor(me,o,false):0,pp=can?Math.round(purse(me,o,t0)*(wk-S.t<=2?1.1:1)):0,od=can&&!err?matchOdds(me,o,rounds):null;
   const book=can&&(!err||nat||tDef.length)?`<div class="mbar col">
-    <div class="wkpick"><span>Dans</span><div class="seg">${[2,3,4,6,8,10].map(w=>`<button data-a="bw" data-k="${w}" aria-pressed="${!bev&&bw===w}" ${me&&S.t+w<(me.lastFight||-99)+6?'disabled':''}>${w}</button>`).join('')}</div><span>sem.</span></div>${me&&S.t+2<(me.lastFight||-99)+6?`<p class="small" style="margin:0">💤 Récupération : pas de combat avant ${when(me.lastFight+6)}.</p>`:''}${galas.length?`<div class="seg">${galas.map(g=>`<button data-a="bev" data-k="${g.id}" aria-pressed="${bev===g.id}">🎪 ${esc(g.name.slice(0,18))}</button>`).join('')}</div>`:''}
+    <div class="wkpick"><span>Dans</span><div class="seg">${[2,3,4,6,8,10].map(w=>`<button data-a="bw" data-k="${w}" aria-pressed="${!bev&&bw===w}" ${me&&S.t+w<(me.lastFight||-99)+6?'disabled':''}>${w}</button>`).join('')}</div><span>sem. · camp ${$(campTotal(ui.bw||4))}</span></div>${me&&S.t+2<(me.lastFight||-99)+6?`<p class="small" style="margin:0">💤 Récupération : pas de combat avant ${when(me.lastFight+6)}.</p>`:''}${galas.length?`<div class="seg">${galas.map(g=>`<button data-a="bev" data-k="${g.id}" aria-pressed="${bev===g.id}">🎪 ${esc(g.name.slice(0,18))}</button>`).join('')}</div>`:''}
     <div class="row" style="justify-content:space-between;gap:8px"><div style="min-width:0"><b>${bev?'Ton gala':$(myShare(pp))}</b> <span class="small">· ${when(wk)}${bev?` · tu paies ${$(Math.round(pp*.6))}`:''}</span></div>${od?`<div class="small">Victoire ${pill(od.w)}</div>`:''}</div>
       <div class="bkbtns">${!err?`<button class="btn ${t0?'gold':'pri'}" data-a="propose" data-id="${o.id}">${t0?'Défier · '+t0.join(' '):'Signer'}</button>`:''}${tDef.length?`<button class="btn gold" data-a="proposeD" data-id="${o.id}">Défendre ${tDef.join(' ')}</button>`:''}${nat?`<button class="btn gold" data-a="proposeN" data-id="${o.id}">Titre ${flag(o.nat)}</button>`:''}</div></div></div>`
     :`<div class="mbar"><span class="small">${err||''}</span></div>`;
@@ -4168,5 +4169,5 @@ async function doUpd(){try{if(window.caches){for(const k of await caches.keys())
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),60000);try{const pv=localStorage.getItem('cr_build');localStorage.setItem('cr_build',window.BUILD);if(pv&&pv!==window.BUILD){const n=document.getElementById('updok');if(n){n.innerHTML='✅ <b>Jeu mis à jour !</b>'+(window.BUILD_MSG?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(window.BUILD_MSG)+'</span>':'');n.hidden=false;setTimeout(()=>{n.hidden=true},7000)}}}catch(e){}});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});addEventListener('pageshow',()=>checkUpd(false));addEventListener('focus',()=>checkUpd(false));
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
-export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList };
+export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList, train, campWeekCost, campTotal };
 export const getState = () => S;
