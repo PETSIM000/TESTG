@@ -1,0 +1,8 @@
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  base: './',
+  build: { outDir: 'dist', assetsInlineLimit: 0, emptyOutDir: true },
+  server: { port: 5178, strictPort: true },
+  preview: { port: 5178, strictPort: true },
+});

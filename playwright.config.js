@@ -7,6 +7,7 @@ export default defineConfig({
   timeout: 60_000,
   fullyParallel: true,
   retries: 0,
+  workers: 2,
   reporter: [['list']],
   expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: 'disabled' } },
   use: { baseURL: BASE_URL, serviceWorkers: 'block', locale: 'fr-CA' },
@@ -15,7 +16,7 @@ export default defineConfig({
     { name: 'small', use: { ...devices['Pixel 7'], viewport: { width: 360, height: 740 } } },
   ],
   webServer: process.env.BASE_URL ? undefined : {
-    command: process.env.WEB_CMD || 'npm run serve:legacy',
+    command: process.env.WEB_CMD || 'npm run build && npm run preview',
     url: BASE_URL,
     reuseExistingServer: true,
     timeout: 120_000,

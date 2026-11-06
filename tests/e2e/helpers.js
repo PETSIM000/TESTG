@@ -39,11 +39,15 @@ export async function newCareer(page) {
   await page.locator('#ng-club').fill('Test Gym');
   await page.locator('[data-a="m_ngc"]').click();
   await page.locator('[data-a="m_nat"][data-k="CA"]').click();
+  await page.locator('[data-a="m_nat"][data-k="CA"][aria-pressed="true"]').waitFor();
   await page.locator('[data-a="m_ngd"]').click();
   await page.locator('[data-a="m_diff"][data-k="normal"]').click();
+  await page.locator('[data-a="m_diff"][data-k="normal"][aria-pressed="true"]').waitFor();
   await page.locator('[data-a="m_ng2"]').click();
   await page.locator('[data-a="m_pick"][data-k="0"]').click();
+  await page.locator('[data-a="m_pick"][data-k="0"][aria-pressed="true"]').waitFor();
   await page.locator('[data-a="m_pick"][data-k="1"]').click();
+  await page.locator('[data-a="m_pick"][data-k="1"][aria-pressed="true"]').waitFor();
   await page.locator('[data-a="m_go"]').click();
   await page.locator('[data-a="next"]').waitFor();
 }
