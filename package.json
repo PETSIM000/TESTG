@@ -1,0 +1,14 @@
+{
+  "name": "fight-dynasty",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "serve:legacy": "http-server . -p 5178 -c-1 --silent",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "http-server": "^14.1.1"
+  }
+}
