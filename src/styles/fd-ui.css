@@ -218,3 +218,22 @@ nav.tabs button[aria-current="true"]::before {
 .fd-rres-p { font: 600 13px var(--f-mono); color: var(--muted); }
 .fd-rres .trk { width: 100%; }
 .fd-rres-x { margin-top: 10px; font: 700 11px var(--f-cond); letter-spacing: .18em; text-transform: uppercase; color: rgba(255, 255, 255, .45); }
+
+/* ---------- Cadres équipables : « Mes cadres » et bannière ---------- */
+.ohd-fr { flex: none; display: block; margin: -10px -8px -10px -10px; }
+.frgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; }
+.frit { display: grid; justify-items: center; gap: 6px; padding: 10px 6px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255, 255, 255, .02); text-align: center; }
+.frit.on { border-color: rgba(245, 196, 81, .6); box-shadow: 0 0 0 1px rgba(245, 196, 81, .25), 0 8px 22px rgba(245, 196, 81, .12); }
+.frit b { font: 700 12.5px var(--f-cond); letter-spacing: .04em; text-transform: uppercase; }
+.frit .btn { width: 100%; }
+.frit .btn.on { border-color: rgba(245, 196, 81, .6); color: var(--gold); }
+.bnr { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 12px; border-radius: 18px; border: 1px solid rgba(255, 226, 122, .4);
+  background: radial-gradient(90% 120% at 0% 0%, rgba(255, 61, 82, .25), transparent 60%), radial-gradient(90% 120% at 100% 0%, rgba(255, 200, 60, .18), transparent 60%), linear-gradient(180deg, #1a0d12, #0d1018); }
+.bnr-av .ohd-av.big { width: 96px; height: 96px; font-size: 44px; }
+.bnr-id { display: grid; gap: 3px; min-width: 0; }
+.bnr-id b { font: 900 24px/1 var(--f-disp); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bnr-rk { display: flex; align-items: center; gap: 4px; font: 700 13px var(--f-cond); color: #ffd27a; }
+.bnr-l { font: 800 10px var(--f-cond); letter-spacing: .2em; text-transform: uppercase; color: rgba(255, 255, 255, .5); }
+.bnr-vit { display: grid; justify-items: center; gap: 2px; }
+.bnr-empty { width: 96px; aspect-ratio: 1; border-radius: 50%; border: 2px dashed rgba(255, 255, 255, .2); display: grid; place-items: center; font: 700 11px var(--f-cond); color: var(--muted); text-transform: uppercase; }
+@media (max-width: 380px) { .bnr { grid-template-columns: auto 1fr; } .bnr-vit { grid-column: 1 / -1; } }
