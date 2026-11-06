@@ -3903,34 +3903,26 @@ function vCloudCard(){if(ON)return`<div class="cloudc ok"><span class="ci">☁�
 function renderMenu(){
   const el=document.getElementById('menu'),st=ui.menu,back='<button class="back" data-a="m_home">← Menu</button>';let h='';
   if(st==='home'){const n=lastSlot(),m=n&&slotMeta(n),cnt=[1,2,3].filter(x=>slotMeta(x)).length,ss=seasonNow();
-    // Menu principal FIGHT DYNASTY : logo officiel, reprise de partie en vedette, deux modes en grandes tuiles.
-    const SV={glove:'<path d="M7 13.5V8.6C7 6 8.8 4 11.4 4h1.8C15.9 4 18 6.1 18 8.8v3.4c0 2-1 3.4-2.4 4.2V19H8.6v-2.7C7.6 15.8 7 14.8 7 13.5Z"/><path d="M7 10.2c-1.6 0-2.6 1-2.6 2.4 0 1.5 1.1 2.4 2.6 2.4"/><path d="M8.6 16.4h7"/><path d="M11 8.4c1.6-.2 3 .3 4 1.4"/>',
-      globe:'<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.6 3.6 5.4 3.6 8.5s-1 5.9-3.6 8.5c-2.6-2.6-3.6-5.4-3.6-8.5s1-5.9 3.6-8.5Z"/>',
-      load:'<path d="M4 7.5V18a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 18V9.5A1.5 1.5 0 0 0 18.5 8H12l-2-2.5H5.5A1.5 1.5 0 0 0 4 7Z"/>',
-      lang:'<path d="M4 6h9M8.5 4v2c0 4-2 7-5 8.5M6 10c1.2 2 3 3.4 5.5 4.3"/><path d="M13 20l3.5-8 3.5 8M14.2 17.5h4.6"/>',
-      chat:'<path d="M5 17.5 4 21l4-1.8c1.2.5 2.5.8 4 .8 4.7 0 8-3.1 8-7s-3.3-7-8-7-8 3.1-8 7c0 1.6.4 3.1 1 4.5Z"/>',
+    // Menu principal, style soirée de combat (UFC / Fight Night) : fond vidéo plein écran (public/brand/menu-bg.mp4,
+    // repli sur une scène CSS), logo en coin, menu vertical en lettres massives.
+    const SV={lang:'<path d="M4 6h9M8.5 4v2c0 4-2 7-5 8.5M6 10c1.2 2 3 3.4 5.5 4.3"/><path d="M13 20l3.5-8 3.5 8M14.2 17.5h4.6"/>',
       music:'<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
-      sfx:'<path d="M5 9.5h3l4.5-4v13L8 14.5H5Z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>',
-      play:'<path d="M8 5.5v13l10.5-6.5Z" fill="currentColor"/>'};
-    const sv=(k,c)=>`<svg class="mh-ic ${c||''}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${SV[k]}</svg>`;
-    const off=(k)=>AU[k]?'':' off';
-    const emb=Array.from({length:18},(_,i)=>`<i style="left:${(i*53)%100}%;animation-delay:${((i*37)%60)/10}s;animation-duration:${5+(i%5)}s"></i>`).join('');
-    h=`<div class="mstage mh-arena" aria-hidden="true"><i class="sl l"></i><i class="sl r"></i><i class="sl c"></i><div class="ring"></div><div class="emb">${emb}</div></div><div class="mwrap gut mh">
-      <div class="mh-logo"><img src="brand/logo.webp" alt="FIGHT DYNASTY" width="600" height="636"></div>
-      ${vCloudCard()}
-      ${m?`<button class="mh-cont" data-a="m_cont"><span class="mh-flag">${flag(m.home)}</span><span class="mh-ci"><small>Reprendre ta carrière</small><b>${esc(m.club)}</b><em>${when(m.t)} · ${$(m.money)}</em></span><span class="mh-go">${sv('play')}</span></button>`:''}
-      <div class="mh-modes">
-        <button class="mh-mode car${m?'':' hot'}" data-a="m_new">${sv('glove','big')}<b>Carrière</b><span>Nouvelle carrière</span></button>
-        <button class="mh-mode onl" data-a="m_online">${sv('globe','big')}<b>En ligne</b><span>Classé · Saison ${ss}</span></button>
-      </div>
-      <div class="mh-tools">
-        <button data-a="m_load" ${cnt?'':'disabled'}>${sv('load')}<span>Charger${cnt?` · ${cnt}`:''}</span></button>
-        <button data-a="m_lang" data-noi18n>${sv('lang')}<span>${LANG==='en'?'English':'Français'}</span></button>
-        <button data-gfb>${sv('chat')}<span>Avis</span></button>
-        <button class="${off('music')}" data-a="m_au" data-k="music" aria-pressed="${!!AU.music}">${sv('music')}<span>Musique</span></button>
-        <button class="${off('sfx')}" data-a="m_au" data-k="sfx" aria-pressed="${!!AU.sfx}">${sv('sfx')}<span>Sons</span></button>
-      </div>
-      <p class="mfoot">Aucun avantage à acheter · Aucune pub<br><span class="vtag">10 COUNT GAMES · ${GAME_V}</span></p></div>`}
+      sfx:'<path d="M5 9.5h3l4.5-4v13L8 14.5H5Z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>'};
+    const sv=k=>`<svg class="fn-ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${SV[k]}</svg>`;
+    const item=(a,title,sub,extra='',cls='')=>`<button class="fn-it ${cls}" ${a}${extra}><b>${title}</b>${sub?`<span>${sub}</span>`:''}</button>`;
+    h=`<div class="fn-bg" aria-hidden="true"><video class="fn-vid" autoplay muted loop playsinline preload="auto" poster="brand/menu-bg.webp"><source src="brand/menu-bg.mp4" type="video/mp4"></video><i class="fn-fog"></i><i class="fn-beam"></i><i class="fn-shade"></i></div>
+      <div class="fn">
+        <div class="fn-top"><img class="fn-logo" src="brand/logo.webp" alt="FIGHT DYNASTY" width="600" height="636"><span class="fn-season"><i></i>Saison ${ss}</span>
+          <span class="fn-tools"><button data-a="m_lang" data-noi18n aria-label="Langue">${sv('lang')}<em>${LANG==='en'?'EN':'FR'}</em></button><button data-a="m_au" data-k="music" class="${AU.music?'':'off'}" aria-label="Musique">${sv('music')}</button><button data-a="m_au" data-k="sfx" class="${AU.sfx?'':'off'}" aria-label="Sons">${sv('sfx')}</button></span></div>
+        <nav class="fn-menu">
+          ${m?item('data-a="m_cont"','Continuer',`${flag(m.home)} ${esc(m.club)} · ${$(m.money)}`,'','main'):''}
+          ${item('data-a="m_new"','Carrière','Nouvelle carrière','',m?'':'main')}
+          ${item('data-a="m_online"','En ligne',`Classé · Saison ${ss}`)}
+          ${item('data-a="m_load"','Charger',cnt?`${cnt} sauvegarde${cnt>1?'s':''}`:'Aucune sauvegarde',cnt?'':' disabled')}
+          ${item('data-gfb','Avis','Dis-nous ce que tu penses')}
+        </nav>
+        <div class="fn-foot">${vCloudCard()}<p><b>10 COUNT GAMES</b> · Aucun avantage à acheter · Aucune pub · v${GAME_V}</p></div>
+      </div>`}
   else if(st==='onslot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>🌐 En ligne</h2><p class="lede">Choisis une partie pour entrer en ligne (ton écurie en ligne est séparée de ta carrière, elle ne change rien).</p>
       <div class="stack">${[1,2,3].filter(n=>slotMeta(n)).map(n=>{const m=slotMeta(n);return`<button class="mbtn" data-a="m_onld" data-k="${n}"><b>${flag(m.home)} ${esc(m.club)}</b><span>${when(m.t)} · ${$(m.money)}</span></button>`}).join('')}</div></div>`}
   else if(st==='load'||st==='slot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>${st==='load'?'Charger une partie':'Choisis un emplacement'}</h2>
