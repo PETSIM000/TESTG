@@ -1058,10 +1058,15 @@ function galaEst(g,rnd){
 function createGala(){const n=ui.gn;if(!n)return;const ar=arenaList().find(a=>a.id===n.arena);if(!ar||S.mgr.lvl<ar.lvl)return;
   const C=GCITY.find(c=>c.id===n.city)||GCITY[0];if(S.mgr.lvl<C.lvl){toast(`${C.n} : gérant niveau ${C.lvl} requis`);return}
   const g={id:'g'+(S.uid++),name:(n.name||'').trim()||`${S.club} Fight Night ${(S.galas||[]).length+1}`,arena:n.arena,week:S.t+n.wk,price:n.price,promo:n.promo,ppv:n.tv==='ppv',city:n.city||'home',tv:n.tv||'loc',ppvp:n.ppvp||60,x:{...(n.x||{})},done:false};
+  const up=galaUpfront(g);if(S.money<up){toast(`Fonds insuffisants : ${$(up)} requis pour ce gala`);return null}
+  S.money-=up;g.paid=up;g.locked=true;
   S.galas.push(g);log(`Gala créé : ${g.name} (${ar.n}), ${when(g.week)}.`,'good');toast('Gala créé ! Ajoute des combats.');return g}
+// B23 : le budget engagé (location, promo, extras, frais de ville) se paie à la création.
+function galaUpfront(g){const ar=arenaList().find(a=>a.id===g.arena)||ARENAS[0],C=GCITY.find(c=>c.id===(g.city||'home'))||GCITY[0],X=g.x||{};
+  return ar.rent+(+g.promo||0)+Object.keys(GX).reduce((s,q)=>s+(X[q]?GX[q].c:0),0)+C.fee}
 function galaNight(g){
-  if(!galaFights(g).length){const loss=Math.round((arenaList().find(a=>a.id===g.arena)||ARENAS[0]).rent*.5);S.money-=loss;g.done=true;g.res={cancel:true,loss};log(`Gala ${g.name} annulé faute de combats : ${$(loss)} de frais.`,'bad');return}
-  const r=galaEst(g,true);S.money+=r.profit;g.done=true;g.res=r;mcAdd('galas');
+  if(!galaFights(g).length){const loss=Math.round((arenaList().find(a=>a.id===g.arena)||ARENAS[0]).rent*.5);S.money+=(g.paid||0)-loss;g.done=true;g.res={cancel:true,loss};log(`Gala ${g.name} annulé faute de combats : ${$(loss)} de frais.`,'bad');return}
+  const r=galaEst(g,true);S.money+=r.profit+(g.paid||0);g.done=true;g.res=r;mcAdd('galas');
   for(const f of galaFights(g)){const a=getB(f.a);if(a){a.fame=cl(a.fame+2,1,100);addFol(a,r.att*1.5+r.ppvBuys*2)}}
   log(`${g.name} : ${r.att.toLocaleString('fr-CA')} spectateurs${r.ppvBuys?`, ${r.ppvBuys.toLocaleString('fr-CA')} achats PPV`:''}. Profit : ${$(r.profit)}.`,r.profit>=0?'gold':'bad');toast(`🎪 ${g.name} : ${r.profit>=0?'+':''}${$(r.profit)}`)}
 
@@ -3700,8 +3705,8 @@ document.addEventListener('click',e=>{
     case'gala':ui.sheet='gala:'+id;break;
     case'galacreate':{const g=createGala();if(g)ui.sheet='gala:'+g.id;break}
     case'gnar':ui.gn.arena=k;break;case'gnwk':ui.gn.wk=+k;break;case'gnpr':ui.gn.price=+k;break;case'gnpm':ui.gn.promo=+k;break;case'gnppv':ui.gn.ppv=!ui.gn.ppv;break;case'gncity':ui.gn.city=k;break;case'gntv':ui.gn.tv=k;ui.gn.ppv=k==='ppv';break;case'gnppvp':ui.gn.ppvp=+k;break;case'gnx':ui.gn.x=ui.gn.x||{};ui.gn.x[k]=!ui.gn.x[k];break;
-    case'ggcity':case'ggtv':case'ggppvp':case'ggx':{const g=(S.galas||[]).find(x=>'gala:'+x.id===ui.sheet);if(g){if(a==='ggcity'){const C=GCITY.find(c=>c.id===k);if(C&&S.mgr.lvl>=C.lvl)g.city=k;else toast('Gérant niveau '+(C?C.lvl:'?')+' requis')}else if(a==='ggtv'){g.tv=k;g.ppv=k==='ppv'}else if(a==='ggppvp')g.ppvp=+k;else{g.x=g.x||{};g.x[k]=!g.x[k]}}break}
-    case'gpr':case'gpm':case'gppv':{const g=(S.galas||[]).find(x=>'gala:'+x.id===ui.sheet);if(g){if(a==='gpr')g.price=+k;else if(a==='gpm')g.promo=+k;else g.ppv=!g.ppv}break}
+    case'ggcity':case'ggtv':case'ggppvp':case'ggx':{const g=(S.galas||[]).find(x=>'gala:'+x.id===ui.sheet);if(g&&g.locked){toast('🔒 Budget verrouillé : le gala est déjà payé');break}if(g){if(a==='ggcity'){const C=GCITY.find(c=>c.id===k);if(C&&S.mgr.lvl>=C.lvl)g.city=k;else toast('Gérant niveau '+(C?C.lvl:'?')+' requis')}else if(a==='ggtv'){g.tv=k;g.ppv=k==='ppv'}else if(a==='ggppvp')g.ppvp=+k;else{g.x=g.x||{};g.x[k]=!g.x[k]}}break}
+    case'gpr':case'gpm':case'gppv':{const g=(S.galas||[]).find(x=>'gala:'+x.id===ui.sheet);if(g&&g.locked){toast('🔒 Budget verrouillé : le gala est déjà payé');break}if(g){if(a==='gpr')g.price=+k;else if(a==='gpm')g.promo=+k;else g.ppv=!g.ppv}break}
     case'galaadd':ui.bev=id;ui.tab='combats';ui.csub='book';ui.sheet=null;window.scrollTo(0,0);break;
     case'skipf':if(!guardAdvance({a:'skipf',id}))return;skipTo(id);return;
     case'cauto':{const f=S.fights.find(x=>'camp:'+x.id===ui.sheet);if(f){f.auto=k==='auto';ui.cw=f.wk||0}break}
@@ -4163,5 +4168,5 @@ async function doUpd(){try{if(window.caches){for(const k of await caches.keys())
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),60000);try{const pv=localStorage.getItem('cr_build');localStorage.setItem('cr_build',window.BUILD);if(pv&&pv!==window.BUILD){const n=document.getElementById('updok');if(n){n.innerHTML='✅ <b>Jeu mis à jour !</b>'+(window.BUILD_MSG?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(window.BUILD_MSG)+'</span>':'');n.hidden=false;setTimeout(()=>{n.hidden=true},7000)}}}catch(e){}});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});addEventListener('pageshow',()=>checkUpd(false));addEventListener('focus',()=>checkUpd(false));
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
-export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow };
+export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList };
 export const getState = () => S;
