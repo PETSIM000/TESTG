@@ -1667,8 +1667,10 @@ async function rkFind(){const u=onUi();u.rkBusy=1;onR();try{u.rkOpps=((await rpc
 async function rkGo(id){const u=onUi(),me=u.home&&u.home.me,o=(u.rkOpps||[]).find(x=>x.id===id);if(!me||!me.rk||!o){toast('Adversaire introuvable');return}
   let ticket;try{ticket=String((await rpc('cr_rk_start',{p_token:ON.token,p_opp:o.id})).ticket||'')}catch(e){toast(e.message);return}
   const oc=o.rk&&rkValid(o.rk)?o.rk:botRk(o);let F;const f0=FORM;FORM=.08;try{F=newFight(rkFighter(me.rk,true,me.id),rkFighter(oc,false,o.id),10,false)}finally{FORM=f0}
-  F.cut=1;F.online={rk:true,fid:o.id,ticket,n:o.name,title:false,bn:oc.name,e0:onI(me.elo,0,99999,1000)};u.rkOpps=null;beginFight(F)}
+  F.cut=1;F.online={rk:true,fid:o.id,ticket,t0:Date.now(),n:o.name,title:false,bn:oc.name,e0:onI(me.elo,0,99999,1000)};u.rkOpps=null;beginFight(F)}
 async function rkDone(F){const r=F.res,res=r.w==='A'?'W':r.w==='B'?'L':'D',o=F.online;
+  // Le serveur refuse un résultat avant 40 s de combat (anti-triche) : on attend si le combat a été accéléré.
+  const wait=Math.max(0,42000-(Date.now()-(o.t0||0)));if(wait){toast('Envoi du résultat classé…');await new Promise(z=>setTimeout(z,wait))}
   try{const x=await rpc('cr_rk_result',{p_token:ON.token,p_ticket:o.ticket,p_res:res,p_method:r.m==='KO'||r.m==='TKO'?r.m:'DEC',p_rnd:r.r||0});
     await onLoad(true);rankResult(o.e0,onI(x.elo,0,99999,o.e0),onI(x.dpos,0,250,0));if(onI(x.repeat,0,99,0))setTimeout(()=>toast('Même adversaire aujourd’hui : gain réduit'),1500)}
   catch(e){toast('Résultat non envoyé : '+e.message);await onLoad(true)}}
