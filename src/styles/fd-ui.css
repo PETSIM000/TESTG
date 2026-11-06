@@ -1,0 +1,134 @@
+/* FIGHT DYNASTY — couche d'interface v1 (charte docs/charte-visuelle.md).
+   Chargée après les anciens styles : elle les remplace écran par écran. */
+
+:root {
+  --fd-ease: cubic-bezier(.2, .8, .2, 1);
+  --fd-hdr-h: 64px;
+  --fd-gold-line: linear-gradient(90deg, transparent, rgba(245, 196, 81, .65), transparent);
+}
+
+/* ---------- En-tête de carrière ---------- */
+header#hdr {
+  background: linear-gradient(180deg, rgba(18, 22, 33, .97), rgba(7, 8, 12, .92));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+}
+header#hdr::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: var(--fd-gold-line);
+}
+#hdr .hrow {
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  gap: 8px;
+  align-items: center;
+}
+#hdr .hrow > .mark { display: grid; }
+#hdr .mark {
+  width: 34px; height: 38px;
+  border-radius: 0;
+  clip-path: path('M17 0 L34 5 Q35 22 26 31 Q21 36 17 38 Q13 36 8 31 Q-1 22 0 5 Z');
+  background: linear-gradient(180deg, #ff4a5e, #b3101f 60%, #4a0610);
+  color: #fff1b8;
+  font: 900 13px var(--f-disp);
+  letter-spacing: .5px;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 2px #f5c451;
+}
+#hdr .club { min-width: 0; }
+#hdr .club b {
+  display: block;
+  font: 900 18px/1.05 var(--f-disp);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#hdr .club span { font: 600 11.5px var(--f-cond); color: var(--muted); letter-spacing: .3px; white-space: nowrap; }
+#hdr .cash small { display: none; }
+#hdr .cash b {
+  font: 500 15px var(--f-mono);
+  color: var(--gold);
+  white-space: nowrap;
+}
+#hdr .cash { padding: 6px 9px; gap: 5px; }
+#hdr .cash::before { width: 12px; height: 12px; }
+#hdr .cash b.neg { color: var(--red); }
+#hdr .next {
+  background: var(--gold-g);
+  color: #2a1d00;
+  font: 900 14px var(--f-disp);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 6px 18px rgba(245, 196, 81, .28), inset 0 1px 0 rgba(255, 255, 255, .6);
+  transition: transform .12s var(--fd-ease), box-shadow .2s;
+}
+#hdr .next.fight { background: var(--red-g); color: #fff; box-shadow: 0 6px 18px rgba(255, 59, 80, .35), inset 0 1px 0 rgba(255, 255, 255, .35); animation: fd-beat 1.6s ease-in-out infinite; }
+#hdr .next:active, .tabs button:active { transform: scale(.96); }
+@keyframes fd-beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+
+/* ---------- Bulles : jamais par-dessus l'en-tête ---------- */
+.toast {
+  top: calc(var(--fd-hdr-h) + 8px + env(safe-area-inset-top, 0px));
+  font: 800 14px var(--f-body);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .5);
+}
+
+/* ---------- Barre d'onglets ---------- */
+.tabs {
+  background: linear-gradient(0deg, rgba(7, 8, 12, .98), rgba(18, 22, 33, .94));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.tabs button {
+  font: 700 11px var(--f-cond);
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color .2s, transform .12s var(--fd-ease);
+  position: relative;
+}
+nav.tabs button[aria-current="true"] {
+  color: var(--gold);
+  background: linear-gradient(180deg, rgba(245, 196, 81, .16), rgba(245, 196, 81, .03));
+  box-shadow: inset 0 0 0 1px rgba(245, 196, 81, .28);
+}
+nav.tabs button[aria-current="true"] svg { stroke: var(--gold); filter: drop-shadow(0 0 6px rgba(245, 196, 81, .55)); }
+nav.tabs button[aria-current="true"]::before {
+  content: "";
+  position: absolute;
+  top: -1px; left: 30%; right: 30%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--gold-g);
+}
+
+/* ---------- Petits téléphones (360 px) ---------- */
+@media (max-width: 380px) {
+  #hdr .hrow { gap: 5px; }
+  #hdr .gear { width: 30px; height: 30px; padding: 0; }
+  #hdr .gear svg { width: 18px; height: 18px; }
+  #hdr .mark { width: 28px; height: 32px; font-size: 11px; clip-path: path('M14 0 L28 4 Q29 18 21 26 Q17 30 14 32 Q11 30 7 26 Q-1 18 0 4 Z'); }
+  #hdr .cash::before { display: none; }
+  #hdr .club b { font-size: 16px; }
+  #hdr .club span { font-size: 11px; }
+  #hdr .cash b { font-size: 13px; }
+  #hdr .cash { padding: 5px 7px; }
+  #hdr .next { padding: 9px 9px; font-size: 12.5px; letter-spacing: .2px; }
+  .tabs button { font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hdr .next.fight { animation: none; }
+}
