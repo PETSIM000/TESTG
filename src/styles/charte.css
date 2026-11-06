@@ -18,3 +18,12 @@ figcaption { font: 700 13px var(--f-cond); text-transform: uppercase; letter-spa
 .ch-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
 .ch-disp { font: 900 34px var(--f-disp); margin: 0 0 8px; }
 .ch-mono { font: 500 16px var(--f-mono); color: var(--gold); }
+
+/* Vitrine des rangs */
+.ch-vit { display: grid; gap: 14px; }
+.ch-rank { border: 1px solid var(--line); border-radius: 18px; padding: 12px; background: radial-gradient(80% 70% at 50% 60%, rgba(255,255,255,.04), transparent 70%), #0b0d14; }
+.ch-rank header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.ch-rank header b { font: 900 26px var(--f-disp); text-transform: uppercase; color: var(--gold); }
+.ch-rank header span { font: 600 12px var(--f-cond); color: var(--muted); letter-spacing: .04em; }
+.ch-pair { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 10px; }
+@media (max-width: 420px) { .ch-pair .fd-frame { --size: 160px !important; } .ch-pair .fd-badge { --size: 150px !important; } }
