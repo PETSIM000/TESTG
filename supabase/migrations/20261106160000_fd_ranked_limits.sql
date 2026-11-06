@@ -22,7 +22,7 @@ begin
   e := 1 / (1 + power(10, (op.elo - me.elo) / 400.0));
   n := (select count(*) from public.matches where mode = 'rk' and p1 = me.id and p2 = op.id and created_at > now() - interval '1 day');
   d1 := round(32 * (s - e) / (1 + n));
-  gained := coalesce((select sum(greatest(d1, 0)) from public.matches where p1 = me.id and mode = 'rk' and created_at > now() - interval '1 day'), 0);
+  gained := coalesce((select sum(greatest(m.d1, 0)) from public.matches m where m.p1 = me.id and m.mode = 'rk' and m.created_at > now() - interval '1 day'), 0);
   if d1 > 0 then d1 := least(d1, greatest(0, 250 - gained)); end if;
   update public.players set elo = greatest(0, elo + d1), rk_w = rk_w + (r=1)::int, rk_l = rk_l + (r=2)::int, rk_d = rk_d + (r=0)::int where id = me.id;
   insert into public.matches(p1,p2,b1,b2,res,method,rnd,d1,d2,mode)
