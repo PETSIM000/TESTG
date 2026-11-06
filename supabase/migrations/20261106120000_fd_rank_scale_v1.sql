@@ -3,12 +3,12 @@
 -- client-side; this migration adds the server pieces: points in the API, DYNASTY position, season,
 -- and the reward ladder on the new divisions.
 -- Rank points are a rescaling of the existing account ELO, so matchmaking stays consistent:
---   rp = max(0, (elo - 800) * 8)   ->  elo 1000 = 1600 (Argent III), elo 2050 = 10000 (DYNASTY)
+--   rp = max(0, (elo - 1000) * 4)  ->  new account (1000) = 0 (Bronze III), elo 3500 = 10000 (DYNASTY)
 create or replace function public.cr_rp(p_elo integer) returns integer
-language sql immutable set search_path to '' as $$ select greatest(0, (p_elo - 800) * 8) $$;
+language sql immutable set search_path to '' as $$ select greatest(0, (p_elo - 1000) * 4) $$;
 
 create or replace function public.cr_rp_elo(p_rp integer) returns integer
-language sql immutable set search_path to '' as $$ select 800 + ceil(p_rp / 8.0)::int $$;
+language sql immutable set search_path to '' as $$ select 1000 + ceil(p_rp / 4.0)::int $$;
 
 -- World position inside DYNASTY (null below 10000 points). Top 250 only.
 create or replace function public.cr_dpos(p_id uuid) returns integer

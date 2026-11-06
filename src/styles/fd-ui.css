@@ -134,12 +134,11 @@ nav.tabs button[aria-current="true"]::before {
 }
 
 /* ---------- Rang du compte (Phase 4) : cadre animé autour de l'avatar, badge à côté ---------- */
-.ohd-av.fd-in { width: 84px; height: 84px; background: none; border: 0; padding: 0; box-shadow: none; border-radius: 0; display: block; overflow: visible; }
-.ohd-in { width: 100%; height: 100%; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle at 40% 30%, #3a4257, #121621); font: 900 22px var(--f-disp); color: var(--ink); }
-.ohd-in.big { font-size: 44px; }
-.ohd-elo { display: flex; flex-direction: column; align-items: center; gap: 0; text-decoration: none; }
-.ohd-elo .fd-badge { margin: -6px 0 -4px; }
-.ohd-elo b { font: 900 18px var(--f-disp); color: var(--gold); line-height: 1; }
+.ohd-elo { background: linear-gradient(180deg, #1b1f2b, #0d1017); border: 1px solid rgba(245, 196, 81, .35); box-shadow: 0 6px 18px rgba(0, 0, 0, .45); color: var(--ink); padding: 4px 10px 6px; gap: 0; }
+.ohd-elo .fd-badge { margin: -4px 0 -2px; }
+.ohd-elo b { font: 900 19px var(--f-disp); color: var(--gold); line-height: 1; }
+.ohd-elo i { color: var(--muted); }
+.me-frm { display: block; margin-top: 4px; color: var(--muted); }
 .me-rank { display: flex; align-items: center; justify-content: center; gap: 4px; margin: 4px 0 2px; }
 .me-rkn { font: 900 24px var(--f-disp); text-transform: uppercase; letter-spacing: .6px; background: var(--gold-g); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .rkbig .fd-badge { margin: -4px 0; }
