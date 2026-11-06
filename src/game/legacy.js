@@ -1420,7 +1420,7 @@ async function onAddFriend(){
   try{const f=onP(await rpc('cr_add_friend',{p_token:ON.token,p_code:c}));toast(`🤝 ${f.name} est ton ami !`);await onLoad(true)}catch(e){toast(e.message)}
 }
 async function onShareCode(){
-  const code=onUi().home&&onUi().home.me.code;if(!code)return;const txt=`Viens boxer contre moi sur Boxing Manager 🥊 ! Mon code ami : ${code}\nhttps://petsim000.github.io/TESTG/`;
+  const code=onUi().home&&onUi().home.me.code;if(!code)return;const txt=`Viens boxer contre moi sur Boxing Manager 🥊 ! Mon code ami : ${code}\n${location.origin}/`;
   try{if(navigator.share){await navigator.share({text:txt});return}}catch(e){return}
   try{await navigator.clipboard.writeText(txt);toast('Code copié !')}catch(e){toast('Ton code : '+code)}
 }
@@ -2122,7 +2122,7 @@ async function shareCard(){const u=onUi(),H=u.home;if(!H)return;toast('🎨 Cré
   x.textAlign='left';
   // pied
   x.fillStyle='rgba(255,255,255,.08)';x.fillRect(60,1220,960,2);x.fillStyle='#fff';x.font=`800 34px ${B}`;x.fillText(`Code ami : ${me.code||''}`,60,1272);
-  x.textAlign='right';x.fillStyle='rgba(255,255,255,.6)';x.font=`600 26px ${B}`;x.fillText('petsim000.github.io/TESTG',1020,1272);x.textAlign='left';
+  x.textAlign='right';x.fillStyle='rgba(255,255,255,.6)';x.font=`600 26px ${B}`;x.fillText(location.host,1020,1272);x.textAlign='left';
   const blob=await new Promise(r=>{try{c.toBlob(b=>r(b),'image/png')}catch(e){r(null)}});
   const url=blob?URL.createObjectURL(blob):c.toDataURL('image/png');
   try{if(blob&&navigator.canShare){const f=new File([blob],'boxing-manager-carte.png',{type:'image/png'});if(navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Ma carte Boxing Manager',text:`Viens boxer contre moi sur Boxing Manager 🥊 Mon code ami : ${me.code}`});return}}}catch(e){if(e&&e.name==='AbortError')return}
@@ -4166,7 +4166,7 @@ document.addEventListener('DOMContentLoaded',()=>{const C=window.Capacitor;if(!C
     if(close){close.click();return}if(vis('fx'))return;if(vis('menu')){P.App.minimizeApp();return}if(typeof openMenu==='function')openMenu('home')});
 });
 
-window.BUILD='95a267b177';window.BUILD_MSG="\u2696\ufe0f Carri\u00e8re : % fiables, \u00e9conomie r\u00e9aliste, contr\u00f4le en combat, club clarifi\u00e9";if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+window.BUILD=__BUILD__;window.BUILD_MSG=__BUILD_MSG__;if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
 function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
