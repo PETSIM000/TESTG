@@ -22,6 +22,6 @@ def mask(w, h, inner):
 
 if __name__ == '__main__':
     out = Path(sys.argv[1])
-    mask(280, 362, 0.8).save(out / 'badge-280x362.png')
+    mask(280, 334, 0.82).save(out / 'badge-280x334.png')
     mask(300, 300, 0.84).save(out / 'round-300.png')
     mask(320, 320, 0.88).save(out / 'round-320.png')

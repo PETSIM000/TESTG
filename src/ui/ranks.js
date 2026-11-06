@@ -21,10 +21,10 @@ const byId = Object.fromEntries(RANKS.map((r, i) => [r.id, { ...r, i }]));
 
 // Géométrie de chaque art, en fractions du carré du cadre : trou de l'avatar et plaque de saison.
 // Bronze → Platine reprennent l'art Champion recoloré, donc sa géométrie.
-const CHAMPION_ART = { badgeRatio: 362 / 280, hole: [0.49, 0.555, 0.28], plateY: 0.875 };
+const CHAMPION_ART = { badgeRatio: 334 / 280, hole: [0.49, 0.555, 0.28], plateY: 0.875 };
 const ART = {
-  diamant: { badgeRatio: 362 / 280, hole: [0.5, 0.51, 0.29], plateY: 0.855 },
-  maitre: { badgeRatio: 362 / 280, hole: [0.53, 0.51, 0.25], plateY: 0.815 },
+  diamant: { badgeRatio: 334 / 280, hole: [0.5, 0.51, 0.29], plateY: 0.855 },
+  maitre: { badgeRatio: 334 / 280, hole: [0.53, 0.51, 0.25], plateY: 0.815 },
   champion: CHAMPION_ART,
   dynasty: { badgeRatio: 1, hole: [0.49, 0.53, 0.27], plateY: 0.905, plates2: [0.39, 0.61] },
 };

@@ -20,11 +20,15 @@ python -I "$ROOT/scripts/rank_masks.py" "$TMP"
 
 CRUSH="curves=all='0/0 0.1/0 1/1'"
 LOOP="split[a][b];[a]trim=1:10,setpts=PTS-STARTPTS[m];[b]trim=0:1,setpts=PTS-STARTPTS[h];[m][h]xfade=transition=fade:duration=1:offset=8"
-declare -A BADGE=([diamant]="480:620:0:0" [maitre]="480:620:0:0" [champion]="480:620:0:0" [dynasty]="672:672:0:0")
+# The videos cut the badges on the left edge; they are symmetric, so the right half (from the
+# measured symmetry axis) is mirrored to rebuild a complete badge.
+declare -A BADGE=([diamant]="260:620:208:0,MIRROR" [maitre]="260:620:196:0,MIRROR" [champion]="260:620:194:0,MIRROR" [dynasty]="672:672:0:0")
+MIRROR="split[r1][r2];[r2]hflip[l];[l][r1]hstack"
+cropf() { case "$1" in *,MIRROR) echo "crop=${1%,MIRROR},$MIRROR";; *) echo "crop=$1";; esac; }
 declare -A FRAME=([diamant]="736:736:510:0" [maitre]="736:736:510:0" [champion]="736:736:510:0" [dynasty]="672:672:672:0")
 declare -A FILE=([diamant]=diamond [maitre]=master [champion]=champion [dynasty]=dynasty)
-size() { if [ "$1" = badge ]; then [ "$2" = dynasty ] && echo "300:300" || echo "280:362"; else echo "320:320"; fi; }
-mask() { if [ "$1" = badge ]; then [ "$2" = dynasty ] && echo "$TMP/round-300.png" || echo "$TMP/badge-280x362.png"; else echo "$TMP/round-320.png"; fi; }
+size() { if [ "$1" = badge ]; then [ "$2" = dynasty ] && echo "300:300" || echo "280:334"; else echo "320:320"; fi; }
+mask() { if [ "$1" = badge ]; then [ "$2" = dynasty ] && echo "$TMP/round-300.png" || echo "$TMP/badge-280x334.png"; else echo "$TMP/round-320.png"; fi; }
 
 for id in diamant maitre champion dynasty; do
   v="$(ls "$SRC"/media-generation-anime-${FILE[$id]}-badge-cadre-*.mp4 | head -1)"
@@ -32,10 +36,10 @@ for id in diamant maitre champion dynasty; do
     c=${BADGE[$id]}; [ $kind = frame ] && c=${FRAME[$id]}
     s=$(size $kind $id); mk=$(mask $kind $id)
     q -i "$v" -loop 1 -i "$mk" -filter_complex \
-      "[0:v]$LOOP,crop=$c,scale=$s,$CRUSH,format=gbrp[v];[1:v]format=gbrp[k];[v][k]blend=all_mode=multiply:shortest=1,format=yuv420p" \
+      "[0:v]$LOOP,$(cropf $c),scale=$s,$CRUSH,format=gbrp[v];[1:v]format=gbrp[k];[v][k]blend=all_mode=multiply:shortest=1,format=yuv420p" \
       -an -c:v libx264 -profile:v main -crf 28 -preset slow -movflags +faststart "$OUT/$id-$kind.mp4"
     q -ss 4 -i "$v" -i "$mk" -filter_complex \
-      "[0:v]crop=$c,scale=$s,$CRUSH,format=gbrp[v];[1:v]format=gbrp[k];[v][k]blend=all_mode=multiply" \
+      "[0:v]$(cropf $c),scale=$s,$CRUSH,format=gbrp[v];[1:v]format=gbrp[k];[v][k]blend=all_mode=multiply" \
       -frames:v 1 -c:v libwebp -quality 86 "$OUT/$id-$kind.webp"
   done
 done
@@ -52,7 +56,7 @@ for id in bronze argent or platine; do
     c=${BADGE[champion]}; [ $kind = frame ] && c=${FRAME[champion]}
     s=$(size $kind champion); mk=$(mask $kind champion)
     q -ss 4 -i "$V" -i "$mk" -filter_complex \
-      "[0:v]crop=$c,scale=$s,${TINT[$id]},$CRUSH,format=gbrp[v];[1:v]format=gbrp[k];[v][k]blend=all_mode=multiply" \
+      "[0:v]$(cropf $c),scale=$s,${TINT[$id]},$CRUSH,format=gbrp[v];[1:v]format=gbrp[k];[v][k]blend=all_mode=multiply" \
       -frames:v 1 -c:v libwebp -quality 86 "$OUT/$id-$kind.webp"
   done
 done
