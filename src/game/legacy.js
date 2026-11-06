@@ -1,5 +1,6 @@
 // Code du jeu (ancien index.html), regroupé en un seul module en attendant le découpage par domaine.
 import * as THREE from 'three';
+import { rnd } from '../core/rng.js';
 
 // Boutons de langue et d'avis rendus en HTML (ex-onclick inline).
 document.addEventListener('click', (e) => {
@@ -280,7 +281,7 @@ function ensureAllNat(){for(const n of Object.keys(NAT))for(const d of DIVS)ensu
 function canNat(me,op){if(!op.nchamp||op.nat!==me.nat||me.inj||me.booked||op.booked||op.inj)return false;const i=natIdx(me);return i>=0&&i<3}
 
 /* ================= OUTILS ================= */
-const R=Math.random, ri=(a,b)=>Math.floor(a+R()*(b-a+1)), cl=(v,a,b)=>Math.max(a,Math.min(b,v)), pick=a=>a[Math.floor(R()*a.length)];
+const R=rnd, ri=(a,b)=>Math.floor(a+R()*(b-a+1)), cl=(v,a,b)=>Math.max(a,Math.min(b,v)), pick=a=>a[Math.floor(R()*a.length)];
 const $=n=>Math.round(n).toLocaleString('fr-CA')+' $';
 const ord=n=>n+(n===1?'er':'e');
 const sur=b=>b.name.split(' ').slice(1).join(' ');
@@ -498,7 +499,7 @@ const REFS=[{id:'n',n:'Marc « Le Juste » Gagnon',t:'Normal',d:'Arbitre classiq
  {id:'m',n:'Dre Sophie « Protectrice » Côté',t:'Protecteur',d:'Très attentive aux coupures : arrêts médicaux plus rapides.',hp:24,p:.18,kh:25,kr:3,ct:2,cp:.4,ic:'🩺'},
  {id:'v',n:'Tony « Le Vétéran » Russo',t:'Vétéran',d:'Laisse un peu plus de chances au boxeur ébranlé.',hp:18,p:.12,kh:22,kr:3,ct:3,cp:.3,ic:'🎖️'}];
 const refOf=F=>F.ref||REFS[0];
-function newFight(a,b,rounds,title,camp){const F={ref:REFS[Math.floor(Math.random()*REFS.length)],A:fighter(a),B:fighter(b),r:0,ph:0,rd:null,rs:[],rst:[],cs:null,rounds,title,cards:[[0,0],[0,0],[0,0]],log:[],done:false,res:null,strat:'eq',adv:null,cut:a.mine&&S.staff.cut?S.staff.cut.stars:0};F.A.camp=camp||'';return F}
+function newFight(a,b,rounds,title,camp){const F={ref:REFS[Math.floor(R()*REFS.length)],A:fighter(a),B:fighter(b),r:0,ph:0,rd:null,rs:[],rst:[],cs:null,rounds,title,cards:[[0,0],[0,0],[0,0]],log:[],done:false,res:null,strat:'eq',adv:null,cut:a.mine&&S.staff.cut?S.staff.cut.stars:0};F.A.camp=camp||'';return F}
 const prepM=p=>.95+(p==null?60:p)*.0009;
 function exchange(A,B,sa,sb,k=1){
   const ef=.55+.45*A.en/100;
@@ -4170,3 +4171,7 @@ function updEsc(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 async function checkUpd(manual){try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==window.BUILD){const b=document.getElementById('updbar');if(b){const t=document.getElementById('updtxt');if(t)t.innerHTML='✨ <b>Nouvelle version !</b>'+(j.m?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(j.m)+'</span>':'');b.hidden=false}return true}if(manual&&typeof toast==='function')toast('Tu as déjà la dernière version 👍')}catch(e){if(manual&&typeof toast==='function')toast('Pas de connexion')}return false}
 async function doUpd(){try{if(window.caches){for(const k of await caches.keys())await caches.delete(k)}const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.update()}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),60000);try{const pv=localStorage.getItem('cr_build');localStorage.setItem('cr_build',window.BUILD);if(pv&&pv!==window.BUILD){const n=document.getElementById('updok');if(n){n.innerHTML='✅ <b>Jeu mis à jour !</b>'+(window.BUILD_MSG?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(window.BUILD_MSG)+'</span>':'');n.hidden=false;setTimeout(()=>{n.hidden=true},7000)}}}catch(e){}});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});addEventListener('pageshow',()=>checkUpd(false));addEventListener('focus',()=>checkUpd(false));
+
+// Points d'entrée du moteur, utilisés par les tests unitaires.
+export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer };
+export const getState = () => S;
