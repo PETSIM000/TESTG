@@ -24,7 +24,7 @@ describe('Phase 4 : rang du gérant sur l’échelle 0 – 10 000', () => {
     expect(k.pct).toBe(80);
   });
   it('icône du rang = badge officiel', () => {
-    expect(onRk(1000).ic).toContain('ranks/bronze-badge.webp');
+    expect(onRk(1000).ic).toContain('ranks/badge-bronze.webp');
   });
   it('saison 1 démarre le 2 novembre 2026 (28 jours)', () => {
     expect(seasonNow(new Date('2026-11-06T12:00:00'))).toBe(1);

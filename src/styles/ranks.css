@@ -1,16 +1,27 @@
-/* Rangs (vidéos de Max) : fond noir et bords déjà fondus dans les clips ; la fusion « screen »
-   les rend invisibles sur l'interface sombre, sans aucune boîte noire. */
-.fd-badge, .fd-frame { position: relative; display: inline-block; flex: none; }
-.fd-badge { width: var(--w); }
-.fd-badge .fd-art { display: block; width: var(--w); height: var(--h); object-fit: cover; mix-blend-mode: screen; }
-.fd-frame { width: var(--w); height: var(--w); }
-.fd-frame .fd-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; mix-blend-mode: screen; z-index: 1; }
-.fd-hole { position: absolute; border-radius: 50%; overflow: hidden; display: grid; place-items: center; z-index: 0; }
-.fd-hole > * { width: 100%; height: 100%; object-fit: cover; }
-.fd-div, .fd-plate {
-  font: 900 calc(var(--w) * .095) / 1 var(--f-disp, Impact, sans-serif);
-  color: var(--c); background: #0b0d14; border: 2px solid var(--c); border-radius: 6px;
-  padding: .2em .45em; letter-spacing: .04em; box-shadow: 0 0 10px color-mix(in srgb, var(--c) 45%, transparent);
-}
-.fd-div { display: block; width: max-content; margin: -.4em auto 0; position: relative; z-index: 2; }
-.fd-plate { position: absolute; transform: translate(-50%, -50%); z-index: 2; min-width: 2.4em; text-align: center; }
+/* Rangs FIGHT DYNASTY — art officiel de Max affiché tel quel (spec rangs.html, VERSION 1).
+   Boîte carrée, object-fit: contain : pointes, laurier et plaque toujours visibles en entier.
+   Fond noir des images fondu par mix-blend-mode: screen sur les fonds sombres du jeu. */
+.fd-badge:has(.fd-div) { margin-bottom: calc(var(--s) * .17 + 6px); }
+.fd-badge, .fd-frame { position: relative; display: inline-block; flex: none; width: var(--s, 120px); aspect-ratio: 1; vertical-align: middle; }
+.fd-badge > img, .fd-badge > video,
+.fd-cadre > img, .fd-cadre > video { display: block; width: 100%; height: 100%; object-fit: contain; mix-blend-mode: screen; background: transparent; }
+
+/* Division (III / II / I) : valeur du moteur, sous le badge */
+.fd-div { position: absolute; left: 50%; top: calc(100% + 3px); transform: translateX(-50%); font: 900 calc(var(--s) * .13)/1 var(--f-disp, Impact, sans-serif);
+  color: #f5c451; background: #050506; border: 1.5px solid #c9a03a; border-radius: 4px; padding: .12em .45em; letter-spacing: .06em; min-width: 1.6em; text-align: center; }
+
+/* Cadre de profil : photo ronde dessous, cadre entier par-dessus */
+.fd-avatar { position: absolute; left: 21.5%; top: 21.5%; width: 57%; height: 57%; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
+  background: radial-gradient(circle at 40% 30%, #3a4257, #121621); }
+.fd-avatar > img { width: 100%; height: 100%; object-fit: cover; }
+.fd-cadre { position: absolute; inset: 0; } /* pas de z-index : le fondu « screen » doit voir la photo dessous */
+
+/* Plaques : valeurs du moteur, texte HTML par-dessus le bas du cadre */
+.fd-plaques { position: absolute; left: 50%; bottom: 3.5%; transform: translateX(-50%); z-index: 2; display: flex; gap: 4px; }
+.fd-plaque { display: inline-block; font: 900 calc(var(--s) * .085)/1 var(--f-disp, Impact, sans-serif); text-transform: uppercase; letter-spacing: .08em;
+  color: #f5c451; background: #000; border: 1.5px solid #c9a03a; border-radius: 3px; padding: .25em .6em; white-space: nowrap; }
+.fd-grave { position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%); font-size: 11px; }
+
+/* Collection DYNASTY du profil */
+.fd-coll { display: flex; flex-wrap: wrap; gap: 14px 10px; padding-bottom: 8px; }
+.fd-coll-vide { margin: 0; color: var(--muted, #8c95a8); font-size: 13px; }

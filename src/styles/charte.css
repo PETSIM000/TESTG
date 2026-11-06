@@ -12,9 +12,9 @@ h2 { font: 700 18px var(--f-disp); text-transform: uppercase; letter-spacing: 1p
 figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; }
 figcaption { font: 700 13px var(--f-cond); text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
 .ch-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.ch-face { display: grid; place-items: center; background: radial-gradient(circle at 40% 30%, #3a4257, #151a26); font: 900 26px var(--f-disp); color: var(--muted); }
+.ch-face { width: 100%; height: 100%; display: grid; place-items: center; background: radial-gradient(circle at 40% 30%, #3a4257, #151a26); font: 900 26px var(--f-disp); color: var(--muted); }
 .ch-logo { width: min(300px, 80vw); height: auto; }
 .ch-icon { width: 72px; height: 72px; border-radius: 16px; }
-.ch-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.ch-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
 .ch-disp { font: 900 34px var(--f-disp); margin: 0 0 8px; }
 .ch-mono { font: 500 16px var(--f-mono); color: var(--gold); }

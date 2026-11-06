@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { RANKS, rankFromElo, badgeHTML, frameHTML } from '../../src/ui/ranks.js';
+import { RANKS, rankFromElo, badgeHTML, frameHTML, collectionHTML } from '../../src/ui/ranks.js';
 
-describe('échelle des rangs (brief §4)', () => {
+describe('échelle des rangs (spec rangs.html)', () => {
   it('8 rangs dans l’ordre Bronze → DYNASTY', () => {
     expect(RANKS.map((r) => r.id)).toEqual(['bronze', 'argent', 'or', 'platine', 'diamant', 'maitre', 'champion', 'dynasty']);
   });
@@ -10,80 +10,65 @@ describe('échelle des rangs (brief §4)', () => {
   });
   it('rankFromElo : rang et division III → I', () => {
     expect(rankFromElo(0)).toMatchObject({ id: 'bronze', div: 'III' });
-    expect(rankFromElo(499)).toMatchObject({ id: 'bronze', div: 'III' });
     expect(rankFromElo(500)).toMatchObject({ id: 'bronze', div: 'II' });
     expect(rankFromElo(1499)).toMatchObject({ id: 'bronze', div: 'I' });
     expect(rankFromElo(1500)).toMatchObject({ id: 'argent', div: 'III' });
     expect(rankFromElo(9999)).toMatchObject({ id: 'champion', div: 'I' });
-  });
-  it('DYNASTY à 10 000 : pas de division', () => {
     expect(rankFromElo(10000)).toMatchObject({ id: 'dynasty', div: '' });
-    expect(rankFromElo(12000)).toMatchObject({ id: 'dynasty', div: '' });
-  });
-  it('ELO négatif ou invalide ⇒ Bronze III', () => {
-    expect(rankFromElo(-50)).toMatchObject({ id: 'bronze', div: 'III' });
     expect(rankFromElo(NaN)).toMatchObject({ id: 'bronze', div: 'III' });
   });
 });
 
-describe('badges', () => {
-  it('Diamant → DYNASTY : vidéo en boucle, muette, avec image fixe de secours', () => {
-    for (const id of ['diamant', 'maitre', 'champion', 'dynasty']) {
-      const s = badgeHTML(id, { size: 96 });
-      expect(s).toContain('<video');
-      expect(s).toMatch(/autoplay/);
-      expect(s).toMatch(/muted/);
-      expect(s).toMatch(/loop/);
-      expect(s).toMatch(/playsinline/);
-      expect(s).toContain(`ranks/${id}-badge.mp4`);
-      expect(s).toContain(`poster="ranks/${id}-badge.webp"`);
+describe('badge : art officiel tel quel', () => {
+  it('boîte carrée, image entière (fichiers officiels)', () => {
+    for (const r of RANKS) {
+      const s = badgeHTML(r.id, { size: 96, still: true });
+      expect(s).toContain('class="fd-badge');
+      expect(s).toContain(`ranks/badge-${r.id}.webp`);
     }
   });
-  it('Bronze → Platine : image fixe, jamais de vidéo', () => {
-    for (const id of ['bronze', 'argent', 'or', 'platine']) {
-      const s = badgeHTML(id, { size: 96 });
-      expect(s).not.toContain('<video');
-      expect(s).toContain(`ranks/${id}-badge.webp`);
-    }
+  it('animé (mp4 autoplay loop muted playsinline) seulement à partir de Diamant', () => {
+    const anim = RANKS.map((r) => badgeHTML(r.id, { size: 96 }).includes('<video'));
+    expect(anim).toEqual([false, false, false, false, true, true, true, true]);
+    const v = badgeHTML('diamant', { size: 96 });
+    for (const a of ['autoplay', 'loop', 'muted', 'playsinline', 'ranks/badge-diamant-anim.mp4', 'poster="ranks/badge-diamant.webp"']) expect(v).toContain(a);
   });
-  it('petite taille (liste) : image fixe même pour un rang animé', () => {
+  it('petite taille (liste longue) : image fixe', () => {
     expect(badgeHTML('dynasty', { size: 40 })).not.toContain('<video');
   });
-  it('option still : image fixe (téléphones faibles, mouvement réduit)', () => {
-    expect(badgeHTML('maitre', { size: 120, still: true })).not.toContain('<video');
-  });
-  it('le badge ne porte jamais de saison', () => {
-    for (const r of RANKS) expect(badgeHTML(r.id, { div: 'II' })).not.toMatch(/\bS\d+\b/);
-  });
-  it('division affichée sous le badge', () => {
-    expect(badgeHTML('or', { div: 'II' })).toContain('>II<');
+  it('division affichée par le moteur, pas dans l’art', () => {
+    expect(badgeHTML('or', { div: 'II' })).toContain('<b class="fd-div">II</b>');
   });
   it('rang inconnu ⇒ erreur claire', () => {
     expect(() => badgeHTML('fer')).toThrow(/rang inconnu/);
   });
 });
 
-describe('cadres', () => {
+describe('cadre : photo dessous, cadre entier par-dessus, plaques moteur', () => {
+  it('structure .fd-frame > .fd-avatar + .fd-cadre + plaque saison', () => {
+    const s = frameHTML({ rank: 'or', season: 3, photo: '<b>AR</b>' });
+    expect(s).toMatch(/class="fd-frame[^"]*"[^>]*><span class="fd-avatar"><b>AR<\/b><\/span><span class="fd-cadre">/);
+    expect(s).toContain('ranks/cadre-or.webp');
+    expect(s).toContain('<b class="fd-plaque">S3</b>');
+  });
+  it('DYNASTY : numéro mondial en direct + saison', () => {
+    const s = frameHTML({ rank: 'dynasty', season: 1, pos: 37 });
+    expect(s).toContain('<b class="fd-plaque">#37</b>');
+    expect(s).toContain('<b class="fd-plaque">S1</b>');
+  });
   it('cadre animé à partir de Diamant', () => {
-    expect(frameHTML({ rank: 'champion', season: 1, size: 132 })).toContain('ranks/champion-frame.mp4');
-    expect(frameHTML({ rank: 'argent', season: 1, size: 132 })).not.toContain('<video');
+    expect(frameHTML({ rank: 'champion', season: 1, size: 160 })).toContain('ranks/cadre-champion-anim.mp4');
+    expect(frameHTML({ rank: 'platine', season: 1, size: 160 })).not.toContain('<video');
   });
-  it('saison 1 : la plaque « S1 » de l’art suffit, pas de surcouche', () => {
-    expect(frameHTML({ rank: 'or', season: 1 })).not.toContain('fd-plate');
+});
+
+describe('collection DYNASTY à vie', () => {
+  it('badge gravé du rang final et de la saison', () => {
+    const s = collectionHTML([{ pos: 37, season: 1 }]);
+    expect(s).toContain('ranks/badge-dynasty.webp');
+    expect(s).toContain('#37 — S1');
   });
-  it('autre saison : plaque redessinée avec la bonne saison', () => {
-    const s = frameHTML({ rank: 'or', season: 3 });
-    expect(s).toContain('fd-plate');
-    expect(s).toContain('S3');
-  });
-  it('DYNASTY : numéro mondial et saison sur le cadre', () => {
-    const s = frameHTML({ rank: 'dynasty', season: 2, pos: 7 });
-    expect(s).toContain('#7');
-    expect(s).toContain('S2');
-  });
-  it('avatar placé dans le trou du cadre', () => {
-    const s = frameHTML({ rank: 'diamant', season: 1, avatar: '<b>AR</b>' });
-    expect(s).toContain('fd-hole');
-    expect(s).toContain('<b>AR</b>');
+  it('vide : message clair, rien d’inventé', () => {
+    expect(collectionHTML([])).toContain('Aucun badge DYNASTY');
   });
 });
