@@ -778,9 +778,12 @@ function sponsWeek(){S.sOff=(S.sOff||[]).filter(o=>o.exp>=S.t&&getB(o.b)&&getB(o
   for(const b of club()){if(b.spons){b.sTaken=(b.sTaken||0)+1;const c=b.spons;S.money+=c.pay;
       if(S.t>=c.until){const ok=sponsDone(b);if(ok){S.money+=c.bonus;b.morale=cl(b.morale+5,0,100);log(`🤝 ${c.brand} : objectif réussi par ${b.name} ! Bonus ${$(c.bonus)}.`,'gold');toast(`🤝 Bonus ${c.brand} : +${moneyS(c.bonus)}`)}else{b.fame=cl(b.fame-2,1,100);log(`🤝 ${c.brand} ne renouvelle pas ${b.name} : objectif raté.`,'bad')}b.spons=null}continue}
     if(S.sOff.length>=2||S.sOff.some(o=>o.b===b.id)||R()>.01+Math.min(.05,fol(b)/2e8)+beltsOf(b).length*.01)continue;
-    const[br,cat]=pick(BRANDS),pay=Math.round((3000+fol(b)*.004+beltsOf(b).length*8000+b.fame*60)/500)*500,gk=beltsOf(b).length&&R()<.4?'keep':R()<.25?'kos':R()<.3?'fol':'wins';
+    const[br,cat]=pick(BRANDS),{pay,bonus,weeks}=sponsorTerms({fol:fol(b),fame:b.fame,belts:beltsOf(b).length}),gk=beltsOf(b).length&&R()<.4?'keep':R()<.25?'kos':R()<.3?'fol':'wins';
     const g=gk==='wins'?ri(2,3):gk==='kos'?ri(1,2):gk==='fol'?Math.max(1000,Math.round(fol(b)*.15/1000)*1000):0;
-    S.sOff.push({id:'so'+(S.uid++),b:b.id,brand:br,cat,pay,weeks:26,gk,g,bonus:pay*12,exp:S.t+3})}}
+    S.sOff.push({id:'so'+(S.uid++),b:b.id,brand:br,cat,pay,weeks,gk,g,bonus,exp:S.t+3})}}
+// B5 : un sponsor aide sans effacer la gestion. Paiement selon la crédibilité
+// (abonnés, notoriété, ceintures), bonus de résultat limité à 4 semaines de paiement.
+function sponsorTerms({fol=0,fame=1,belts=0}){const pay=Math.min(6000,Math.round((250+fol*.0012+belts*700+fame*15)/50)*50);return{pay,bonus:pay*4,weeks:26}}
 function sponsDone(b){const c=b.spons;if(!c)return false;return c.gk==='keep'?beltsOf(b).length>=c.base:c.gk==='fol'?fol(b)-c.base>=c.g:(c.prog||0)>=c.g}
 function sponsAccept(id){const o=(S.sOff||[]).find(x=>x.id===id),b=o&&getB(o.b);if(!b)return;S.sOff=S.sOff.filter(x=>x!==o);b.spons={brand:o.brand,cat:o.cat,pay:o.pay,gk:o.gk,g:o.g,bonus:o.bonus,until:S.t+o.weeks,prog:0,base:o.gk==='keep'?beltsOf(b).length:o.gk==='fol'?fol(b):0};addFol(b,fol(b)*.02);log(`🤝 ${b.name} signe avec ${o.brand} (${o.cat}) : ${$(o.pay)}/sem. pendant ${o.weeks} sem.`,'good');toast(`🤝 ${sur(b)} × ${o.brand}`)}
 function sponsPanel(b){const c=b.spons;if(!c)return'';const p=c.gk==='keep'?(beltsOf(b).length>=c.base?1:0):c.gk==='fol'?Math.max(0,fol(b)-c.base):(c.prog||0),g=c.gk==='keep'?1:c.g;
@@ -4155,5 +4158,5 @@ async function doUpd(){try{if(window.caches){for(const k of await caches.keys())
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),60000);try{const pv=localStorage.getItem('cr_build');localStorage.setItem('cr_build',window.BUILD);if(pv&&pv!==window.BUILD){const n=document.getElementById('updok');if(n){n.innerHTML='✅ <b>Jeu mis à jour !</b>'+(window.BUILD_MSG?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(window.BUILD_MSG)+'</span>':'');n.hidden=false;setTimeout(()=>{n.hidden=true},7000)}}}catch(e){}});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});addEventListener('pageshow',()=>checkUpd(false));addEventListener('focus',()=>checkUpd(false));
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
-export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored };
+export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms };
 export const getState = () => S;
