@@ -1,27 +1,46 @@
-/* Rangs FIGHT DYNASTY — art officiel de Max affiché tel quel (spec rangs.html, VERSION 1).
-   Boîte carrée, object-fit: contain : pointes, laurier et plaque toujours visibles en entier.
-   Fond noir des images fondu par mix-blend-mode: screen sur les fonds sombres du jeu. */
-.fd-badge:has(.fd-div) { margin-bottom: calc(var(--s) * .17 + 6px); }
-.fd-badge, .fd-frame { position: relative; display: inline-block; flex: none; width: var(--s, 120px); aspect-ratio: 1; vertical-align: middle; }
-.fd-badge > img, .fd-badge > video,
-.fd-cadre > img, .fd-cadre > video { display: block; width: 100%; height: 100%; object-fit: contain; mix-blend-mode: screen; background: transparent; }
+/* Rangs FIGHT DYNASTY — art officiel de Max (fight-dynasty-assets V2).
+   Le bloc « COMPOSANTS » ci-dessous est copié tel quel de composants.html : ne pas le réécrire. */
 
-/* Division (III / II / I) : valeur du moteur, sous le badge */
-.fd-div { position: absolute; left: 50%; top: calc(100% + 3px); transform: translateX(-50%); font: 900 calc(var(--s) * .13)/1 var(--f-disp, Impact, sans-serif);
-  color: #f5c451; background: #050506; border: 1.5px solid #c9a03a; border-radius: 4px; padding: .12em .45em; letter-spacing: .06em; min-width: 1.6em; text-align: center; }
+/* ============ COMPOSANTS (copier à partir d'ici) ============ */
 
-/* Cadre de profil : photo ronde dessous, cadre entier par-dessus */
-.fd-avatar { position: absolute; left: 21.5%; top: 21.5%; width: 57%; height: 57%; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
-  background: radial-gradient(circle at 40% 30%, #3a4257, #121621); }
-.fd-avatar > img { width: 100%; height: 100%; object-fit: cover; }
-.fd-cadre { position: absolute; inset: 0; } /* pas de z-index : le fondu « screen » doit voir la photo dessous */
+/* Badge : image entière, jamais coupée */
+.fd-badge{ width:var(--size,160px); aspect-ratio:1; }
+.fd-badge img, .fd-badge video{
+  width:100%; height:100%; object-fit:contain; display:block;
+}
+.fd-badge video{ mix-blend-mode:screen; } /* fond noir -> transparent sur fond sombre */
 
-/* Plaques : valeurs du moteur, texte HTML par-dessus le bas du cadre */
-.fd-plaques { position: absolute; left: 50%; bottom: 3.5%; transform: translateX(-50%); z-index: 2; display: flex; gap: 4px; }
-.fd-plaque { display: inline-block; font: 900 calc(var(--s) * .085)/1 var(--f-disp, Impact, sans-serif); text-transform: uppercase; letter-spacing: .08em;
-  color: #f5c451; background: #000; border: 1.5px solid #c9a03a; border-radius: 3px; padding: .25em .6em; white-space: nowrap; }
-.fd-grave { position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%); font-size: 11px; }
+/* Cadre : photo dessous (cropée en rond, c'est une photo), cadre entier dessus */
+.fd-frame{ position:relative; width:var(--size,220px); aspect-ratio:1; }
+.fd-frame .fd-avatar{
+  position:absolute; left:21.5%; top:21.5%; width:57%; height:57%;
+  border-radius:50%; object-fit:cover; /* la PHOTO peut être cropée, pas le cadre */
+}
+.fd-frame .fd-cadre{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:contain; pointer-events:none;
+}
+.fd-frame video.fd-cadre{ mix-blend-mode:screen; }
 
-/* Collection DYNASTY du profil */
-.fd-coll { display: flex; flex-wrap: wrap; gap: 14px 10px; padding-bottom: 8px; }
-.fd-coll-vide { margin: 0; color: var(--muted, #8c95a8); font-size: 13px; }
+/* Plaque dynamique (saison, numéro mondial) : texte par-dessus, fond opaque */
+.fd-plaque{
+  position:absolute; left:50%; bottom:1.5%; transform:translateX(-50%);
+  background:#050505; border:1.5px solid #c9a227; border-radius:6px;
+  color:#f5c542; font-weight:700; letter-spacing:.12em;
+  padding:2px 14px; font-size:calc(var(--size,220px) * .075); white-space:nowrap;
+}
+/* ============ FIN DES COMPOSANTS ============ */
+
+/* --- Ajouts du jeu (classes séparées, les composants ci-dessus ne sont pas modifiés) --- */
+/* Avatar sans photo : initiale ou emblème du joueur dans le rond */
+.fd-frame .fd-ini { display:grid; place-items:center; overflow:hidden; background:radial-gradient(circle at 40% 30%, #3a4257, #121621);
+  font:900 calc(var(--size,220px) * .2)/1 var(--f-disp, Impact, sans-serif); color:var(--ink, #fff); }
+/* Badge + division (III / II / I) ou gravure de collection, sous l'image */
+.fd-rk { display:inline-flex; flex-direction:column; align-items:center; gap:4px; vertical-align:middle; }
+.fd-div, .fd-grave { font:900 13px/1 var(--f-disp, Impact, sans-serif); color:#f5c542; background:#050505; border:1.5px solid #c9a227; border-radius:4px;
+  padding:3px 8px; letter-spacing:.08em; white-space:nowrap; }
+.fd-grave { font-size:11px; }
+.fd-coll { display:flex; flex-wrap:wrap; gap:14px 10px; }
+.fd-coll-vide { margin:0; color:var(--muted, #8c95a8); font-size:13px; }
+/* Vignette de rang dans une ligne de texte (classement, puces) : reste dans la ligne */
+span > .fd-badge, a > .fd-badge, b > .fd-badge, td > .fd-badge { display:inline-block; vertical-align:middle; }

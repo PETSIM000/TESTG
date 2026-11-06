@@ -1,7 +1,7 @@
 // Rangs classés FIGHT DYNASTY : échelle ELO et affichage de l'art officiel de Max
-// (dossier fight-dynasty-assets, importé dans public/ranks/ par scripts/import_rank_assets.sh).
-// Règles (rangs.html) : art utilisé tel quel, boîte carrée + object-fit: contain, jamais coupé ;
-// fond noir fondu par mix-blend-mode: screen ; animé (mp4) à partir de Diamant ;
+// (dossier « fight-dynasty-assets V2 », importé dans public/ranks/ par scripts/import_rank_assets.sh).
+// Balisage exact de composants.html : .fd-badge > img|video ; .fd-frame > .fd-avatar + .fd-cadre + .fd-plaque.
+// Images alpha (fond transparent) ; animé (.mp4, fond noir + screen) à partir de Diamant ;
 // plaques (saison, numéro DYNASTY) et divisions = valeurs du moteur en texte HTML.
 
 export const RANKS = [
@@ -46,42 +46,34 @@ function preferStill() {
   } catch (e) { /* navigateur ancien : on anime */ }
   return false;
 }
+const animate = (r, size, still) => r.i >= ANIMATED_FROM && size >= VIDEO_MIN_SIZE && !still && !preferStill();
 
-function art(r, kind, size, still) {
-  const base = `ranks/${kind}-${r.id}`;
-  const animated = r.i >= ANIMATED_FROM && size >= VIDEO_MIN_SIZE && !still && !preferStill();
-  return animated
-    ? `<video autoplay loop muted playsinline disablepictureinpicture preload="auto" poster="${base}.webp" aria-hidden="true"><source src="${base}-anim.mp4" type="video/mp4"></video>`
-    : `<img src="${base}.webp" alt="" loading="lazy" decoding="async">`;
-}
-
-/** Badge d'un rang (intemporel). `div` : division III/II/I affichée dessous. `still` : image fixe. */
+/** Badge d'un rang (intemporel). `div` : division III/II/I sous le badge. `still` : image fixe. */
 export function badgeHTML(id, { size = 120, div = '', still = false, engrave = '' } = {}) {
   const r = get(id);
-  return (
-    `<span class="fd-badge fd-r-${r.id}" style="--s:${size}px" role="img" aria-label="${r.n}${div ? ' ' + div : ''}">` +
-    art(r, 'badge', size, still) +
-    (div ? `<b class="fd-div">${div}</b>` : '') +
-    (engrave ? `<b class="fd-plaque fd-grave">${engrave}</b>` : '') +
-    `</span>`
-  );
+  const media = animate(r, size, still)
+    ? `<video src="ranks/badge-${r.id}-anim.mp4" poster="ranks/badge-${r.id}.webp" autoplay loop muted playsinline disablepictureinpicture aria-hidden="true"></video>`
+    : `<img src="ranks/badge-${r.id}${size < VIDEO_MIN_SIZE ? '-sm' : ''}.webp" alt="Badge ${r.n}" decoding="async">`;
+  const box = `<div class="fd-badge" style="--size:${size}px">${media}</div>`;
+  if (!div && !engrave) return box;
+  return `<span class="fd-rk">${box}${div ? `<b class="fd-div">${div}</b>` : ''}${engrave ? `<b class="fd-grave">${engrave}</b>` : ''}</span>`;
 }
 
-/** Cadre de profil : photo ronde dessous (57 %), cadre entier par-dessus, plaques du moteur en bas. */
-export function frameHTML({ rank, season = 1, pos, size = 160, photo = '', still = false } = {}) {
+/** Cadre de profil : avatar rond dessous, cadre entier dessus, plaque du moteur. */
+export function frameHTML({ rank, season = 1, pos, size = 220, initials = '', photo = '', still = false } = {}) {
   const r = get(rank);
-  const tags = r.id === 'dynasty' && pos != null ? [`#${pos}`, `S${season}`] : [`S${season}`];
-  return (
-    `<span class="fd-frame fd-r-${r.id}" style="--s:${size}px" role="img" aria-label="Cadre ${r.n}">` +
-    `<span class="fd-avatar">${photo}</span>` +
-    `<span class="fd-cadre">${art(r, 'cadre', size, still)}</span>` +
-    `<span class="fd-plaques">${tags.map((t) => `<b class="fd-plaque">${t}</b>`).join('')}</span>` +
-    `</span>`
-  );
+  const avatar = photo
+    ? `<img class="fd-avatar" src="${photo}" alt="">`
+    : `<span class="fd-avatar fd-ini">${initials}</span>`;
+  const cadre = animate(r, size, still)
+    ? `<video class="fd-cadre" src="ranks/cadre-${r.id}-anim.mp4" poster="ranks/cadre-${r.id}.webp" autoplay loop muted playsinline disablepictureinpicture aria-hidden="true"></video>`
+    : `<img class="fd-cadre" src="ranks/cadre-${r.id}.webp" alt="Cadre ${r.n}">`;
+  const plaque = r.id === 'dynasty' && pos != null ? `#${pos} · S${season}` : `S${season}`;
+  return `<div class="fd-frame" style="--size:${size}px">${avatar}${cadre}<div class="fd-plaque">${plaque}</div></div>`;
 }
 
-/** Collection du profil : badges DYNASTY gagnés en fin de saison (à vie), gravés « #rang — Saison ». */
+/** Collection du profil : badges DYNASTY gagnés en fin de saison (à vie), gravés « #rang · Saison ». */
 export function collectionHTML(items = []) {
   if (!items.length) return `<p class="fd-coll-vide">Aucun badge DYNASTY pour l'instant. Termine une saison dans le top 250 mondial pour le garder à vie.</p>`;
-  return `<div class="fd-coll">${items.map((x) => badgeHTML('dynasty', { size: 96, still: true, engrave: `#${x.pos} — S${x.season}` })).join('')}</div>`;
+  return `<div class="fd-coll">${items.map((x) => badgeHTML('dynasty', { size: 96, still: true, engrave: `#${x.pos} · S${x.season}` })).join('')}</div>`;
 }
