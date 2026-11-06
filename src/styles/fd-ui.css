@@ -278,3 +278,9 @@ nav.tabs button[aria-current="true"]::before {
 .clr-m { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .clr-m > b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .clr-r { flex: none; display: flex; align-items: center; gap: 6px; font-size: 13px; }
+
+/* Membres du club : badge de rang animé + nom du rang en couleur */
+.clm-bd { flex: none; display: inline-flex; }
+.clm-rk { color: var(--gold); letter-spacing: .02em; }
+.clm-rk[data-rk="bronze"] { color: #e0905a; } .clm-rk[data-rk="argent"] { color: #d6dde8; } .clm-rk[data-rk="platine"] { color: #9fe3f0; }
+.clm-rk[data-rk="diamant"] { color: #6fb8ff; } .clm-rk[data-rk="maitre"] { color: #c58cff; } .clm-rk[data-rk="champion"] { color: #ffcf4a; } .clm-rk[data-rk="dynasty"] { color: #ffd76a; }
