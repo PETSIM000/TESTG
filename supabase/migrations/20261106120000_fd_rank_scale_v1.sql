@@ -50,14 +50,26 @@ $$;
 
 create or replace function public.cr_rank_claim(p_token text, p_r integer) returns jsonb
 language plpgsql security definer set search_path to '' as $$
-declare me public.players; q jsonb;
+declare me public.players; q jsonb; v_coins int;
 begin
   me := public.cr_me(p_token);
   select x into q from jsonb_array_elements(public.cr_rkdefs()) x where (x->>'r')::int = p_r;
   if q is null or public.cr_best(me.id) < p_r then raise exception 'rank'; end if;
-  if me.rkdone ? p_r::text then raise exception 'claimed'; end if;
+  -- Check and grant in one statement: two simultaneous claims cannot both pay.
   update public.players set rkdone = rkdone || to_jsonb(p_r::text), coins = coins + (q->>'c')::int,
     trophies = case when (q->>'rp')::int >= 6000 then trophies || jsonb_build_array(jsonb_build_object('t','Rang '||(q->>'n')||' atteint','at',now(),'box','')) else trophies end
-  where id = me.id;
-  return jsonb_build_object('gain', (q->>'c')::int, 'coins', me.coins + (q->>'c')::int);
+  where id = me.id and not (rkdone ? p_r::text)
+  returning coins into v_coins;
+  if not found then raise exception 'claimed'; end if;
+  return jsonb_build_object('gain', (q->>'c')::int, 'coins', v_coins);
 end $$;
+
+-- Old claims were keyed on the old ladder (850 ... 2000). Mark every new division at or below the
+-- highest old claim as already received, so nobody is paid twice for the same progress.
+update public.players p
+set rkdone = p.rkdone || coalesce((
+  select jsonb_agg(to_jsonb((x->>'r')))
+  from jsonb_array_elements(public.cr_rkdefs()) x
+  where (x->>'r')::int <= (select max(k::int) from jsonb_array_elements_text(p.rkdone) k where k ~ '^[0-9]+$')
+    and not (p.rkdone ? (x->>'r'))), '[]'::jsonb)
+where jsonb_typeof(p.rkdone) = 'array' and jsonb_array_length(p.rkdone) > 0;
