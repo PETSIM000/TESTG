@@ -26,11 +26,11 @@ describe('badge (composants.html)', () => {
       expect(s).toContain(`<div class="fd-badge" style="--size:96px"><img src="ranks/badge-${r.id}.webp"`);
     }
   });
-  it('animé (mp4 autoplay loop muted playsinline) seulement à partir de Diamant', () => {
-    const anim = RANKS.map((r) => badgeHTML(r.id, { size: 96 }).includes('<video'));
+  it('animé (WebP transparent, simple <img>) seulement à partir de Diamant ; plus aucune vidéo', () => {
+    const anim = RANKS.map((r) => badgeHTML(r.id, { size: 96 }).includes('-anim.webp'));
     expect(anim).toEqual([false, false, false, false, true, true, true, true]);
-    const v = badgeHTML('diamant', { size: 96 });
-    for (const a of ['autoplay', 'loop', 'muted', 'playsinline', 'src="ranks/badge-diamant-anim.mp4"']) expect(v).toContain(a);
+    for (const r of RANKS) expect(badgeHTML(r.id, { size: 96 })).not.toContain('<video');
+    expect(badgeHTML('diamant', { size: 96 })).toContain('<img src="ranks/badge-diamant-anim.webp"');
   });
   it('petite vignette de liste : image fixe, même boîte carrée', () => {
     const s = badgeHTML('dynasty', { size: 28 });
@@ -53,8 +53,8 @@ describe('cadre (composants.html)', () => {
   it('DYNASTY : « #numéro · saison » en texte', () => {
     expect(frameHTML({ rank: 'dynasty', season: 1, pos: 37 })).toContain('<div class="fd-plaque">#37 · S1</div>');
   });
-  it('cadre animé (video.fd-cadre) à partir de Diamant', () => {
-    expect(frameHTML({ rank: 'champion', season: 1, size: 160 })).toContain('<video class="fd-cadre" src="ranks/cadre-champion-anim.mp4"');
+  it('cadre animé (img.fd-cadre WebP transparent) à partir de Diamant', () => {
+    expect(frameHTML({ rank: 'champion', season: 1, size: 160 })).toContain('<img class="fd-cadre" src="ranks/cadre-champion-anim.webp"');
     expect(frameHTML({ rank: 'platine', season: 1, size: 160 })).not.toContain('<video');
   });
 });

@@ -135,13 +135,11 @@ nav.tabs button[aria-current="true"]::before {
 
 /* ---------- Rang du compte (Phase 4) : cadre animé autour de l'avatar, badge à côté ---------- */
 .ohd-elo { background: linear-gradient(180deg, #1b1f2b, #0d1017); border: 1px solid rgba(245, 196, 81, .35); box-shadow: 0 6px 18px rgba(0, 0, 0, .45); color: var(--ink); padding: 4px 10px 6px; gap: 0; }
-.ohd-elo .fd-badge { margin: -4px 0 -2px; }
 .ohd-elo b { font: 900 19px var(--f-disp); color: var(--gold); line-height: 1; }
 .ohd-elo i { color: var(--muted); }
 .me-frm { display: block; margin-top: 4px; color: var(--muted); }
 .me-rank { display: flex; align-items: center; justify-content: center; gap: 4px; margin: 4px 0 2px; }
 .me-rkn { font: 900 24px var(--f-disp); text-transform: uppercase; letter-spacing: .6px; background: var(--gold-g); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.rkbig .fd-badge { margin: -4px 0; }
 
 /* ---------- Menu principal : soirée de combat (UFC / Fight Night) ---------- */
 .fn-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; background:
@@ -206,8 +204,8 @@ nav.tabs button[aria-current="true"]::before {
 }
 
 /* ---------- Fin de combat classé ---------- */
-.fd-rres { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; background: radial-gradient(60% 50% at 50% 40%, rgba(40, 30, 10, .6), rgba(0, 0, 0, .92)); animation: fn-fade .25s ease both; }
-.fd-rres.up { background: radial-gradient(60% 50% at 50% 40%, rgba(245, 196, 81, .28), rgba(0, 0, 0, .94)); }
+.fd-rres { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; background: radial-gradient(60% 45% at 50% 38%, rgba(120, 80, 20, .35), transparent 70%), #06070b; animation: fn-fade .25s ease both; }
+.fd-rres.up { background: radial-gradient(60% 45% at 50% 38%, rgba(245, 196, 81, .32), transparent 70%), #06070b; }
 .fd-rres.out { opacity: 0; transition: opacity .25s; }
 .fd-rres-c { display: grid; justify-items: center; gap: 6px; width: min(86vw, 340px); text-align: center; animation: rr-pop .45s cubic-bezier(.2, 1.4, .4, 1) both; }
 @keyframes rr-pop { from { transform: scale(.7); opacity: 0; } to { transform: none; opacity: 1; } }

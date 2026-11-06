@@ -4,7 +4,7 @@
 # The art is used AS IS: no crop, no redraw. Only resized for phones (longest side 640 px for images,
 # 480 px for videos; plus a 128 px badge for list thumbnails). Videos: near-black lifted by
 # compression is set back to pure black, so mix-blend-mode: screen leaves no visible square. and re-encoded (webp / H.264) so the game stays light.
-# Usage: scripts/import_rank_assets.sh "<path to fight-dynasty-assets>"
+# Usage: scripts/import_rank_assets.sh "<fight-dynasty-assets V2>" "<fight-dynasty-assets V3>"
 set -euo pipefail
 SRC="${1:?assets folder}"
 OUT="$(cd "$(dirname "$0")/.." && pwd)/public/ranks"
@@ -18,12 +18,15 @@ for r in $RANKS; do
     [ $k = badge ] && python -I -c "import sys;from PIL import Image;im=Image.open(sys.argv[1]).convert('RGBA');im.thumbnail((128,128),Image.LANCZOS);im.save(sys.argv[2],'WEBP',quality=88,method=6)" "$f" "$OUT/$k-$r-sm.webp"
   done
 done
+# Animations (Diamant and up): transparent animated WebP from "fight-dynasty-assets V3/anim-alpha",
+# copied as is (built-in back-and-forth loop, no background). Usage: second argument = V3 folder.
+V3="${2:?V3 folder (anim-alpha)}"
 for r in diamant maitre champion dynasty; do
   for k in badge cadre; do
-    f="$SRC/$k-$r-anim.mp4"
-    [ -f "$f" ] || { echo "MANQUANT : $k-$r-anim.mp4"; exit 1; }
-    ffmpeg -v error -y -i "$f" -an -vf "scale='if(gt(iw,ih),min(480,iw),-2)':'if(gt(iw,ih),-2,min(480,ih))':flags=lanczos,curves=all='0/0 0.05/0 1/1',format=yuv420p" \
-      -c:v libx264 -profile:v main -crf 24 -preset slow -movflags +faststart "$OUT/$k-$r-anim.mp4"
+    f="$V3/anim-alpha/$k-$r-anim-alpha.webp"
+    [ -f "$f" ] || { echo "MANQUANT : anim-alpha/$k-$r-anim-alpha.webp"; exit 1; }
+    cp "$f" "$OUT/$k-$r-anim.webp"
   done
 done
+rm -f "$OUT"/*.mp4
 du -ch "$OUT" | tail -1

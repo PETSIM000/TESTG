@@ -1,7 +1,7 @@
 // Rangs classés FIGHT DYNASTY : échelle ELO et affichage de l'art officiel de Max
 // (dossier « fight-dynasty-assets V2 », importé dans public/ranks/ par scripts/import_rank_assets.sh).
 // Balisage exact de composants.html : .fd-badge > img|video ; .fd-frame > .fd-avatar + .fd-cadre + .fd-plaque.
-// Images alpha (fond transparent) ; animé (.mp4, fond noir + screen) à partir de Diamant ;
+// Images alpha (fond transparent) ; animé à partir de Diamant = WebP animé transparent (V3, boucle aller-retour) ;
 // plaques (saison, numéro DYNASTY) et divisions = valeurs du moteur en texte HTML.
 
 export const RANKS = [
@@ -52,7 +52,7 @@ const animate = (r, size, still) => r.i >= ANIMATED_FROM && size >= VIDEO_MIN_SI
 export function badgeHTML(id, { size = 120, div = '', still = false, engrave = '' } = {}) {
   const r = get(id);
   const media = animate(r, size, still)
-    ? `<video src="ranks/badge-${r.id}-anim.mp4" poster="ranks/badge-${r.id}.webp" autoplay loop muted playsinline disablepictureinpicture aria-hidden="true"></video>`
+    ? `<img src="ranks/badge-${r.id}-anim.webp" alt="Badge ${r.n}" decoding="async">`
     : `<img src="ranks/badge-${r.id}${size < VIDEO_MIN_SIZE ? '-sm' : ''}.webp" alt="Badge ${r.n}" decoding="async">`;
   const box = `<div class="fd-badge" style="--size:${size}px">${media}</div>`;
   if (!div && !engrave) return box;
@@ -66,7 +66,7 @@ export function frameHTML({ rank, season = 1, pos, size = 220, initials = '', ph
     ? `<img class="fd-avatar" src="${photo}" alt="">`
     : `<span class="fd-avatar fd-ini">${initials}</span>`;
   const cadre = animate(r, size, still)
-    ? `<video class="fd-cadre" src="ranks/cadre-${r.id}-anim.mp4" poster="ranks/cadre-${r.id}.webp" autoplay loop muted playsinline disablepictureinpicture aria-hidden="true"></video>`
+    ? `<img class="fd-cadre" src="ranks/cadre-${r.id}-anim.webp" alt="Cadre ${r.n}">`
     : `<img class="fd-cadre" src="ranks/cadre-${r.id}.webp" alt="Cadre ${r.n}">`;
   const plaque = r.id === 'dynasty' && pos != null ? `#${pos} · S${season}` : `S${season}`;
   return `<div class="fd-frame" style="--size:${size}px">${avatar}${cadre}<div class="fd-plaque">${plaque}</div></div>`;

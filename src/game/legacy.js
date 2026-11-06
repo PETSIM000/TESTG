@@ -1664,11 +1664,12 @@ async function rkSave(){const u=onUi(),d=rkDraft();d.name=(d.name||'').trim();
   if(!rkValid(d)){toast(d.name.length<2?'Choisis un nom (2 à 16 caractères)':!d.style?'Choisis un style':'Choisis 2 habiletés');onR();return}
   try{await rpc('cr_rk_set',{p_token:ON.token,p_name:d.name,p_style:d.style,p_abil:d.abil});u.rkEdit=null;toast('Boxeur Classé enregistré');await onLoad(true)}catch(e){toast(e.message)}}
 async function rkFind(){const u=onUi();u.rkBusy=1;onR();try{u.rkOpps=((await rpc('cr_rk_opps',{p_token:ON.token}))||[]).map(onP)}catch(e){toast(e.message);u.rkOpps=[]}u.rkBusy=0;onR()}
-function rkGo(id){const u=onUi(),me=u.home&&u.home.me,o=(u.rkOpps||[]).find(x=>x.id===id);if(!me||!me.rk||!o){toast('Adversaire introuvable');return}
+async function rkGo(id){const u=onUi(),me=u.home&&u.home.me,o=(u.rkOpps||[]).find(x=>x.id===id);if(!me||!me.rk||!o){toast('Adversaire introuvable');return}
+  let ticket;try{ticket=String((await rpc('cr_rk_start',{p_token:ON.token,p_opp:o.id})).ticket||'')}catch(e){toast(e.message);return}
   const oc=o.rk&&rkValid(o.rk)?o.rk:botRk(o);let F;const f0=FORM;FORM=.08;try{F=newFight(rkFighter(me.rk,true,me.id),rkFighter(oc,false,o.id),10,false)}finally{FORM=f0}
-  F.cut=1;F.online={rk:true,fid:o.id,n:o.name,title:false,bn:oc.name,e0:onI(me.elo,0,99999,1000)};u.rkOpps=null;beginFight(F)}
+  F.cut=1;F.online={rk:true,fid:o.id,ticket,n:o.name,title:false,bn:oc.name,e0:onI(me.elo,0,99999,1000)};u.rkOpps=null;beginFight(F)}
 async function rkDone(F){const r=F.res,res=r.w==='A'?'W':r.w==='B'?'L':'D',o=F.online;
-  try{const x=await rpc('cr_rk_report',{p_token:ON.token,p_opp:o.fid,p_res:res,p_method:r.m==='KO'||r.m==='TKO'?r.m:'DEC',p_rnd:r.r||0});
+  try{const x=await rpc('cr_rk_result',{p_token:ON.token,p_ticket:o.ticket,p_res:res,p_method:r.m==='KO'||r.m==='TKO'?r.m:'DEC',p_rnd:r.r||0});
     await onLoad(true);rankResult(o.e0,onI(x.elo,0,99999,o.e0),onI(x.dpos,0,250,0));if(onI(x.repeat,0,99,0))setTimeout(()=>toast('Même adversaire aujourd’hui : gain réduit'),1500)}
   catch(e){toast('Résultat non envoyé : '+e.message);await onLoad(true)}}
 /* Cadres équipables (décision de Max) : emplacement « avatar » et emplacement « vitrine » de la bannière.

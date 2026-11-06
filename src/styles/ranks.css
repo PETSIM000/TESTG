@@ -32,6 +32,8 @@
 /* ============ FIN DES COMPOSANTS ============ */
 
 /* --- Ajouts du jeu (classes séparées, les composants ci-dessus ne sont pas modifiés) --- */
+/* Marge intérieure (~8 %) : les pointes ne touchent jamais un bord, même si un parent coupe (overflow: hidden) */
+.fd-badge { padding: 8%; box-sizing: border-box; }
 /* Avatar sans photo : initiale ou emblème du joueur dans le rond */
 .fd-frame .fd-ini { display:grid; place-items:center; overflow:hidden; background:radial-gradient(circle at 40% 30%, #3a4257, #121621);
   font:900 calc(var(--size,220px) * .2)/1 var(--f-disp, Impact, sans-serif); color:var(--ink, #fff); }

@@ -26,7 +26,7 @@ export function buildMeta() {
         }
       };
       walk(outDir);
-      const list = ['./', ...files.filter((f) => f !== 'index.html' && f !== 'sw.js' && f !== 'version.json' && !f.startsWith('.') && !f.endsWith('.mp4'))].sort();
+      const list = ['./', ...files.filter((f) => f !== 'index.html' && f !== 'sw.js' && f !== 'version.json' && !f.startsWith('.') && !f.endsWith('.mp4') && !f.endsWith('-anim.webp'))].sort();
       fs.writeFileSync(path.join(outDir, 'version.json'), JSON.stringify({ v: build, m: msg }));
       const tpl = fs.readFileSync('scripts/sw.template.js', 'utf8');
       fs.writeFileSync(path.join(outDir, 'sw.js'), tpl.replace('__BUILD__', () => build).replace('__FILES__', () => JSON.stringify(list)));
