@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { RANKS, rankFromElo, badgeSVG, frameSVG } from '../../src/ui/ranks.js';
+import { RANKS, rankFromElo, badgeHTML, frameHTML } from '../../src/ui/ranks.js';
 
 describe('échelle des rangs (brief §4)', () => {
   it('8 rangs dans l’ordre Bronze → DYNASTY', () => {
@@ -27,34 +27,63 @@ describe('échelle des rangs (brief §4)', () => {
 });
 
 describe('badges', () => {
-  it('un SVG par rang, sans aucune saison', () => {
-    for (const r of RANKS) {
-      const s = badgeSVG(r.id);
-      expect(s.startsWith('<svg')).toBe(true);
-      expect(s).not.toMatch(/\bS\d+\b/);
+  it('Diamant → DYNASTY : vidéo en boucle, muette, avec image fixe de secours', () => {
+    for (const id of ['diamant', 'maitre', 'champion', 'dynasty']) {
+      const s = badgeHTML(id, { size: 96 });
+      expect(s).toContain('<video');
+      expect(s).toMatch(/autoplay/);
+      expect(s).toMatch(/muted/);
+      expect(s).toMatch(/loop/);
+      expect(s).toMatch(/playsinline/);
+      expect(s).toContain(`ranks/${id}-badge.mp4`);
+      expect(s).toContain(`poster="ranks/${id}-badge.webp"`);
     }
   });
-  it('animé seulement à partir de Diamant', () => {
-    const anim = RANKS.map((r) => badgeSVG(r.id).includes('fd-anim'));
-    expect(anim).toEqual([false, false, false, false, true, true, true, true]);
+  it('Bronze → Platine : image fixe, jamais de vidéo', () => {
+    for (const id of ['bronze', 'argent', 'or', 'platine']) {
+      const s = badgeHTML(id, { size: 96 });
+      expect(s).not.toContain('<video');
+      expect(s).toContain(`ranks/${id}-badge.webp`);
+    }
   });
-  it('ids SVG uniques entre deux badges sur la même page', () => {
-    const ids = (s) => [...s.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
-    const a = ids(badgeSVG('or')), b = ids(badgeSVG('or'));
-    expect(a.some((x) => b.includes(x))).toBe(false);
+  it('petite taille (liste) : image fixe même pour un rang animé', () => {
+    expect(badgeHTML('dynasty', { size: 40 })).not.toContain('<video');
+  });
+  it('option still : image fixe (téléphones faibles, mouvement réduit)', () => {
+    expect(badgeHTML('maitre', { size: 120, still: true })).not.toContain('<video');
+  });
+  it('le badge ne porte jamais de saison', () => {
+    for (const r of RANKS) expect(badgeHTML(r.id, { div: 'II' })).not.toMatch(/\bS\d+\b/);
+  });
+  it('division affichée sous le badge', () => {
+    expect(badgeHTML('or', { div: 'II' })).toContain('>II<');
+  });
+  it('rang inconnu ⇒ erreur claire', () => {
+    expect(() => badgeHTML('fer')).toThrow(/rang inconnu/);
   });
 });
 
 describe('cadres', () => {
-  it('la saison est sur le cadre', () => {
-    expect(frameSVG({ rank: 'or', season: 1 })).toContain('S1');
+  it('cadre animé à partir de Diamant', () => {
+    expect(frameHTML({ rank: 'champion', season: 1, size: 132 })).toContain('ranks/champion-frame.mp4');
+    expect(frameHTML({ rank: 'argent', season: 1, size: 132 })).not.toContain('<video');
   });
-  it('DYNASTY porte numéro mondial et saison', () => {
-    const s = frameSVG({ rank: 'dynasty', season: 2, pos: 7 });
+  it('saison 1 : la plaque « S1 » de l’art suffit, pas de surcouche', () => {
+    expect(frameHTML({ rank: 'or', season: 1 })).not.toContain('fd-plate');
+  });
+  it('autre saison : plaque redessinée avec la bonne saison', () => {
+    const s = frameHTML({ rank: 'or', season: 3 });
+    expect(s).toContain('fd-plate');
+    expect(s).toContain('S3');
+  });
+  it('DYNASTY : numéro mondial et saison sur le cadre', () => {
+    const s = frameHTML({ rank: 'dynasty', season: 2, pos: 7 });
     expect(s).toContain('#7');
     expect(s).toContain('S2');
   });
-  it('rang inconnu ⇒ erreur claire', () => {
-    expect(() => badgeSVG('fer')).toThrow(/rang inconnu/);
+  it('avatar placé dans le trou du cadre', () => {
+    const s = frameHTML({ rank: 'diamant', season: 1, avatar: '<b>AR</b>' });
+    expect(s).toContain('fd-hole');
+    expect(s).toContain('<b>AR</b>');
   });
 });

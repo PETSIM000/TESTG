@@ -1,17 +1,16 @@
-/* Animations des rangs (charte §3-4) : seulement à partir de Diamant. */
-.fd-badge, .fd-frame { display: block; overflow: visible; }
-.fd-animated .fd-sparkle path { transform-box: fill-box; transform-origin: center; animation: fd-twinkle 1.8s ease-in-out infinite; }
-.fd-animated .fd-sparkle path:nth-child(2) { animation-delay: .6s; }
-.fd-animated .fd-sparkle path:nth-child(3) { animation-delay: 1.2s; }
-.fd-animated .fd-wings { transform-box: fill-box; transform-origin: center; animation: fd-wing 2.6s ease-in-out infinite; }
-.fd-animated .fd-flame { transform-box: fill-box; transform-origin: 50% 100%; animation: fd-flame .9s ease-in-out infinite alternate; }
-.fd-animated .fd-halo { transform-box: fill-box; transform-origin: center; animation: fd-spin 14s linear infinite; }
-.fd-animated .fd-glow { animation: fd-pulse 2.4s ease-in-out infinite; }
-.fd-animated .fd-energy { animation: fd-run 2.2s linear infinite; }
-@keyframes fd-twinkle { 0%, 100% { opacity: .15; transform: scale(.6); } 50% { opacity: 1; transform: scale(1.15); } }
-@keyframes fd-wing { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.06) translateY(-1px); } }
-@keyframes fd-flame { from { transform: scale(.9, .85); opacity: .7; } to { transform: scale(1.05, 1.15); opacity: 1; } }
-@keyframes fd-spin { to { transform: rotate(360deg); } }
-@keyframes fd-pulse { 0%, 100% { opacity: .25; } 50% { opacity: .75; } }
-@keyframes fd-run { to { stroke-dashoffset: -340; } }
-@media (prefers-reduced-motion: reduce) { .fd-animated * { animation: none !important; } }
+/* Rangs (vidéos de Max) : fond noir et bords déjà fondus dans les clips ; la fusion « screen »
+   les rend invisibles sur l'interface sombre, sans aucune boîte noire. */
+.fd-badge, .fd-frame { position: relative; display: inline-block; flex: none; }
+.fd-badge { width: var(--w); }
+.fd-badge .fd-art { display: block; width: var(--w); height: var(--h); object-fit: cover; mix-blend-mode: screen; }
+.fd-frame { width: var(--w); height: var(--w); }
+.fd-frame .fd-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; mix-blend-mode: screen; z-index: 1; }
+.fd-hole { position: absolute; border-radius: 50%; overflow: hidden; display: grid; place-items: center; z-index: 0; }
+.fd-hole > * { width: 100%; height: 100%; object-fit: cover; }
+.fd-div, .fd-plate {
+  font: 900 calc(var(--w) * .095) / 1 var(--f-disp, Impact, sans-serif);
+  color: var(--c); background: #0b0d14; border: 2px solid var(--c); border-radius: 6px;
+  padding: .2em .45em; letter-spacing: .04em; box-shadow: 0 0 10px color-mix(in srgb, var(--c) 45%, transparent);
+}
+.fd-div { display: block; width: max-content; margin: -.4em auto 0; position: relative; z-index: 2; }
+.fd-plate { position: absolute; transform: translate(-50%, -50%); z-index: 2; min-width: 2.4em; text-align: center; }
