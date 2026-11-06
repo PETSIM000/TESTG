@@ -7,6 +7,7 @@ document.addEventListener('click', (e) => {
   const l = e.target.closest && e.target.closest('[data-gl]');
   if (l) { setLang(l.dataset.gl); return; }
   if (e.target.closest && e.target.closest('[data-gfb]')) openFB();
+  if (e.target.closest && e.target.closest('[data-upd]')) doUpd();
 });
 
 /* ===== langue FR / EN ===== */
@@ -2875,7 +2876,7 @@ function chooseEvent(i){
 
 /* --- combat 3D --- */
 let G3=null,HAS3=null;
-function has3D(){if(HAS3!==null)return HAS3;try{HAS3=!!window.THREE&&!!document.createElement('canvas').getContext('webgl')}catch(e){HAS3=false}return HAS3}
+function has3D(){if(HAS3!==null)return HAS3;try{HAS3=!!THREE&&!!document.createElement('canvas').getContext('webgl')}catch(e){HAS3=false}return HAS3}
 const M3=(c,r)=>new THREE.MeshStandardMaterial({color:c,roughness:r==null?.6:r,metalness:0});
 
 /* ===== logo Boxing Manager ===== */
@@ -4173,5 +4174,5 @@ async function doUpd(){try{if(window.caches){for(const k of await caches.keys())
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),60000);try{const pv=localStorage.getItem('cr_build');localStorage.setItem('cr_build',window.BUILD);if(pv&&pv!==window.BUILD){const n=document.getElementById('updok');if(n){n.innerHTML='✅ <b>Jeu mis à jour !</b>'+(window.BUILD_MSG?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(window.BUILD_MSG)+'</span>':'');n.hidden=false;setTimeout(()=>{n.hidden=true},7000)}}}catch(e){}});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});addEventListener('pageshow',()=>checkUpd(false));addEventListener('focus',()=>checkUpd(false));
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
-export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer };
+export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D };
 export const getState = () => S;

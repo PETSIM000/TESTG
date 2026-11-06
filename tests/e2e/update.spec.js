@@ -21,3 +21,17 @@ test('une nouvelle version affiche la bannière de mise à jour', async ({ page 
   await page.goto('/');
   await expect(page.locator('#updbar')).toBeVisible({ timeout: 10_000 });
 });
+
+test('le bouton Mettre à jour recharge le jeu sans erreur', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.route('**/version.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ v: 'nouvelle', m: 'Test' }) }));
+  await page.addInitScript(() => localStorage.setItem('bm_lang', 'fr'));
+  await page.goto('/');
+  await page.locator('#splash').click({ force: true }).catch(() => {});
+  await page.locator('#splash').waitFor({ state: 'detached' });
+  const btn = page.locator('#updbar button').first();
+  await expect(btn).toBeVisible({ timeout: 10_000 });
+  await Promise.all([page.waitForEvent('load'), btn.click()]);
+  expect(errors).toEqual([]);
+});

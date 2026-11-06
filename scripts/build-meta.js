@@ -29,7 +29,7 @@ export function buildMeta() {
       const list = ['./', ...files.filter((f) => f !== 'index.html' && f !== 'sw.js' && f !== 'version.json' && !f.startsWith('.'))].sort();
       fs.writeFileSync(path.join(outDir, 'version.json'), JSON.stringify({ v: build, m: msg }));
       const tpl = fs.readFileSync('scripts/sw.template.js', 'utf8');
-      fs.writeFileSync(path.join(outDir, 'sw.js'), tpl.replace('__BUILD__', build).replace('__FILES__', JSON.stringify(list)));
+      fs.writeFileSync(path.join(outDir, 'sw.js'), tpl.replace('__BUILD__', () => build).replace('__FILES__', () => JSON.stringify(list)));
     },
   };
 }
