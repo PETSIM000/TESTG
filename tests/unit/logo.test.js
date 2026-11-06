@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { crestSVG, drawCrest, CREST } from '../../src/ui/logo.js';
+import { crestSVG, drawCrest, CREST, logoHTML, LOGO, _setLogoImage } from '../../src/ui/logo.js';
 
 describe('logo FIGHT DYNASTY', () => {
   it('SVG avec le nom du jeu et la signature', () => {
@@ -29,5 +29,21 @@ describe('logo FIGHT DYNASTY', () => {
     expect(calls).toContain('fill');
     expect(calls).toContain('save');
     expect(calls).toContain('restore');
+  });
+  it('logo officiel de Max : image du dossier brand/', () => {
+    expect(LOGO.full).toBe('brand/logo.webp');
+    const s = logoHTML('full');
+    expect(s).toContain('<img');
+    expect(s).toContain('src="brand/logo.webp"');
+    expect(s).toContain('alt="FIGHT DYNASTY"');
+  });
+  it('drawCrest dessine l’image du logo de Max dès qu’elle est chargée', () => {
+    const calls = [];
+    const ctx = new Proxy({}, { get: (t, k) => (k in t ? t[k] : (...a) => { calls.push(k); return { addColorStop() {} }; }), set: (t, k, v) => { t[k] = v; return true; } });
+    globalThis.Path2D = class { constructor(d) { this.d = d; } };
+    _setLogoImage({ complete: true, naturalWidth: 600, naturalHeight: 636 });
+    drawCrest(ctx, 100, 100, 80);
+    expect(calls).toContain('drawImage');
+    _setLogoImage(null);
   });
 });

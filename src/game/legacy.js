@@ -1,7 +1,7 @@
 // Code du jeu (ancien index.html), regroupé en un seul module en attendant le découpage par domaine.
 import * as THREE from 'three';
 import { rnd } from '../core/rng.js';
-import { drawCrest } from '../ui/logo.js';
+import { drawCrest, logoReady } from '../ui/logo.js';
 
 // Boutons de langue et d'avis rendus en HTML (ex-onclick inline).
 document.addEventListener('click', (e) => {
@@ -64,8 +64,6 @@ function bmLogo(c,cx,cy,R,o){drawCrest(c,cx,cy,R,{flat:!!(o&&o.flat)})}
 (function(){const sp=document.getElementById('splash');if(!sp)return;let done=false;
   // B20 : après un changement de langue, pas de nouvelle intro.
   try{if(sessionStorage.getItem('fd_skip_splash')){sessionStorage.removeItem('fd_skip_splash');sp.remove();return}}catch(e){}
-  const cv=document.getElementById('sp-logo');const go=()=>{try{const x=cv.getContext('2d');x.clearRect(0,0,520,520);bmLogo(x,260,260,240)}catch(e){}};go();
-  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(go);
   const end=()=>{if(done)return;done=true;sp.classList.add('out');setTimeout(()=>sp.remove(),650)};
   sp.addEventListener('click',end);setTimeout(end,4300)})();
 
@@ -2896,6 +2894,7 @@ function ringMatTex(){const c=document.createElement('canvas');c.width=c.height=
   x.lineWidth=10;x.strokeStyle='rgba(200,16,46,.35)';x.beginPath();x.arc(512,512,330,0,7);x.stroke();
   x.globalAlpha=.92;bmLogo(x,512,512,300,{flat:1});x.globalAlpha=1;
   const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;tx.anisotropy=4;return tx}
+logoReady.then(()=>{_bmC=null;_bmU=null});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{_bmC=null;_bmU=null;if(typeof ui!=='undefined'&&ui.menu==='home'&&typeof renderMenu==='function')try{renderMenu()}catch(e){}});
 
 function texTxt(t,bg,fg,w,h,sz){const c=document.createElement('canvas');c.width=w||512;c.height=h||512;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);x.fillStyle=fg;x.font=`900 ${sz||200}px "Big Shoulders Display",Impact,sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillText(t,c.width/2,c.height/2+8);const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;return tx}

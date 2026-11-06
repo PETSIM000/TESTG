@@ -1,5 +1,23 @@
-// Logo FIGHT DYNASTY redessiné en vectoriel (charte §1, référence : logo de Max).
-// Une seule géométrie (repère 200 × 220) sert au SVG du DOM et au canvas (Path2D).
+// Logo FIGHT DYNASTY : l'image officielle de Max (public/brand/, scripts/make-brand-assets.sh).
+// Le dessin vectoriel plus bas ne sert que de secours sur canvas tant que l'image n'est pas chargée.
+
+export const LOGO = { full: 'brand/logo.webp' };
+
+/** Balise <img> du logo officiel (détouré, fond transparent). */
+export function logoHTML(kind = 'full', cls = '') {
+  return `<img class="fd-logo ${cls}" src="${LOGO[kind]}" alt="FIGHT DYNASTY" decoding="async">`;
+}
+
+let markImg = null;
+if (typeof Image !== 'undefined' && typeof document !== 'undefined') {
+  markImg = new Image();
+  markImg.src = LOGO.full;
+}
+/** Tests seulement : remplace l'image chargée. */
+export function _setLogoImage(img) { markImg = img; }
+/** Promesse résolue quand l'écusson est prêt (pour redessiner les canvas). */
+export const logoReady = markImg && markImg.decode ? markImg.decode().catch(() => {}) : Promise.resolve();
+
 
 const SHIELD = 'M100 30 L166 48 Q170 120 140 158 Q122 180 100 192 Q78 180 60 158 Q30 120 34 48 Z';
 const FIELD = 'M100 40 L157 55 Q160 118 133 152 Q117 171 100 181 Q83 171 67 152 Q40 118 43 55 Z';
@@ -80,6 +98,15 @@ export function crestSVG({ title = false, tagline = '', size = 200 } = {}) {
 
 /** Dessine l'écusson (sans texte) sur un canvas 2D, centré en (cx, cy), inscrit dans un rayon R. */
 export function drawCrest(ctx, cx, cy, R, { flat = false } = {}) {
+  if (markImg && markImg.complete && markImg.naturalWidth) {
+    ctx.save();
+    if (!flat) { ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = R * 0.12; ctx.shadowOffsetY = R * 0.04; }
+    const iw = markImg.naturalWidth, ih = markImg.naturalHeight || iw;
+    const k = (R * 2) / Math.max(iw, ih);
+    ctx.drawImage(markImg, cx - (iw * k) / 2, cy - (ih * k) / 2, iw * k, ih * k);
+    ctx.restore();
+    return;
+  }
   const s = (R * 2) / 220;
   ctx.save();
   ctx.translate(cx - 100 * s, cy - 110 * s);

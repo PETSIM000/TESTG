@@ -19,7 +19,7 @@
 @keyframes spgone{to{opacity:0;transform:scale(1.08);filter:blur(6px)}}
 .sp-bm{opacity:0;animation:spin .7s 2.95s cubic-bezier(.2,1.4,.4,1) forwards}
 @keyframes spin{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
-#sp-logo{width:min(56vw,250px);height:auto;filter:drop-shadow(0 10px 30px rgba(200,16,46,.55))}
+#sp-logo{width:min(80vw,340px);height:auto;filter:drop-shadow(0 12px 36px rgba(200,16,46,.5))}
 .sp-title{margin-top:10px;font-size:min(14vw,64px);font-weight:900;line-height:.86;letter-spacing:.03em;background:linear-gradient(180deg,#fff6c8,#f4c542 45%,#b8860b 70%,#ffe27a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 14px rgba(0,0,0,.8))}
 .sp-tag{margin-top:12px;font:800 12px system-ui;letter-spacing:.32em;text-transform:uppercase;background:linear-gradient(90deg,#ff3d52,#a3101f);padding:6px 12px 6px 16px;border-radius:6px;transform:skewX(-10deg)}
 .sp-skip{position:absolute;bottom:calc(26px + env(safe-area-inset-bottom,0px));font:600 11px system-ui;letter-spacing:.12em;color:rgba(255,255,255,.35);text-transform:uppercase}
