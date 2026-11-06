@@ -1,7 +1,7 @@
 {
- "name": "Boxing Manager",
- "short_name": "Boxing Manager",
- "description": "Gérant de boxe",
+ "name": "FIGHT DYNASTY",
+ "short_name": "FIGHT DYNASTY",
+ "description": "Gestion de boxe",
  "lang": "fr",
  "start_url": "./",
  "display": "standalone",
