@@ -17,6 +17,7 @@ export const RANKS = [
 
 const ANIMATED_FROM = 4; // Diamant
 const VIDEO_MIN_SIZE = 64; // listes longues et petites tailles : image fixe (la .webp sert de repli)
+const FX_MIN_SIZE = 56; // en dessous (vignettes de liste), pas d'effet
 const DIVS = ['III', 'II', 'I'];
 const byId = Object.fromEntries(RANKS.map((r, i) => [r.id, { ...r, i }]));
 
@@ -51,10 +52,11 @@ const animate = (r, size, still) => r.i >= ANIMATED_FROM && size >= VIDEO_MIN_SI
 /** Badge d'un rang (intemporel). `div` : division III/II/I sous le badge. `still` : image fixe. */
 export function badgeHTML(id, { size = 120, div = '', still = false, engrave = '' } = {}) {
   const r = get(id);
-  const media = animate(r, size, still)
-    ? `<img src="ranks/badge-${r.id}-anim.webp" alt="Badge ${r.n}" decoding="async">`
-    : `<img src="ranks/badge-${r.id}${size < VIDEO_MIN_SIZE ? '-sm' : ''}.webp" alt="Badge ${r.n}" decoding="async">`;
-  const box = `<div class="fd-badge" style="--size:${size}px">${media}</div>`;
+  const src = animate(r, size, still) ? `ranks/badge-${r.id}-anim.webp` : `ranks/badge-${r.id}${size < VIDEO_MIN_SIZE ? '-sm' : ''}.webp`;
+  // Effets permanents (reflet qui balaie le badge, lueur qui respire) à partir de 56 px, pour tous les rangs.
+  // Le reflet prend la forme exacte du badge : l'image sert de masque (--img).
+  const fx = size >= FX_MIN_SIZE && !still;
+  const box = `<div class="fd-badge${fx ? ' fd-fx' : ''}" style="--size:${size}px;--img:url('${src}')" data-rk="${r.id}"><img src="${src}" alt="Badge ${r.n}" decoding="async"></div>`;
   if (!div && !engrave) return box;
   return `<span class="fd-rk">${box}${div ? `<b class="fd-div">${div}</b>` : ''}${engrave ? `<b class="fd-grave">${engrave}</b>` : ''}</span>`;
 }

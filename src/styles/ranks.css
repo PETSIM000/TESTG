@@ -46,3 +46,26 @@
 .fd-coll-vide { margin:0; color:var(--muted, #8c95a8); font-size:13px; }
 /* Vignette de rang dans une ligne de texte (classement, puces) : reste dans la ligne */
 span > .fd-badge, a > .fd-badge, b > .fd-badge, td > .fd-badge { display:inline-block; vertical-align:middle; }
+
+/* --- Effets permanents des badges (tous les rangs, ≥ 56 px) --- */
+/* Bronze → Platine : les rayons de l'art vont jusqu'aux bords ; un fondu circulaire efface le carré
+   sans toucher l'emblème (qui tient dans le cercle central). */
+.fd-badge[data-rk="bronze"] img, .fd-badge[data-rk="argent"] img, .fd-badge[data-rk="or"] img, .fd-badge[data-rk="platine"] img {
+  -webkit-mask-image: radial-gradient(closest-side, #000 78%, transparent 100%); mask-image: radial-gradient(closest-side, #000 78%, transparent 100%); }
+.fd-badge.fd-fx { position: relative; --glow: rgba(245, 197, 66, .55); }
+.fd-badge.fd-fx[data-rk="bronze"] { --glow: rgba(224, 140, 80, .55); }
+.fd-badge.fd-fx[data-rk="argent"] { --glow: rgba(220, 230, 245, .5); }
+.fd-badge.fd-fx[data-rk="platine"] { --glow: rgba(150, 225, 240, .55); }
+.fd-badge.fd-fx[data-rk="diamant"] { --glow: rgba(100, 180, 255, .65); }
+.fd-badge.fd-fx[data-rk="maitre"] { --glow: rgba(190, 120, 255, .65); }
+.fd-badge.fd-fx[data-rk="dynasty"] { --glow: rgba(255, 200, 70, .75); }
+.fd-badge.fd-fx img { animation: fd-breathe 2.8s ease-in-out infinite; }
+.fd-badge.fd-fx::after { content: ""; position: absolute; inset: 8%; pointer-events: none;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, .7) 48%, rgba(255, 246, 210, .9) 50%, rgba(255, 255, 255, .7) 52%, transparent 62%);
+  background-size: 300% 100%; background-repeat: no-repeat;
+  -webkit-mask-image: var(--img); mask-image: var(--img); -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;
+  mix-blend-mode: screen; animation: fd-sweep 3.2s ease-in-out infinite; }
+@keyframes fd-breathe { 0%, 100% { filter: drop-shadow(0 0 4px var(--glow)); transform: scale(1); } 50% { filter: drop-shadow(0 0 14px var(--glow)); transform: scale(1.03); } }
+@keyframes fd-sweep { 0% { background-position: 130% 0; } 55%, 100% { background-position: -30% 0; } }
+@media (prefers-reduced-motion: reduce) { .fd-badge.fd-fx img, .fd-badge.fd-fx::after { animation: none; } }

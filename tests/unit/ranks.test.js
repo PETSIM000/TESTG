@@ -23,7 +23,7 @@ describe('badge (composants.html)', () => {
   it('.fd-badge carrée (--size) avec l’image alpha officielle', () => {
     for (const r of RANKS) {
       const s = badgeHTML(r.id, { size: 96, still: true });
-      expect(s).toContain(`<div class="fd-badge" style="--size:96px"><img src="ranks/badge-${r.id}.webp"`);
+      expect(s).toMatch(new RegExp(`<div class="fd-badge[^"]*" style="--size:96px[^"]*" data-rk="${r.id}"><img src="ranks/badge-${r.id}.webp"`));
     }
   });
   it('animé (WebP transparent, simple <img>) seulement à partir de Diamant ; plus aucune vidéo', () => {
@@ -35,7 +35,7 @@ describe('badge (composants.html)', () => {
   it('petite vignette de liste : image fixe, même boîte carrée', () => {
     const s = badgeHTML('dynasty', { size: 28 });
     expect(s).not.toContain('<video');
-    expect(s).toContain('<div class="fd-badge" style="--size:28px"><img src="ranks/badge-dynasty-sm.webp"');
+    expect(s).toMatch(/<div class="fd-badge" style="--size:28px[^"]*" data-rk="dynasty"><img src="ranks\/badge-dynasty-sm.webp"/);
   });
   it('division affichée par le moteur, hors de l’image', () => {
     expect(badgeHTML('or', { div: 'II' })).toContain('<b class="fd-div">II</b>');
@@ -67,5 +67,18 @@ describe('collection DYNASTY à vie', () => {
   });
   it('vide : message clair, rien d’inventé', () => {
     expect(collectionHTML([])).toContain('Aucun badge DYNASTY');
+  });
+});
+
+describe('effets permanents (tous les rangs)', () => {
+  it('à partir de 56 px, chaque badge a l’effet de reflet en boucle (classe fd-fx) et son image en masque', () => {
+    for (const r of RANKS) {
+      const s = badgeHTML(r.id, { size: 96 });
+      expect(s).toContain('fd-fx');
+      expect(s).toMatch(/--img:url\('ranks\/badge-/);
+    }
+  });
+  it('petites vignettes de liste : pas d’effet (léger)', () => {
+    expect(badgeHTML('or', { size: 30 })).not.toContain('fd-fx');
   });
 });

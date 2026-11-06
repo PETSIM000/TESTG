@@ -253,3 +253,8 @@ nav.tabs button[aria-current="true"]::before {
 .rkst i { height: 7px; border-radius: 4px; background: rgba(255, 255, 255, .08); overflow: hidden; }
 .rkst i b { display: block; height: 100%; background: var(--gold-g); border-radius: 4px; }
 .rkst em { font: 500 13px var(--f-mono); font-style: normal; color: var(--ink); text-align: right; }
+
+/* Profil d’un autre joueur : rang bien visible */
+.pf-rank { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; padding: 10px; border-radius: 16px; background: radial-gradient(70% 90% at 30% 50%, rgba(245, 196, 81, .12), transparent 70%); }
+.pf-rk { display: grid; gap: 3px; min-width: 0; }
+.pf-rk .me-rkn { font-size: 22px; }
