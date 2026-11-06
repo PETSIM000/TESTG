@@ -80,6 +80,12 @@ test('langue: le bouton Français/English des réglages change la langue', async
   const en = page.locator('[data-gl="en"]').first();
   await en.waitFor();
   await Promise.all([page.waitForEvent('load'), en.click()]);
-  await page.locator('#splash').click({ force: true }).catch(() => {});
+  await expect(page.locator('#splash')).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => localStorage.getItem('bm_lang'))).toBe('en');
+});
+
+test('B20 : changer de langue ne relance pas l’intro', async ({ page }) => {
+  await bootToMenu(page);
+  await Promise.all([page.waitForEvent('load'), page.locator('[data-a="m_lang"]').click()]);
+  await expect(page.locator('#splash')).toHaveCount(0, { timeout: 1500 });
 });

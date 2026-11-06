@@ -53,7 +53,7 @@ function i18nStart(){if(LANG!=='en'||I18N_MO)return;document.documentElement.lan
   CanvasRenderingContext2D.prototype.measureText=function(t){return g.call(this,tr(String(t)))}})();
 function setLang(l,silent){LANG=l==='en'?'en':'fr';try{localStorage.setItem('bm_lang',LANG)}catch(e){}
   try{if(typeof ON!=='undefined'&&ON.token)rpc('cr_set_lang',{p_token:ON.token,p_lang:LANG}).catch(()=>{})}catch(e){}
-  if(!silent)location.reload()}
+  if(!silent){try{sessionStorage.setItem('fd_skip_splash','1')}catch(e){}location.reload()}}
 function langPick(){if(LANG)return;const el=document.createElement('div');el.id='langpick';el.setAttribute('data-noi18n','');
   el.innerHTML=`<div class="lp-card"><div class="lp-ic">🌍</div><b>Choisis ta langue</b><span>Choose your language</span>
     <button data-l="fr"><i>🇫🇷</i>Français</button><button data-l="en"><i>🇬🇧</i>English</button><small>Tu pourras changer plus tard dans les réglages · You can change it later in settings</small></div>`;
@@ -62,6 +62,8 @@ function langPick(){if(LANG)return;const el=document.createElement('div');el.id=
 
 function bmLogo(c,cx,cy,R,o){drawCrest(c,cx,cy,R,{flat:!!(o&&o.flat)})}
 (function(){const sp=document.getElementById('splash');if(!sp)return;let done=false;
+  // B20 : après un changement de langue, pas de nouvelle intro.
+  try{if(sessionStorage.getItem('fd_skip_splash')){sessionStorage.removeItem('fd_skip_splash');sp.remove();return}}catch(e){}
   const cv=document.getElementById('sp-logo');const go=()=>{try{const x=cv.getContext('2d');x.clearRect(0,0,520,520);bmLogo(x,260,260,240)}catch(e){}};go();
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(go);
   const end=()=>{if(done)return;done=true;sp.classList.add('out');setTimeout(()=>sp.remove(),650)};
@@ -3272,7 +3274,7 @@ const ftag=(f,a)=>`${f.title?titleTxt(f.title):f.ntitle?'Titre national '+flag(a
 const natChip=b=>{const i=natIdx(b);return`<span class="chip ${b.nchamp?'gold':''}">${flag(b.nat)} ${b.nchamp?'Champion national':i>=0?'#'+(i+1)+' '+NAT[b.nat].n:NAT[b.nat].n}</span>`};
 const champRank=b=>(isUndisp(b)?100:0)+beltsOf(b).length*10;
 const sortB=l=>[...l].sort((a,b)=>(champRank(b)-champRank(a))||(ovr(b)-ovr(a)));
-const moneyS=n=>{const a=Math.abs(n),sg=n<0?'−':'';return a>=1e9?sg+(a/1e9).toFixed(1).replace('.',',')+' G$':a>=1e6?sg+(a/1e6).toFixed(1).replace('.',',')+' M$':a>=1e5?sg+Math.round(a/1e3)+' k$':$(n)};
+const moneyS=n=>{const a=Math.abs(n),sg=n<0?'−':'';return a>=1e9?sg+(a/1e9).toFixed(1).replace('.',',')+' G$':a>=1e6?sg+(a/1e6).toFixed(1).replace('.',',')+' M$':$(n)}; // B19 : montant exact sous le million
 const worldChip=b=>b.champ?beltChips(b,38):`<span class="chip">Monde ${rankLabel(b)}</span>`;
 function statusChips(b){const f=upF(b);return`${b.inj?`<span class="chip red">Blessé ${b.inj} sem.</span>`:''}${f?`<span class="chip blue">Combat ${f.week-S.t?`dans ${f.week-S.t} sem.`:'ce soir'}</span>`:''}${b.gate?'<span class="chip gold">Épreuve</span>':''}${b.sp?`<span class="chip gold">+${b.sp} pts</span>`:''}${b.trOpt?'<span class="chip gold">Trait</span>':''}`}
 const condList=b=>[['Forme',100-b.fatigue,b.fatigue>65?'warn':'green'],['Moral',b.morale,b.morale<40?'red':'green'],['Loyauté',b.loy,b.loy<30?'red':'gold']];
@@ -4180,5 +4182,5 @@ async function doUpd(){try{if(window.caches){for(const k of await caches.keys())
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),60000);try{const pv=localStorage.getItem('cr_build');localStorage.setItem('cr_build',window.BUILD);if(pv&&pv!==window.BUILD){const n=document.getElementById('updok');if(n){n.innerHTML='✅ <b>Jeu mis à jour !</b>'+(window.BUILD_MSG?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(window.BUILD_MSG)+'</span>':'');n.hidden=false;setTimeout(()=>{n.hidden=true},7000)}}}catch(e){}});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});addEventListener('pageshow',()=>checkUpd(false));addEventListener('focus',()=>checkUpd(false));
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
-export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList, train, campWeekCost, campTotal, inactivityTick, inactiveWeeks, INACTIVE_MAX, purse };
+export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList, train, campWeekCost, campTotal, inactivityTick, inactiveWeeks, INACTIVE_MAX, purse, moneyS };
 export const getState = () => S;
