@@ -443,6 +443,13 @@ function finishNew(){
 // pour que la durée du camp redevienne une vraie décision (8 sem. ≈ +3 500 $ par rapport à 6).
 function campWeekCost(i){return Math.round(250*Math.pow(1.35,i)/50)*50}
 function campTotal(n){let s=0;for(let i=0;i<n;i++)s+=campWeekCost(i);return s}
+// Règle n° 10 (Max, 2026-11-05) : au moins 1 combat par 3 mois, sinon perte de crédibilité.
+// Le gérant est averti 2 semaines avant, puis à chaque perte (jamais de punition silencieuse).
+const INACTIVE_MAX=13;
+function inactiveWeeks(b){return S.t-(b.lastFight??S.t)}
+function inactivityTick(b){if(!b.mine||b.retired||b.booked)return;const w=inactiveWeeks(b);
+  if(w===INACTIVE_MAX-2){log(`⏳ ${b.name} sera inactif dans 2 sem. : réserve-lui un combat pour garder sa crédibilité.`,'warn');toast(`⏳ ${sur(b)} : combat à réserver d’ici 2 sem.`)}
+  else if(w>=INACTIVE_MAX&&(w-INACTIVE_MAX)%4===0){b.fame=cl(b.fame-3,1,100);log(`📉 ${b.name} est inactif depuis ${w} sem. : −3 de crédibilité.`,'bad');toast(`📉 ${sur(b)} inactif : −3 crédibilité`)}}
 function train(b){
   const cut=S.staff.cut?S.staff.cut.stars:0,phys=S.staff.phys?S.staff.phys.stars:0,coach=S.staff.coach?S.staff.coach.stars:0,fc=S.fac||{};
   const cf=S.fights.find(z=>z.a===b.id&&z.week>=S.t);
@@ -712,7 +719,7 @@ function nextWeek(quiet){
   if(S.neg){renderNeg();return}
   {const ex=mine().find(b=>b.contract<=1);if(ex){openNeg(ex.id,true);return}}
   S.t++;ui.oc={};
-  for(const b of mine()){train(b);if(b.age>=32)b.fatigue=cl(b.fatigue+(b.age-31)*.6,0,100);weeklyLoyalty(b);folWeek(b)}
+  for(const b of mine()){train(b);inactivityTick(b);if(b.age>=32)b.fatigue=cl(b.fatigue+(b.age-31)*.6,0,100);weeklyLoyalty(b);folWeek(b)}
   for(const b of S.boxers)if(!b.mine){if(b.inj>0)b.inj--;b.fatigue=cl(b.fatigue-10,5,100)}
   const g=1-.07*S.mgr.perks.ges;
   const sal=Math.round((mine().reduce((s,b)=>s+b.salary,0)+staffSalary())*g),upk=Math.round((150*S.gym+facLv()*90+(S.branches||[]).length*300)*g),spo=mine().reduce((s,b)=>s+Math.round(b.fame*8),0)+brIncome()+merchInc()+(S.arena?ARENA_LV[S.arena].inc:0);
@@ -748,7 +755,10 @@ function roundsFor(a,b,title){return title?12:(rankIdx(a)<15&&rankIdx(b)<15)?10:
 /* bourses réalistes : selon le rang, les ceintures et la popularité (vedette = gros chèque) */
 function drawOf(b){const r=rankIdx(b),bl=beltsOf(b).length;let v=b.champ?700000*(1+.5*(bl-1))*(isUndisp(b)?1.5:1):r<5?220000:r<15?70000:r<30?22000:r<50?9000:ovr(b)<50?3500:5000;
   return v+Math.min(12e6,fol(b)*.05)+(b.nchamp?10000:0)}
-function purse(a,b,title){return Math.max(1500,Math.round((drawOf(a)*.65+drawOf(b)*.35)*(title?1.35:1)*(a.rival===b.id?1.5:1)/100)*100)}
+// Règle n° 8 (Max, 2026-11-05) : la crédibilité (notoriété) du boxeur pèse sur sa bourse ;
+// rester actif la fait monter (règle n° 10).
+const credF=b=>.85+cl(b.fame||1,1,100)/100*.6;
+function purse(a,b,title){return Math.max(1500,Math.round((drawOf(a)*.65+drawOf(b)*.35)*credF(a)*(title?1.35:1)*(a.rival===b.id?1.5:1)/100)*100)}
 const myShare=p=>Math.round(p*SHARE*(1+.08*S.mgr.perks.neg));
 function canBook(me,op){
   if(me.inj)return'Ton boxeur est blessé';
@@ -3203,6 +3213,7 @@ function traitChips(b,max){return b.traits.slice(0,max||9).map(k=>`<span class="
 function alerts(){
   const out=[];
   for(const b of club()){
+    if(b.mine&&!b.booked&&!b.retired&&inactiveWeeks(b)>=INACTIVE_MAX-2)out.push({bad:1,t:`<b>${esc(b.name)}</b> : ${inactiveWeeks(b)} sem. sans combat (max ${INACTIVE_MAX}).`,btn:`<button class="btn sm gold" data-a="book" data-id="${b.id}">Réserver</button>`});
     if(b.inj&&b.booked){const f=upF(b);if(f)out.push({bad:1,t:`<b>${esc(b.name)}</b> est blessé pendant son camp (${b.inj} sem.).`,btn:`<button class="btn sm gold" data-a="opencamp" data-id="${f.id}">Gérer</button>`})}
     if(b.raiseAsk)out.push({bad:1,t:`<b>${esc(b.name)}</b> réclame une augmentation : ${$(b.salary)} → ${$(b.raiseAsk)}/sem.`,btn:`<button class="btn sm gold" data-a="raiseok" data-id="${b.id}">Accepter</button><button class="btn sm" data-a="raiseno" data-id="${b.id}">Refuser</button>`});
     if(b.contract<=8)out.push({bad:1,t:`Contrat de <b>${esc(b.name)}</b> : ${b.contract} sem. restantes.`,btn:`<button class="btn sm gold" data-a="neg" data-id="${b.id}">Négocier</button>`});
@@ -4169,5 +4180,5 @@ async function doUpd(){try{if(window.caches){for(const k of await caches.keys())
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),60000);try{const pv=localStorage.getItem('cr_build');localStorage.setItem('cr_build',window.BUILD);if(pv&&pv!==window.BUILD){const n=document.getElementById('updok');if(n){n.innerHTML='✅ <b>Jeu mis à jour !</b>'+(window.BUILD_MSG?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(window.BUILD_MSG)+'</span>':'');n.hidden=false;setTimeout(()=>{n.hidden=true},7000)}}}catch(e){}});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});addEventListener('pageshow',()=>checkUpd(false));addEventListener('focus',()=>checkUpd(false));
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
-export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList, train, campWeekCost, campTotal };
+export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList, train, campWeekCost, campTotal, inactivityTick, inactiveWeeks, INACTIVE_MAX, purse };
 export const getState = () => S;
