@@ -557,10 +557,12 @@ function roundNotes(F){
   for(const X of[A,B]){if(X.en<25)L.push({t:`${sur(X.b)} est à bout de souffle.`});if((X.cut||0)>=2)L.push({k:1,t:`La coupure de ${sur(X.b)} inquiète le médecin.`})}
   return L;
 }
+// Knockdowns DONNÉS par chaque coin : X.kd compte les fois où X est allé au tapis.
+function kdScored(F){return[F.B.kd,F.A.kd]}
 function endRound(F){
   const A=F.A,B=F.B,rd=F.rd,s0=rd.s0;
   const la=A.land-s0[1],lb=B.land-s0[3],pa=(A.pL||0)-s0[4],pb=(B.pL||0)-s0[5],base=(la-lb)*1+(pa-pb)*.6+(rd.dA-rd.dB)*.25;
-  for(let j=0;j<3;j++){const diff=base+(R()-.5)*3.2;let sA=diff>=0?10:9,sB=diff>=0?9:10;if(Math.abs(diff)<.45&&!rd.kdA&&!rd.kdB){sA=10;sB=10}sA-=rd.kdA;sB-=rd.kdB;const m=10-Math.max(sA,sB);sA+=m;sB+=m;F.cards[j][0]+=sA;F.cards[j][1]+=sB;if(!j)F.rs.push([sA,sB])}
+  for(let j=0;j<3;j++){const diff=base+(R()-.5)*3.2;let sA=diff>=0?10:9,sB=diff>=0?9:10;if(Math.abs(diff)<.45&&!rd.kdA&&!rd.kdB){sA=10;sB=10}sA-=rd.kdA;sB-=rd.kdB;if(sA===sB&&rd.kdA!==rd.kdB){if(rd.kdB>rd.kdA)sB--;else sA--}const m=10-Math.max(sA,sB);sA+=m;sB+=m;F.cards[j][0]+=sA;F.cards[j][1]+=sB;if(!j)F.rs.push([sA,sB])}
   F.rst.push({at:A.thr-s0[0],al:A.land-s0[1],bt:B.thr-s0[2],bl:B.land-s0[3],ap:(A.pL||0)-s0[4],bp:(B.pL||0)-s0[5]});
   A.boost=A.guard=B.boost=B.guard=0;
   F.log.unshift({r:F.r,L:[...rd.L,...roundNotes(F)],s:F.rs[F.rs.length-1]});
@@ -3577,7 +3579,7 @@ function hudHTML(F){
   const o=F.odds,lab=i=>F.online?(i?esc(F.online.n):'Toi')+(F.online.title&&i?' · 👑':''):F.tour?(i?'Tournoi':'Ton club'):F.trial?(i?'Mentor':'Ton club'):F.ex?(i?(S.gyms[F.ex.g].m.indexOf(F.B.b)===2?'Chef':'Gym'):'Ton club'):rankLabel(i?F.B.b:F.A.b);
   const side=(X,i,cls)=>`<div class="hs ${cls}"><div class="hn"><div class="av sm">${avatar(X.b,cls)}</div><div style="min-width:0"><b>${flag(X.b.nat)} ${esc(sur(X.b))}</b><span class="small">${lab(i)} · ${ovr(X.b)}</span></div></div>
     <div class="trk ${cls} hp"><i id="hp${i}" style="width:${pct(F.disp.hp[i])}%"></i></div><div class="trk green en"><i id="en${i}" style="width:${pct(F.disp.en[i])}%"></i></div>
-    <span class="small"><span class="num">${X.land}/${X.thr}</span>${X.kd?` · <b style="color:#ff7b8b">${X.kd} KD</b>`:''}${X.cut?` · <b style="color:#ff7b8b">Coupure ${X.cut}/3</b>`:''}</span></div>`;
+    <span class="small"><span class="num">${X.land}/${X.thr}</span>${(X===F.A?F.B:F.A).kd?` · <b style="color:#ff7b8b">${(X===F.A?F.B:F.A).kd} KD</b>`:''}${X.cut?` · <b style="color:#ff7b8b">Coupure ${X.cut}/3</b>`:''}</span></div>`;
   const rn=F.stage==='done'?'FIN':'R'+(F.stage==='live'?F.r:F.r+1);
   return`<div class="hud">${side(F.A,0,'red')}<div class="clk"><b>${rn}</b><span id="clk" class="num">${clockTxt(F)}</span></div>${side(F.B,1,'blue')}
     ${o?`<div class="odds"><div class="ob"><i style="width:${o.w}%"></i></div><div class="row small" style="justify-content:space-between"><span>Gagne le ${rn==='FIN'?'round':rn.replace('R','round ')} <b style="color:var(--green)">${o.w} %</b></span><span>Perd <b style="color:#ff7b8b">${o.l} %</b></span></div></div>`:''}</div>`;
@@ -3589,7 +3591,7 @@ function statsHTML(F){
   const A=F.A,B=F.B,pc=(l,t)=>t?Math.round(l/t*100)+' %':'–';
   const mx=Math.max(1,...F.rst.map(s=>Math.max(s.al,s.bl)));
   return`<div class="panel"><span class="lab">📊 CompuBox</span><table class="cmp" style="margin-top:6px"><thead><tr><th style="color:var(--red)">${esc(sur(A.b))}</th><th></th><th style="color:var(--blue)">${esc(sur(B.b))}</th></tr></thead><tbody>
-    ${[['Coups portés',`${A.land}/${A.thr}`,`${B.land}/${B.thr}`],['Précision',pc(A.land,A.thr),pc(B.land,B.thr)],['Jabs',`${A.jL||0}/${A.jT||0}`,`${B.jL||0}/${B.jT||0}`],['Puissance',`${A.pL||0}/${A.pT||0}`,`${B.pL||0}/${B.pT||0}`],['Knockdowns',A.kd,B.kd],['Coupures',A.cut||0,B.cut||0]].map(([n,x,y])=>`<tr><td class="num">${x}</td><td>${n}</td><td class="num">${y}</td></tr>`).join('')}</tbody></table>
+    ${[['Coups portés',`${A.land}/${A.thr}`,`${B.land}/${B.thr}`],['Précision',pc(A.land,A.thr),pc(B.land,B.thr)],['Jabs',`${A.jL||0}/${A.jT||0}`,`${B.jL||0}/${B.jT||0}`],['Puissance',`${A.pL||0}/${A.pT||0}`,`${B.pL||0}/${B.pT||0}`],['Knockdowns',...kdScored({A,B})],['Coupures',A.cut||0,B.cut||0]].map(([n,x,y])=>`<tr><td class="num">${x}</td><td>${n}</td><td class="num">${y}</td></tr>`).join('')}</tbody></table>
     ${F.res.m==='DEC'?`<p class="small" style="margin:10px 0 0">Juges : <span class="num">${F.cards.map(c=>c.join('-')).join(' · ')}</span></p>`:''}
     ${F.rst.length?`<div class="cbx">${F.rst.map((s,i)=>`<div><i style="height:${Math.round(s.al/mx*44)}px;background:var(--red)"></i><i style="height:${Math.round(s.bl/mx*44)}px;background:var(--blue)"></i><small>R${i+1}</small></div>`).join('')}</div><p class="small" style="margin:4px 0 0">Coups touchés par round${F.rs.length?' · cartes : '+F.rs.map(r=>r[0]+'-'+r[1]).join(' '):''}</p>`:''}</div>`;
 }
@@ -4153,5 +4155,5 @@ async function doUpd(){try{if(window.caches){for(const k of await caches.keys())
 addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()=>checkUpd(false),60000);try{const pv=localStorage.getItem('cr_build');localStorage.setItem('cr_build',window.BUILD);if(pv&&pv!==window.BUILD){const n=document.getElementById('updok');if(n){n.innerHTML='✅ <b>Jeu mis à jour !</b>'+(window.BUILD_MSG?'<br><span style=\'font-weight:600;font-size:12px\'>'+updEsc(window.BUILD_MSG)+'</span>':'');n.hidden=false;setTimeout(()=>{n.hidden=true},7000)}}}catch(e){}});document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpd(false)});addEventListener('pageshow',()=>checkUpd(false));addEventListener('focus',()=>checkUpd(false));
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
-export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D };
+export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored };
 export const getState = () => S;
