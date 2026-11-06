@@ -47,16 +47,18 @@ function preferStill() {
   } catch (e) { /* navigateur ancien : on anime */ }
   return false;
 }
-const animate = (r, size, still) => r.i >= ANIMATED_FROM && size >= VIDEO_MIN_SIZE && !still && !preferStill();
+// `live` : animé et avec effets même en petit (classements ELO, échelle des rangs, amis).
+const animate = (r, size, still, live = false) => r.i >= ANIMATED_FROM && (live || size >= VIDEO_MIN_SIZE) && !still && !preferStill();
 
-/** Badge d'un rang (intemporel). `div` : division III/II/I sous le badge. `still` : image fixe. */
-export function badgeHTML(id, { size = 120, div = '', still = false, engrave = '' } = {}) {
+/** Badge d'un rang (intemporel). `div` : division III/II/I sous le badge. `still` : image fixe.
+ *  `live` : force l'animation et les effets à toutes les tailles. */
+export function badgeHTML(id, { size = 120, div = '', still = false, engrave = '', live = false } = {}) {
   const r = get(id);
-  const src = animate(r, size, still) ? `ranks/badge-${r.id}-anim.webp` : `ranks/badge-${r.id}${size < VIDEO_MIN_SIZE ? '-sm' : ''}.webp`;
+  const src = animate(r, size, still, live) ? `ranks/badge-${r.id}-anim.webp` : `ranks/badge-${r.id}${size < VIDEO_MIN_SIZE ? '-sm' : ''}.webp`;
   // Effets permanents (reflet qui balaie le badge, lueur qui respire) à partir de 56 px, pour tous les rangs.
   // Le reflet prend la forme exacte du badge : l'image sert de masque (--img).
-  const fx = size >= FX_MIN_SIZE && !still;
-  const box = `<div class="fd-badge${fx ? ' fd-fx' : ''}" style="--size:${size}px;--img:url('${src}')" data-rk="${r.id}"><img src="${src}" alt="Badge ${r.n}" decoding="async"></div>`;
+  const fx = (live || size >= FX_MIN_SIZE) && !still;
+  const box = `<div class="fd-badge${fx ? ' fd-fx' : ''}${fx && size < FX_MIN_SIZE ? ' fd-mini' : ''}" style="--size:${size}px;--img:url('${src}')" data-rk="${r.id}"><img src="${src}" alt="Badge ${r.n}" decoding="async"></div>`;
   if (!div && !engrave) return box;
   return `<span class="fd-rk">${box}${div ? `<b class="fd-div">${div}</b>` : ''}${engrave ? `<b class="fd-grave">${engrave}</b>` : ''}</span>`;
 }
@@ -67,11 +69,13 @@ export function frameHTML({ rank, season = 1, pos, size = 220, initials = '', ph
   const avatar = photo
     ? `<img class="fd-avatar" src="${photo}" alt="">`
     : `<span class="fd-avatar fd-ini">${initials}</span>`;
-  const cadre = animate(r, size, still)
-    ? `<img class="fd-cadre" src="ranks/cadre-${r.id}-anim.webp" alt="Cadre ${r.n}">`
-    : `<img class="fd-cadre" src="ranks/cadre-${r.id}.webp" alt="Cadre ${r.n}">`;
+  const csrc = animate(r, size, still) ? `ranks/cadre-${r.id}-anim.webp` : `ranks/cadre-${r.id}.webp`;
+  const cadre = `<img class="fd-cadre" src="${csrc}" alt="Cadre ${r.n}">`;
+  // Effets permanents sur tous les cadres (reflet en forme du cadre + lueur), comme les badges.
+  const fx = size >= FX_MIN_SIZE && !still;
+  const shine = fx ? '<i class="fd-shine"></i>' : '';
   const plaque = r.id === 'dynasty' && pos != null ? `#${pos} · S${season}` : `S${season}`;
-  return `<div class="fd-frame" style="--size:${size}px">${avatar}${cadre}<div class="fd-plaque">${plaque}</div></div>`;
+  return `<div class="fd-frame${fx ? ' fd-fx' : ''}" style="--size:${size}px;--img:url('${csrc}')" data-rk="${r.id}">${avatar}${cadre}${shine}<div class="fd-plaque">${plaque}</div></div>`;
 }
 
 /** Collection du profil : badges DYNASTY gagnés en fin de saison (à vie), gravés « #rang · Saison ». */

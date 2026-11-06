@@ -48,7 +48,7 @@ describe('badge (composants.html)', () => {
 describe('cadre (composants.html)', () => {
   it('.fd-frame > .fd-avatar + .fd-cadre + .fd-plaque saison', () => {
     const s = frameHTML({ rank: 'or', season: 3, size: 200, initials: 'AR' });
-    expect(s).toMatch(/^<div class="fd-frame" style="--size:200px"><span class="fd-avatar fd-ini">AR<\/span><img class="fd-cadre" src="ranks\/cadre-or.webp"[^>]*><div class="fd-plaque">S3<\/div><\/div>$/);
+    expect(s).toMatch(/^<div class="fd-frame fd-fx" style="--size:200px;--img:url\('ranks\/cadre-or.webp'\)" data-rk="or"><span class="fd-avatar fd-ini">AR<\/span><img class="fd-cadre" src="ranks\/cadre-or.webp"[^>]*><i class="fd-shine"><\/i><div class="fd-plaque">S3<\/div><\/div>$/);
   });
   it('DYNASTY : « #numéro · saison » en texte', () => {
     expect(frameHTML({ rank: 'dynasty', season: 1, pos: 37 })).toContain('<div class="fd-plaque">#37 · S1</div>');

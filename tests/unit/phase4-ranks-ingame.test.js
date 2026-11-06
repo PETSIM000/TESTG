@@ -33,7 +33,7 @@ describe('Phase 4 : rang du gérant sur l’échelle 0 – 10 000', () => {
   it('en-tête : badge et points ; pas de cadre avant la fin de la saison', () => {
     const html = vOnHead({ name: 'Max', elo: 2547, code: 'AB12', coins: 0, w: 0, l: 0, d: 0, kos: 0 }, 0);
     expect(html).toContain('ranks/badge-diamant');
-    expect(html).toContain('class="fd-badge"');
+    expect(html).toMatch(/class="fd-badge[ "]/);
     expect(html).toContain('6188');
     expect(html).not.toContain('fd-frame');
   });

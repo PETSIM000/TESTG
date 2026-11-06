@@ -69,3 +69,30 @@ span > .fd-badge, a > .fd-badge, b > .fd-badge, td > .fd-badge { display:inline-
 @keyframes fd-breathe { 0%, 100% { filter: drop-shadow(0 0 4px var(--glow)); transform: scale(1); } 50% { filter: drop-shadow(0 0 14px var(--glow)); transform: scale(1.03); } }
 @keyframes fd-sweep { 0% { background-position: 130% 0; } 55%, 100% { background-position: -30% 0; } }
 @media (prefers-reduced-motion: reduce) { .fd-badge.fd-fx img, .fd-badge.fd-fx::after { animation: none; } }
+
+/* Petits badges animés (classement ELO, amis, échelle) : lueur plus fine pour rester lisible */
+.fd-badge.fd-mini { padding: 4%; }
+.fd-badge.fd-mini img { animation-name: fd-breathe-mini; }
+.fd-badge.fd-mini::after { inset: 4%; }
+@keyframes fd-breathe-mini { 0%, 100% { filter: drop-shadow(0 0 1px var(--glow)); transform: scale(1); } 50% { filter: drop-shadow(0 0 5px var(--glow)); transform: scale(1.06); } }
+
+/* --- Effets permanents des cadres (tous les rangs, ≥ 56 px) : lueur + reflet en forme du cadre --- */
+.fd-frame.fd-fx { --glow: rgba(245, 197, 66, .55); }
+.fd-frame.fd-fx[data-rk="bronze"] { --glow: rgba(224, 140, 80, .55); }
+.fd-frame.fd-fx[data-rk="argent"] { --glow: rgba(220, 230, 245, .5); }
+.fd-frame.fd-fx[data-rk="platine"] { --glow: rgba(150, 225, 240, .55); }
+.fd-frame.fd-fx[data-rk="diamant"] { --glow: rgba(100, 180, 255, .65); }
+.fd-frame.fd-fx[data-rk="maitre"] { --glow: rgba(190, 120, 255, .65); }
+.fd-frame.fd-fx[data-rk="dynasty"] { --glow: rgba(255, 200, 70, .75); }
+.fd-frame.fd-fx .fd-cadre { animation: fd-frame-glow 2.8s ease-in-out infinite; }
+.fd-frame .fd-shine { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, .65) 48%, rgba(255, 246, 210, .9) 50%, rgba(255, 255, 255, .65) 52%, transparent 62%);
+  background-size: 300% 100%; background-repeat: no-repeat;
+  -webkit-mask-image: var(--img); mask-image: var(--img); -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;
+  mix-blend-mode: screen; animation: fd-sweep 3.6s ease-in-out infinite; }
+@keyframes fd-frame-glow { 0%, 100% { filter: drop-shadow(0 0 3px var(--glow)); } 50% { filter: drop-shadow(0 0 12px var(--glow)); } }
+@media (prefers-reduced-motion: reduce) { .fd-frame.fd-fx .fd-cadre, .fd-frame .fd-shine, .fd-badge.fd-mini img { animation: none; } }
+
+/* Classement Gérants (ELO) : badge animé + ELO à droite */
+.lbrk { display: inline-flex; align-items: center; gap: 8px; text-align: right; flex: none; }
