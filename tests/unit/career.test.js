@@ -3,7 +3,7 @@
 import './setup-dom.js';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createRng, setRng } from '../../src/core/rng.js';
-import { worldGen, getState, nextWeek, rankIdx, campWeekCost, campTotal, drawOf, train, inactivityTick } from '../../src/game/legacy.js';
+import { vCampaign, worldGen, getState, nextWeek, rankIdx, campWeekCost, campTotal, drawOf, train, inactivityTick } from '../../src/game/legacy.js';
 import { eraOf, eraPurse, yearOf, legacyScore, chapterState, chapterAdd, adaptOf, meet, careerInit } from '../../src/game/career.js';
 
 let S;
@@ -101,5 +101,13 @@ describe('simulation de carrière sur 5 ans', () => {
     expect(st.season).toBe(1);
     expect(st.goals.find((g) => g.id === 'wins').ok).toBe(true);
     expect(st.all).toBe(false);
+  });
+
+  it('la carte campagne de l’Écurie s’affiche (saison, ère, héritage, chapitre)', () => {
+    const h = vCampaign();
+    expect(h).toContain('Saison 1');
+    expect(h).toContain('Ère des cogneurs');
+    expect(h).toContain('Héritage');
+    expect(h).toContain('0/5 objectifs');
   });
 });
