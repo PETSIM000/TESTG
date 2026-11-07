@@ -3941,6 +3941,9 @@ let _saveFn=0;
 function save(){if(!S||!S.slot||ui.menu)return;try{localStorage.setItem(SK(S.slot),JSON.stringify(S));localStorage.setItem(MK(S.slot),JSON.stringify(metaOf(S)))}catch(e){}}
 function slotMeta(n){try{return JSON.parse(localStorage.getItem(MK(n)))}catch(e){return null}}
 function loadSlot(n){try{const s=JSON.parse(localStorage.getItem(SK(n)));return s&&s.v===2?s:null}catch(e){return null}}
+/* Une seule carrière : quand une nouvelle carrière démarre, les autres emplacements sont effacés (téléphone + cloud). */
+function keepOnly(n){for(const x of[1,2,3]){if(x===n)continue;if(!slotMeta(x))continue;try{localStorage.removeItem(SK(x));localStorage.removeItem(MK(x))}catch(e){}
+  if(ON)rpc('cr_save_put',{p_token:ON.token,p_slot:x,p_data:null,p_meta:null}).catch(()=>{})}}
 function lastSlot(){let best=0,at=-1;for(const n of[1,2,3]){const m=slotMeta(n);if(m&&m.at>at){at=m.at;best=n}}return best}
 function fixup(s){
   s.club=s.club||'Coin Rouge';s.mgrName=s.mgrName||'Gérant';s.home=s.home||'CA';s.diff=s.diff||'normal';s.offers=s.offers||[];s.champHist=s.champHist||[];
@@ -4193,7 +4196,7 @@ function menuAct(a,t){
     case'm_infox':ui.ng.info=null;break;
     case'm_pickx':{const i=+k,p=ui.ng.picks;if(p.includes(i))ui.ng.picks=p.filter(x=>x!==i);else{if(p.length>=2)p.shift();p.push(i)}ui.ng.info=null;break}
     case'm_diff':ui.ng.diff=k;break;
-    case'm_ng2':{const g=ui.ng;g.club=(g.club||'').trim()||'Coin Rouge';g.mgr=(g.mgr||'').trim()||'Gérant';worldGen(g);genPool();ui.menu='ng2';document.getElementById('menu').scrollTop=0;break}
+    case'm_ng2':{const g=ui.ng;g.club=(g.club||'').trim()||'Coin Rouge';g.mgr=(g.mgr||'').trim()||'Gérant';worldGen(g);keepOnly(g.slot);genPool();ui.menu='ng2';document.getElementById('menu').scrollTop=0;break}
     case'm_pick':{const i=+k,p=ui.ng.picks;if(p.includes(i))ui.ng.picks=p.filter(x=>x!==i);else{if(p.length>=2)p.shift();p.push(i)}break}
     case'm_rr':if(ui.ng.rr>0){ui.ng.rr--;genPool()}break;
     case'm_back1':case'm_ng1':ui.menu='ng1';break;
