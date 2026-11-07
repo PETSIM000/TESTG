@@ -150,3 +150,19 @@ p.watch { text-align: center; margin: 6px 0; }
 .camp-mag { margin: 4px 12px 10px 16px; padding: 10px 12px; border-radius: 12px; background: #f3ead7; color: #1a1408; }
 .camp-mag .lab { color: #8a1020 !important; }
 .camp-mag p { margin: 5px 0 0; font-size: 13px; line-height: 1.35; }
+
+/* Pesée ratée : 3 choix */
+.wi-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 6px 0 10px; }
+.wi-pick .btn { font-size: 12px; padding: 8px 4px; }
+/* Recrutement à l'étranger */
+.abroad .row { flex-wrap: wrap; }
+/* Mon empire */
+.emp-r { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0 10px; }
+.emp-r > div { display: flex; flex-direction: column; align-items: center; padding: 8px 4px; border-radius: 10px; background: rgba(255, 255, 255, .04); }
+.emp-r b { font: 900 17px var(--f-disp); color: var(--gold); }
+.emp-r span { font-size: 11px; color: var(--muted); }
+.emp-ch { display: flex; align-items: flex-end; gap: 3px; height: 54px; margin: 4px 0 8px; padding: 4px; border-radius: 8px; background: rgba(255, 255, 255, .03); }
+.emp-ch i { flex: 1; min-width: 4px; border-radius: 2px 2px 0 0; background: linear-gradient(180deg, var(--gold), #8a6510); }
+.emp-ch.red i { background: linear-gradient(180deg, #ff5a6e, #8a1020); }
+.emp-ch i.neg { background: #ff3d52; opacity: .6; }
+.emp-l { display: flex; justify-content: space-between; gap: 8px; margin: 4px 0 0; }

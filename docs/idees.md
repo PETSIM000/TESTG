@@ -20,14 +20,19 @@ Mise à jour : 2026-11-06. Règle : le joueur est un PROMOTEUR. En carrière, il
 - Classement des héritages entre joueurs (mode Légende) — besoin d'un SQL Supabase
 - Offre de revanche à signer après une défaite sur coupure
 
-## Nouvelles idées (pas commencées)
-1. **Pesée officielle** : la veille du combat, ton boxeur peut rater le poids. Payer une amende, le faire suer (moins d'énergie) ou annuler.
-2. **Tests antidopage** : un adversaire contrôlé positif → victoire sur tapis vert, ou scandale si c'est ton boxeur (il faut gérer la crise).
-3. **Ceintures unifiées** : un boxeur qui réunit les 4 ceintures devient « incontesté ». Grosse prime, grosse pression : les fédérations l'obligent à défendre contre leur n° 1 (combat obligatoire).
-4. **Rétention des vedettes** : un champion en fin de contrat écoute les autres promoteurs. Tu dois prolonger avant (bonus de signature, part du PPV) sinon il part.
-5. **Salles et villes** : remplir une grande salle ou un petit gymnase local. La ville du boxeur ramène plus de public (combat « à domicile »).
-6. **Mauvaise décision des juges** : de temps en temps, un verdict contesté. Tu peux déposer un appel (coûte de l'argent, peut changer le résultat en « sans décision ») ou organiser la revanche immédiate.
-7. **Staff qui part** : ton meilleur entraîneur peut être recruté par un rival, ou prendre sa retraite.
-8. **Boxeurs étrangers** : signer un prospect au Mexique, aux Philippines, en Ukraine… visa, adaptation, public de son pays.
-9. **Retour d'un ancien champion** : une légende à la retraite veut faire un dernier combat. Gros public, gros risque pour sa santé et ton image.
-10. **Écran « Mon empire »** : un tableau de bord du promoteur (argent par mois, graphique de l'héritage, meilleurs galas, boxeurs les plus rentables).
+## Fait le 2026-11-06 (deuxième série)
+- Pesée ratée : payer l'amende, le faire suer (−20 % d'énergie) ou annuler
+- Antidopage : adversaire positif (défaite effacée) ; ton boxeur positif (le défendre ou accepter la suspension)
+- Champion incontesté : +100 000 $ ; combat obligatoire tous les 30 semaines, sinon une ceinture est retirée
+- Garder ses vedettes : à 8 semaines de la fin du contrat, prolonger (bonus + 10 % du PPV) ou risquer une offre rivale
+- Combat à domicile : déjà dans les galas (boxeurs du pays = plus de public, choix de la salle et de la ville)
+- Verdict contesté : appel (15 000 $, 40 % de chances) ou revanche immédiate
+- Staff : entraîneur 3★ débauché par un rival, ou départ à la retraite
+- Recruter à l'étranger : 15 000 $, 3 espoirs (Mexique, Philippines, Ukraine, Cuba), visa de 4 semaines
+- Dernier combat d'une légende du Temple (39 ans ; un KO met fin au retour et nuit à ton image)
+- Écran « Mon empire » dans le Bureau
+
+## Prochaines idées possibles
+- Offre de revanche signable après une défaite sur coupure
+- Classement des héritages entre joueurs (SQL Supabase)
+- Affiche de gala à partager avec les vrais noms de la carte

@@ -189,3 +189,29 @@ describe('modes et idées', () => {
     expect(hasAgent({ fame: 10 }, 60)).toBe(false);
   });
 });
+
+import { EVENTS, vEmpire } from '../../src/game/legacy.js';
+describe('10 nouveaux mécanismes de promoteur', () => {
+  it('chaque nouvel événement s’affiche et chaque choix s’exécute sans erreur', () => {
+    for (const k of ['mand', 'retain', 'dope', 'rob', 'poach', 'legend']) {
+      setRng(createRng(7));
+      worldGen({ club: 'T', mgr: 'T', diff: 'normal', home: 'CA', slot: 1 });
+      S = getState();
+      S.money = 1e6;
+      const me = signFA({ age: 26, lastFight: S.t - 20, salary: 300 });
+      const op = S.boxers.find((x) => x.div === me.div && !x.mine && !x.booked);
+      S.staff.coach = S.staff.coach || { id: 's9', role: 'coach', name: 'Coach Test', stars: 3, salary: 200 };
+      S.hof = [{ nm: 'Vieux Lion', rec: '40-2-0', ko: 30, best: 82, div: me.div, nat: 'CA', g: 900 }];
+      S.rivals = S.rivals || [{ id: 'r0', n: 'Rival Promotions', rep: 50, money: 1e6, signed: 0 }];
+      for (let i = 0; i < EVENTS[k].c.length; i++) {
+        S.event = { k, b: me.id, o: op.id, r: 'r0' };
+        const E = EVENTS[k];
+        expect(typeof E.x(E.b ? me : null)).toBe('string');
+        expect(() => E.c[i][1](E.b ? me : null)).not.toThrow();
+      }
+    }
+  });
+  it('l’écran Mon empire s’affiche', () => {
+    expect(vEmpire()).toContain('Mon empire');
+  });
+});
