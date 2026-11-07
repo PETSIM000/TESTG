@@ -122,3 +122,32 @@ export function meet(opp, mineId) {
   opp.met = opp.met || {};
   opp.met[mineId] = (opp.met[mineId] || 0) + 1;
 }
+
+/* ---------- Négociation d'un combat (promoteur) ----------
+   Avant de signer, le camp adverse fait ses demandes. Toi, tu paies la différence (frais du camp adverse)
+   en plus de la bourse habituelle. Un champion peut éviter un boxeur dangereux : il faut une prime pour l'attirer. */
+export const COUNTERS_MAX = 2;
+
+/**
+ * Conditions du camp adverse.
+ * @param {{base:number, myOvr:number, opOvr:number, myRank:number, opRank:number, opChamp:boolean}} x
+ * @param {() => number} r  générateur 0–1
+ */
+export function dealTerms(x, r = Math.random) {
+  const gap = x.myRank - x.opRank; // > 0 : l'adversaire est mieux classé que toi
+  let ask = 0.1 + Math.max(0, Math.min(40, gap)) * 0.02; // 10 % à 90 % de la bourse en frais
+  if (x.opChamp) ask += 0.35;
+  const danger = x.myOvr >= x.opOvr - 3; // ton boxeur peut gagner
+  const avoid = !!x.opChamp && danger && r() < 0.5;
+  const fee = Math.round((x.base * (ask + (avoid ? 0.6 : 0)) * (0.9 + r() * 0.2)) / 100) * 100;
+  return { fee, avoid, counters: 0, mood: avoid ? 'évite' : gap > 10 ? 'exigeant' : 'ouvert' };
+}
+
+/** Contre-offre à −15 % : acceptée selon l'humeur du camp ; refusée = ils montent de 5 %. */
+export function dealCounter(d, r = Math.random) {
+  if (d.counters >= COUNTERS_MAX) return { ...d, last: 'max' };
+  const p = d.mood === 'ouvert' ? 0.65 : d.mood === 'exigeant' ? 0.4 : 0.2;
+  const ok = r() < p;
+  const fee = ok ? Math.round((d.fee * 0.85) / 100) * 100 : Math.round((d.fee * 1.05) / 100) * 100;
+  return { ...d, fee, counters: d.counters + 1, last: ok ? 'ok' : 'non', avoid: ok ? false : d.avoid };
+}

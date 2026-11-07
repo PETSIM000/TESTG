@@ -111,3 +111,42 @@ describe('simulation de carrière sur 5 ans', () => {
     expect(h).toContain('0/5 objectifs');
   });
 });
+
+import { dealTerms, dealCounter } from '../../src/game/career.js';
+describe('négociation de combat', () => {
+  const seq = (...v) => { let i = 0; return () => v[i++ % v.length]; };
+  it('un adversaire mieux classé demande plus de frais qu’un adversaire égal', () => {
+    const egal = dealTerms({ base: 10000, myOvr: 60, opOvr: 60, myRank: 20, opRank: 20, opChamp: false }, seq(0.5));
+    const haut = dealTerms({ base: 10000, myOvr: 60, opOvr: 70, myRank: 30, opRank: 5, opChamp: false }, seq(0.5));
+    expect(haut.fee).toBeGreaterThan(egal.fee * 3);
+  });
+  it('un champion évite un boxeur dangereux et demande une prime', () => {
+    const d = dealTerms({ base: 10000, myOvr: 80, opOvr: 80, myRank: 2, opRank: -1, opChamp: true }, seq(0.1, 0.5));
+    expect(d.avoid).toBe(true);
+    expect(d.mood).toBe('évite');
+  });
+  it('contre-offre acceptée = −15 % ; refusée = +5 % ; 2 au maximum', () => {
+    const d = { fee: 10000, counters: 0, mood: 'ouvert', avoid: false };
+    expect(dealCounter(d, seq(0.1)).fee).toBe(8500);
+    expect(dealCounter(d, seq(0.9)).fee).toBe(10500);
+    expect(dealCounter({ ...d, counters: 2 }, seq(0.1)).last).toBe('max');
+  });
+});
+
+import { vBook, dealStart, dealOk, ui } from '../../src/game/legacy.js';
+describe('écran de négociation dans le jeu', () => {
+  it('réserver ouvre la négociation (face-à-face, demande du camp), signer paie les frais', () => {
+    const me = signFA({ age: 24, lastFight: S.t - 20 });
+    const op = S.boxers.filter((x) => x.div === me.div && !x.mine && !x.booked && !x.inj && !x.champ).sort((a, b) => rankIdx(b) - rankIdx(a))[0];
+    ui.bookFor = me.id;
+    dealStart(op.id, '');
+    const h = vBook();
+    expect(h).toContain('Négociation');
+    expect(h).toContain('Le camp adverse demande');
+    const fee = ui.deal.fee, m0 = S.money;
+    dealOk();
+    expect(ui.deal).toBe(null);
+    expect(me.booked).toBe(true);
+    expect(S.money).toBe(m0 - fee);
+  });
+});

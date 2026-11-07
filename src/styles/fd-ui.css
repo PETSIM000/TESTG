@@ -314,3 +314,11 @@ nav.tabs button[aria-current="true"]::before {
 .camp-g li { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; padding: 6px 8px; border-radius: 8px; background: rgba(255, 255, 255, .04); }
 .camp-g li.ok { background: rgba(63, 216, 138, .1); }
 .camp-p { margin: 8px 0 0; }
+
+/* Négociation d'un combat */
+.deal-t { display: grid; gap: 4px; }
+.deal-t > div { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 10px; background: rgba(255, 255, 255, .04); font-size: 14px; }
+.deal-t span { color: var(--muted); }
+.deal-t b { font: 900 16px var(--f-disp); }
+.deal-t b.neg { color: #ff7b8b; }
+.al.good { border-color: rgba(63, 216, 138, .4); background: rgba(63, 216, 138, .08); }

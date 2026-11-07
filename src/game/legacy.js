@@ -5,7 +5,7 @@ import { drawCrest, logoReady } from '../ui/logo.js';
 import { RANKS, badgeHTML, frameHTML, collectionHTML } from '../ui/ranks.js';
 import { ownedFrames, frameId, resolveSlot, frameLabel } from '../ui/frames.js';
 import { RK_STYLES, RK_ABIL, rkStats, rkValid, botRk } from '../ui/ranked.js';
-import { careerInit, careerWeek, legacyScore, eraOf, eraPurse, chapterState, chapterAdd, chapterSet, adaptOf, meet } from './career.js';
+import { careerInit, careerWeek, legacyScore, eraOf, eraPurse, chapterState, chapterAdd, chapterSet, adaptOf, meet, dealTerms, dealCounter, COUNTERS_MAX } from './career.js';
 
 // Boutons de langue et d'avis rendus en HTML (ex-onclick inline).
 document.addEventListener('click', (e) => {
@@ -3558,7 +3558,24 @@ function oppRow(me,o){const t=o.champ?titleOpts(me,o):null,err=canBook(me,o),nat
     <div class="rc-m"><div class="nm">${flag(o.nat)} ${esc(o.name)}</div><div class="meta">${STYLES[o.style]} · ${o.w}-${o.l}-${o.d} · ${o.age} ans</div>
       <div class="chips s">${worldChip(o)}${rkCmp(me,o)}<span class="chip pop">👥 ${fmtK(fol(o))}</span>${o.nchamp?'<span class="chip gold">Champ. national</span>':''}${me.rival===o.id?'<span class="chip red">Rival ×1,5</span>':''}${err&&!nat?`<span class="chip bad">${err}</span>`:`<span class="chip">${$(myShare(purse(me,o,t)))}</span>${S.set.odds&&!me.inj?pill(matchOdds(me,o,roundsFor(me,o,t)).w):''}`}</div></div>
     <div class="ovr"><b>${ovr(o)}</b><small>NOTE</small></div></button>`}
+/* --- négociation d'un combat : le camp adverse fait ses demandes avant la signature --- */
+function dealOpts(d){const me=getB(ui.bookFor),op=getB(d.op);return d.kind==='D'?{belts:titleDef(me,op),...bookOpt()}:d.kind==='N'?{n:1,...bookOpt()}:bookOpt()}
+function dealStart(id,kind){const me=getB(ui.bookFor),op=getB(id);if(!me||!op)return;
+  if(op.mine){const f=propose(me.id,op.id,dealOpts({op:id,kind}));if(f)afterBook(f);return}
+  const base=purse(me,op,null);ui.deal=Object.assign(dealTerms({base,myOvr:ovr(me),opOvr:ovr(op),myRank:rankIdx(me),opRank:rankIdx(op),opChamp:!!op.champ},R),{op:id,kind});window.scrollTo(0,0)}
+function dealOk(){const d=ui.deal,me=getB(ui.bookFor),op=d&&getB(d.op);if(!d||!me||!op){ui.deal=null;return}
+  if(S.money<d.fee){toast(`Il te manque ${$(d.fee-S.money)} pour payer le camp adverse`);return}
+  const f=propose(me.id,op.id,dealOpts(d));ui.deal=null;if(!f)return;S.money-=d.fee;f.fee=d.fee;
+  if(d.fee)log(`Contrat : ${$(d.fee)} versés au camp de ${op.name} pour qu’il signe.`);afterBook(f)}
+function vDeal(){const d=ui.deal,me=getB(ui.bookFor),op=getB(d.op);if(!me||!op){ui.deal=null;return''}
+  const p=purse(me,op,null),mood={ouvert:'Le camp est ouvert à la discussion.',exigeant:'Son camp sait qu’il est mieux classé : il exige plus.','évite':`Le champion évite ${esc(sur(me))}. Il faut une grosse prime pour l’attirer.`}[d.mood];
+  return`<div class="panel deal"><div class="ph"><b class="nm" style="font-size:19px">📝 Négociation</b><button class="btn sm" data-a="dealno">← Retour</button></div>${faceOff(me,op)}
+    <p class="small" style="margin:8px 0">${mood}</p>
+    <div class="deal-t"><div><span>Bourse de ${esc(sur(me))}</span><b>${$(p)}</b></div><div><span>Le camp adverse demande</span><b class="${d.avoid?'neg':''}">${$(d.fee)}</b></div><div><span>Ton argent</span><b>${$(S.money)}</b></div></div>
+    ${d.last==='non'?'<p class="small" style="color:#ff7b8b;margin:6px 0 0">Refusé. Ils ont monté leur prix.</p>':d.last==='ok'?'<p class="small" style="color:var(--green);margin:6px 0 0">Contre-offre acceptée.</p>':''}
+    <div class="row" style="gap:6px;margin-top:10px;flex-wrap:nowrap"><button class="btn gold" style="flex:2" data-a="dealok">✍️ Signer (${$(d.fee)})</button><button class="btn" style="flex:1" data-a="dealco" ${d.counters>=COUNTERS_MAX?'disabled':''}>−15 % (${COUNTERS_MAX-d.counters})</button></div></div>`}
 function vBook(){
+  if(ui.deal)return vDeal();
   const m=sortB(orgB().filter(b=>!b.booked&&!b.inj));
   if(!ui.bookFor||!m.find(b=>b.id===ui.bookFor))ui.bookFor=(m.find(b=>!b.inj)||m[0])?.id||null;
   const me=getB(ui.bookFor);
@@ -3825,7 +3842,7 @@ document.addEventListener('click',e=>{
     case'release':if(ui.confirm==='rel'+id){release(id);ui.confirm=null;ui.sheet=null}else ui.confirm='rel'+id;break;
     case'book':ui.bookFor=id;ui.tab='combats';ui.csub='book';ui.sheet=null;window.scrollTo(0,0);break;
     case'pickbook':ui.bookFor=id;ui.justBooked=null;break;case'jbok':ui.justBooked=null;break;case'poster':sharePoster(id);return;case'officesel':ui.offSel=k;break;case'ssok':ssAccept(id);break;case'ssno':ssRefuse(id);break;case'bet':{const[sd,amt]=(k||'').split(':');placeBet(id,sd,+amt);break}case'mand':mandSign(k);return render();case'cvcok':cvcAccept();break;case'cvcno':if(S.cvc){S.cvc.until=S.t-1}break;case'theme':S.theme=k;applyTheme();break;case'acadin':acadRecruit();break;case'tvbuy':if(!S.tv&&S.money>=TV_COST){S.money-=TV_COST;S.tv={subs:0,since:S.t};log(`📺 ${S.club} TV est lancée !`,'gold');toast('📺 Ta chaîne est lancée')}break;case'office':{if(S.offices&&S.offices.includes(k))break;S.offices=S.offices||[];if(S.offices.length>=OFF_MAX){toast('Maximum '+OFF_MAX+' bureaux');break}if(S.money<OFF_COST){toast('Pas assez d’argent');break}S.money-=OFF_COST;S.offices.push(k);log(`🏢 Bureau ouvert : ${flag(k)} ${NAT[k].n}.`,'good');toast(`Bureau ouvert : ${NAT[k].n}`)}break;case'openclub':ui.sheet='myclub';document.getElementById('sheet').scrollTop=0;break;case'todolist':ui.sheet='todo';document.getElementById('sheet').scrollTop=0;break;case'chap':ui.chap=!ui.chap;break;case'spall':{let n=0;for(const b of club())if(canSpend(b)){autoSpend(b);n++}toast(`⚡ Points dépensés pour ${n} boxeur${n>1?'s':''}`);break}case'opengym':ui.sheet='gym:'+id;document.getElementById('sheet').scrollTop=0;break;case'gymup':{const g=(S.branches||[]).find(x=>x.id===id);if(g&&S.money>=gymUpCost(g)){S.money-=gymUpCost(g);g.cap=(g.cap||2)+2;toast('Gym agrandi : +2 places')}break}case'gymcoach':{const g=gymOf(id),c=g&&coachCost(g);if(g&&S.money>=c&&(g.coach.stars||1)<4){S.money-=c;const nc={name:natName(g.nat),nat:g.nat,stars:(g.coach.stars||1)+1};if(g.hq)S.hq.coach=nc;else{const r=S.branches.find(x=>x.id===id);r.coach=nc}toast(`Nouvel entraîneur : ${nc.name}`)}break}case'setgym':{const b=getB(ui.sheet),g=gymOf(k);if(b&&g){if(gymBoxers(k).filter(x=>x!==b).length>=g.cap){toast('Ce gym est plein.');break}b.gym=k;toast(`${sur(b)} s’entraîne maintenant à ${g.hq?'ton gym principal':g.city}`)}break}case'amf':ui.amf=k;break;case'amopen':ui.sheet='am:'+id;document.getElementById('sheet').scrollTop=0;break;case'amscout':scoutAm(id);break;case'amsign':signAm(id);if(!(S.am||[]).some(x=>x.id===id)){ui.sheet=null;ui.esub='mine'}break;case'amtrip':if(S.money>=40000){S.money-=40000;S.amScout=k;toast('✈️ Recruteurs réservés')}break;case'gpall':{let n=0;for(const f of S.fights){const a=getB(f.a),o=getB(f.b);if(a&&a.mine&&!f.gp&&o){f.gp=bestGP(o.style)||'distance';if(f.auto===undefined)f.auto=true;n++}}ui.oc={};toast(`🤖 ${n} plan${n>1?'s':''} de match choisi${n>1?'s':''} · camps en auto`);break}case'todoall':ui.todoAll=!ui.todoAll;break;case'ebrand':ui.ebrand=k||null;ui.esub='mine';break;case'borg':ui.ebrand=k||null;ui.bookFor=null;break;case'gobrand':ui.sheet=null;ui.tab='ecurie';ui.esub='mine';ui.ebrand=id;break;case'prauto':{const p=(S.promos||[]).find(x=>x.id===id);if(p)p.auto=!p.auto;break}case'openpromo':ui.sheet='promo:'+id;document.getElementById('sheet').scrollTop=0;break;case'buypromo':buyPromo(id);break;case'sellpromo':if(ui.confirm==='sp'+id){sellPromo(id);ui.confirm=null}else{ui.confirm='sp'+id;render();return}break;case'prmove':prMove(id);break;case'pickstep':{const m=sortB(orgB().filter(b=>!b.booked&&!b.inj)),i=m.findIndex(b=>b.id===ui.bookFor);if(m.length)ui.bookFor=m[(i+(+k)+m.length)%m.length].id;break}
-    case'propose':{const f=propose(ui.bookFor,id,bookOpt());if(f)afterBook(f);break}
+    case'propose':dealStart(id,'');break;
     case'div':ui.div=k;break;
     case'sign':sign(id);ui.sheet=null;break;
     case'hire':hire(id);break;
@@ -3851,7 +3868,7 @@ document.addEventListener('click',e=>{
     case'negok':negClose(true);return;
     case'negno':if(S.neg&&S.neg.forced&&ui.confirm!=='negno'){ui.confirm='negno';renderNeg();return}negClose(false);return;
     case'post':doPost(b,k);break;
-    case'proposeD':{const me=getB(ui.bookFor),f=propose(ui.bookFor,id,{belts:titleDef(me,getB(id)),...bookOpt()});if(f)afterBook(f);break}
+    case'proposeD':dealStart(id,'D');break;case'dealok':dealOk();break;case'dealco':{const d=ui.deal;if(d){ui.deal=Object.assign(dealCounter(d,R),{op:d.op,kind:d.kind});const x=ui.deal;toast(x.last==='ok'?'🤝 Contre-offre acceptée':x.last==='non'?'❌ Refusée : ils montent leur prix':'Plus de contre-offre possible')}break}case'dealno':ui.deal=null;break;
     case'bw':ui.bw=+k;ui.bev=null;break;case'bev':ui.bev=k;break;case'bevx':ui.bev=null;break;
     case'galanew':ui.gn=null;ui.sheet='galanew';break;
     case'gala':ui.sheet='gala:'+id;break;
@@ -3890,7 +3907,7 @@ document.addEventListener('click',e=>{
     case'gooff':ui.tab='combats';ui.csub='off';ui.sheet=null;window.scrollTo(0,0);break;
     case'offok':{const f=acceptOffer(id);if(f){ui.sheet='camp:'+f.id;ui.ctab='camp'}break}
     case'offno':S.offers=S.offers.filter(o=>o.id!==id);break;
-    case'proposeN':{const f=propose(ui.bookFor,id,{n:1,...bookOpt()});if(f)afterBook(f);break}
+    case'proposeN':dealStart(id,'N');break;
     case'bsc':ui.bsc=k;break;
     case'rsub':ui.rsub=k;break;
     case'rnat':ui.rnat=k;break;
@@ -4332,5 +4349,5 @@ addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
 export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList, train, campWeekCost, campTotal, inactivityTick, inactiveWeeks, INACTIVE_MAX, purse, moneyS };
-export { rpOf, onRk, seasonNow, vOnHead, rankLadder, nextWeek, drawOf, vCampaign };
+export { rpOf, onRk, seasonNow, vOnHead, rankLadder, nextWeek, drawOf, vCampaign, vBook, dealStart, dealOk };
 export const getState = () => S;
