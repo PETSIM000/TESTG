@@ -21,7 +21,7 @@ test('carrière: création 4 étapes puis tableau de bord', async ({ page }) => 
   await bootToMenu(page);
   await newCareer(page);
   await expect(page.locator('#hdr')).toContainText(/test gym/i);
-  await expect(page.locator('#hdr')).toContainText('S1');
+  await expect(page.locator('#hdr')).toContainText('Semaine 1');
   await expect(page.locator('#hdr')).toContainText('25 000');
   await expect(page.locator('[data-a="open"]')).toHaveCount(2);
   await expect(page).toHaveScreenshot('career-home.png');
@@ -31,20 +31,20 @@ test('carrière: avancer une semaine change la semaine affichée', async ({ page
   await bootToMenu(page);
   await newCareer(page);
   await page.locator('[data-a="next"]').click();
-  await expect(page.locator('#hdr')).toContainText('S2');
+  await expect(page.locator('#hdr')).toContainText('Semaine 2');
 });
 
 test('carrière: sauvegarde rechargée', async ({ page }) => {
   await bootToMenu(page);
   await newCareer(page);
   await page.locator('[data-a="next"]').click();
-  await expect(page.locator('#hdr')).toContainText('S2');
+  await expect(page.locator('#hdr')).toContainText('Semaine 2');
   await page.reload();
   await page.locator('#splash').click({ force: true }).catch(() => {});
   await page.locator('#splash').waitFor({ state: 'detached' });
   await page.locator('[data-a="m_cont"]').click();
   await expect(page.locator('#hdr')).toContainText(/test gym/i);
-  await expect(page.locator('#hdr')).toContainText('S2');
+  await expect(page.locator('#hdr')).toContainText('Semaine 2');
 });
 
 test('en ligne: écran de connexion s\'affiche', async ({ page }) => {
@@ -68,7 +68,7 @@ test('aucune erreur console sur le parcours carrière + en ligne', async ({ page
     await page.locator(`[data-a="tab"][data-k="${t}"]`).first().click({ force: true });
   }
   await page.locator('[data-a="next"]').click();
-  await expect(page.locator('#hdr')).toContainText('S2');
+  await expect(page.locator('#hdr')).toContainText('Semaine 2');
   await page.waitForTimeout(500);
   expect(errors).toEqual([]);
 });
@@ -76,6 +76,7 @@ test('aucune erreur console sur le parcours carrière + en ligne', async ({ page
 test('langue: le bouton Français/English des réglages change la langue', async ({ page }) => {
   await bootToMenu(page);
   await newCareer(page);
+  await page.locator('[data-a="tab"][data-k="club"]').click();
   await page.locator('[data-a="settings"]').click();
   const en = page.locator('[data-gl="en"]').first();
   await en.waitFor();

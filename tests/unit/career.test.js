@@ -105,10 +105,10 @@ describe('simulation de carrière sur 5 ans', () => {
 
   it('la carte campagne de l’Écurie s’affiche (saison, ère, héritage, chapitre)', () => {
     const h = vCampaign();
-    expect(h).toContain('Saison 1');
+    expect(h).toContain('Année 1');
     expect(h).toContain('cogneurs');
     expect(h).toContain('Héritage');
-    expect(h).toContain('Chapitre 1 · 0/5');
+    expect(h).toContain('Objectifs de l’année · 0/5');
   });
 });
 

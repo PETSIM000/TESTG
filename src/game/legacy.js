@@ -730,7 +730,7 @@ function nextWeek(quiet){
   S.money+=spo-sal-upk;S.fin={spo,sal,upk};
   {const c=careerWeek(S,mine(),beltsOf);if(mine().some(b=>rankIdx(b)<10))chapterSet(S,'top10',1);if(mine().some(b=>beltsOf(b).length))chapterSet(S,'title',1);
     for(const id of c.exes){if(c.told.includes(id))continue;const x=getB(id);if(x&&!x.mine&&!x.retired&&(x.champ||rankIdx(x)<5)){c.told.push(id);log(`👻 ${x.name}, que tu as laissé partir, est maintenant ${x.champ?'champion':'#'+(rankIdx(x)+1)} ailleurs.`,'bad')}}
-    const st=chapterState(S);c.rw=c.rw||[];if(st.all&&!c.rw.includes(st.season)){c.rw.push(st.season);log(`🏆 Chapitre de la saison ${st.season} terminé ! Plaque « Saison ${st.season} » ajoutée à ton héritage.`,'gold');toast('🏆 Chapitre de saison terminé')}}
+    const st=chapterState(S);c.rw=c.rw||[];if(st.all&&!c.rw.includes(st.season)){c.rw.push(st.season);log(`🏆 Objectifs de l’année ${st.season} réussis ! Plaque « Année ${st.season} » ajoutée à ton héritage.`,'gold');toast('🏆 Objectifs de l’année réussis')}}
   for(const b of mine()){
     if(b.spDue&&S.t>b.spDue){if(b.lastFight<b.spFrom){S.money-=8000;log(`${b.name} ne s’est pas battu à temps : pénalité de 8 000 $ du commanditaire.`,'bad')}b.spDue=0}
     if(b.brand)continue;
@@ -3386,13 +3386,10 @@ const ICONS={
  rank:'<path d="M5 20V12M12 20V5M19 20v-9"/><path d="M3 20h18"/>'};
 function renderChrome(){
   const q=S.queue.length;
-  document.getElementById('hdr').innerHTML=`<div class="hrow"><span class="mark">${esc(initials(S.club))}</span>
-    <div class="club"><b>${esc(S.club)}</b><span>${flag(S.home)} An ${Math.floor((S.t-1)/52)+1} · S${((S.t-1)%52)+1} · Niv ${S.mgr.lvl}</span></div>
-    <div class="cash"><small>Caisse</small><b class="${S.money<0?'neg':''}">${moneyS(S.money)}</b></div>
-    <button class="gear" data-a="settings" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
-    <button class="next ${q||S.event?'fight':''}" data-a="next">${S.event?'Événement':q?'Combat !':'Semaine ▸'}</button></div>`;
+  document.getElementById('hdr').innerHTML=`<div class="hrow cv2"><div class="club"><b>${esc(S.club)}</b><span>${flag(S.home)} Année ${Math.floor((S.t-1)/52)+1} · Semaine ${((S.t-1)%52)+1}</span></div>
+    <div class="cash"><b class="${S.money<0?'neg':''}">${moneyS(S.money)}</b></div></div>`;
   const nA=alerts().length;
-  document.getElementById('tabs').innerHTML=`<div class="in">${[['ecurie','Écurie'],['combats','Combats'],['rank','Rangs'],['defis','Tournois'],['staff','Staff'],['club','Club']].map(([k,n])=>
+  document.getElementById('tabs').innerHTML=`<button class="nextbar ${q||S.event?'fight':''}" data-a="next"><span>${S.event?'Événement à régler':q?'Soir de combat':'Année '+(Math.floor((S.t-1)/52)+1)+' · Semaine '+(((S.t-1)%52)+1)}</span><b>${S.event?'Voir ▸':q?'Combat ! ▸':'Semaine suivante ▸'}</b></button><div class="in">${[['ecurie','Écurie'],['combats','Combats'],['rank','Classements'],['defis','Tournois'],['staff','Équipe'],['club','Bureau']].map(([k,n])=>
     `<button data-a="tab" data-k="${k}" aria-current="${ui.tab===k}"><svg viewBox="0 0 24 24">${ICONS[k]}</svg>${n}${k==='ecurie'&&nA?`<span class="badge">${nA}</span>`:''}${k==='combats'&&S.offers&&S.offers.length?`<span class="badge">${S.offers.length}</span>`:''}</button>`).join('')}</div>`;
 }
 const FOLCAP=5e8;
@@ -3496,14 +3493,14 @@ function todoBar(al){if(!al.length)return'';const g={};for(const a of al){const 
   return`<div class="tbar"><button class="tmain ${urg?'urg':''}" data-a="todolist"><span class="tn">${al.length}</span><span class="tl">${urg?'urgent'+(urg>1?'s':'')+' · ':''}à faire</span><span class="tic">${Object.entries(g).map(([ic,n])=>`${ic}${n>1?n:''}`).join(' ')}</span><span class="tgo">›</span></button>${sp?`<button class="btn gold tqa" data-a="spall">⚡ Points auto</button>`:''}</div>`}
 function vCampaign(){const e=eraOf(S.t),c=careerInit(S),L=legacyScore(c,{t:S.t,hof:(S.hof||[]).length}),ch=chapterState(S);
   const eraN=e.n.replace(/^Ère des /,'');
-  return`<section class="camp" data-era="${e.id}"><button class="camp-top" data-a="chap"><span class="camp-k"><span class="camp-s">Saison ${ch.season} · Ère des</span><b class="camp-era">${eraN}</b><span class="camp-tx">${e.txt} Bourse +15 % pour ce style.</span></span>
+  return`<section class="camp" data-era="${e.id}"><button class="camp-top" data-a="chap"><span class="camp-k"><span class="camp-s">Année ${ch.season} · Ère des</span><b class="camp-era">${eraN}</b><span class="camp-tx">${e.txt} Bourse +15 % pour ce style.</span></span>
       <span class="camp-leg"><b>${L.total.toLocaleString('fr-CA')}</b><span>Héritage</span></span></button>
-    <button class="camp-ch" data-a="chap"><span class="camp-pips">${ch.goals.map(g=>`<i class="${g.ok?'on':''}"></i>`).join('')}</span><span>Chapitre ${ch.season} · ${ch.done}/${ch.goals.length} ${ui.chap?'▲':'▼'}</span></button>
+    <button class="camp-ch" data-a="chap"><span class="camp-pips">${ch.goals.map(g=>`<i class="${g.ok?'on':''}"></i>`).join('')}</span><span>Objectifs de l’année · ${ch.done}/${ch.goals.length} ${ui.chap?'▲':'▼'}</span></button>
     ${ui.chap?`<div class="camp-g">${ch.goals.map(g=>`<div class="cg ${g.ok?'ok':''}"><span>${g.n}</span><b>${g.got}/${g.need}</b><i style="--p:${Math.round(g.got/g.need*100)}%"></i></div>`).join('')}</div>
       <p class="small camp-p">Héritage : titres ${L.parts.titres} · champions formés ${L.parts.champions} · années ${L.parts.annees} · argent ${L.parts.argent} · Temple ${L.parts.temple}</p>${vRecords(c)}`:''}</section>`}
 function vRecords(c){const H=(S.hof||[]).slice().sort((a,b)=>b.g-a.g).slice(0,5),Y=Math.floor((S.t-1)/52);
   const it=(n,v)=>`<div><b>${v}</b><span>${n}</span></div>`;
-  return`<span class="lab" style="display:block;margin:12px 0 6px">🏛️ Records du gérant</span><div class="rec-g">${it('Argent gagné',$(Number(c.earned)||0))}${it('Ceintures gagnées',(c.belts||[]).length)}${it('Champions formés',(c.champs||[]).length)}${it('Années de carrière',Y)}${it('Chapitres terminés',(c.rw||[]).length)}${it('Au Temple',(S.hof||[]).length)}</div>
+  return`<span class="lab" style="display:block;margin:12px 0 6px">🏛️ Records du gérant</span><div class="rec-g">${it('Argent gagné',$(Number(c.earned)||0))}${it('Ceintures gagnées',(c.belts||[]).length)}${it('Champions formés',(c.champs||[]).length)}${it('Années de carrière',Y)}${it('Années réussies',(c.rw||[]).length)}${it('Au Temple',(S.hof||[]).length)}</div>
     ${H.length?`<div class="rec-h">${H.map((h,i)=>`<div><span>${i+1}. ${flag(h.nat)} <b>${esc(h.nm)}</b></span><span class="small">${esc(String(h.rec||''))} · ${Number(h.ko)||0} KO${(Number(h.tw)||0)?` · ${Number(h.tw)} titre${Number(h.tw)>1?'s':''}`:''}</span></div>`).join('')}</div>`:'<p class="small" style="margin:0">Aucun boxeur au Temple pour l’instant.</p>'}`}
 function vTodo(){const al=alerts();const by={};for(const a of al){const k=alKind(a);(by[k[2]]=by[k[2]]||{ic:k[1],L:[]}).L.push(a)}
   return`<div class="in"><button class="back" data-a="close">← Retour</button><h2>À faire</h2>${al.length?'':'<div class="panel">Rien à faire. Bravo, gérant ! 👊</div>'}
@@ -3745,7 +3742,7 @@ function render(){
   document.body.classList.remove('onmode');
   checkAch();try{ladCheck()}catch(e){}
   renderChrome();
-  const v={ecurie:vEcurie,combats:vCombats,rank:()=>`<h2>Classements</h2><div style="height:8px"></div>${vRank()}`,defis:vDefis,staff:vStaff,club:vClub,online:vOnline}[ui.tab]();document.body.classList.toggle('onmode',ui.tab==='online');
+  const v={ecurie:vEcurie,combats:vCombats,rank:()=>`<h2>Classements</h2><div style="height:8px"></div>${vRank()}`,defis:vDefis,staff:vStaff,club:()=>`<button class="btn ghost set-b" data-a="settings">⚙️ Réglages · sauvegarde · menu</button>`+vClub(),online:vOnline}[ui.tab]();document.body.classList.toggle('onmode',ui.tab==='online');
   const vw=document.getElementById('view'),tk=ui.tab+(ui.csub||'')+(ui.esub||'');if(ui._pt!==tk&&!RM){vw.classList.remove('anim');void vw.offsetWidth;vw.classList.add('anim')}ui._pt=tk;
   document.getElementById('view').innerHTML=(S.money<-15000?'<div class="al bad" style="margin-bottom:12px"><p><b>Le club est lourdement endetté.</b> Libère des salaires ou décroche une grosse bourse.</p></div>':'')+v;
   const sh=document.getElementById('sheet'),sid=ui.sheet||'';let sv='';
