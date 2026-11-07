@@ -5,7 +5,7 @@ import { drawCrest, logoReady } from '../ui/logo.js';
 import { RANKS, badgeHTML, frameHTML, collectionHTML } from '../ui/ranks.js';
 import { ownedFrames, frameId, resolveSlot, frameLabel } from '../ui/frames.js';
 import { RK_STYLES, RK_ABIL, rkStats, rkValid, botRk } from '../ui/ranked.js';
-import { careerInit, careerWeek, legacyScore, eraOf, eraPurse, chapterState, chapterAdd, chapterSet, adaptOf, meet, dealTerms, dealCounter, COUNTERS_MAX } from './career.js';
+import { careerInit, careerWeek, legacyScore, eraOf, eraPurse, chapterState, chapterAdd, chapterSet, adaptOf, meet, dealTerms, dealCounter, COUNTERS_MAX, tvOffer, tvCounter } from './career.js';
 
 // Boutons de langue et d'avis rendus en HTML (ex-onclick inline).
 document.addEventListener('click', (e) => {
@@ -1068,10 +1068,11 @@ function galaEst(g,rnd){
   const att=Math.round(Math.min(ar.cap,(40+Math.pow(pop,1.6)*.6)*promoF*priceF*attF*k));
   const tickets=Math.round(att*g.price*(X.vip&&att>=ar.cap*.5?1.18:1)),spons=Math.round(pop*60*promoF*k*(X.pesee?1.1:1));
   const tvm=g.tv||(g.ppv?'ppv':'loc'),tv=Math.round(tvm==='none'?0:tvm==='loc'?Math.max(0,pop-60)*120*C.tv:tvm==='str'?(pop>=70?pop*450:0)*C.tv:tvm==='big'?(pop>=110?pop*1100:0)*C.tv:tvm==='own'?(S.tv?Math.round(S.tv.subs*.4+pop*200):0):Math.max(0,pop-80)*60*C.tv);
+  const tvx=g.tvDeal?g.tvDeal:tv;
   const pp=g.ppvp||60,ppvOn=tvm==='ppv',ppvOk=mainP>=90,ppvBuys=ppvOn&&ppvOk?Math.round((mainP*mainP*.3+folEco(mainF)*.03)*promoF*k*C.tv*Math.pow(60/pp,1.1)):0,ppvRev=Math.round(ppvBuys*pp*.5),ppvCost=ppvOn&&ppvOk?25000:0;
   const pay=fs.reduce((s,f)=>s+(f.pay||0),0),prod=4000+2500*fs.length,xc=Object.keys(GX).reduce((s,q)=>s+(X[q]?GX[q].c:0),0),fee=C.fee;
-  const rev=Math.round((tickets+spons+tv+ppvRev)*pro),cost=ar.rent+g.promo+ppvCost+pay+prod+xc+fee;
-  return{att,cap:ar.cap,tickets,spons,tv,tvm,ppvOk,ppvOn,ppvBuys,ppvRev,ppvCost,pay,prod,xc,fee,city:C,loc,rent:ar.rent,promo:g.promo,rev,cost,profit:rev-cost,pop,n:fs.length,mainP,ar};
+  const rev=Math.round((tickets+spons+tvx+ppvRev)*pro),cost=ar.rent+g.promo+ppvCost+pay+prod+xc+fee;
+  return{att,cap:ar.cap,tickets,spons,tv:tvx,tvRaw:tv,tvm,ppvOk,ppvOn,ppvBuys,ppvRev,ppvCost,pay,prod,xc,fee,city:C,loc,rent:ar.rent,promo:g.promo,rev,cost,profit:rev-cost,pop,n:fs.length,mainP,ar};
 }
 function createGala(){const n=ui.gn;if(!n)return;const ar=arenaList().find(a=>a.id===n.arena);if(!ar||S.mgr.lvl<ar.lvl)return;
   const C=GCITY.find(c=>c.id===n.city)||GCITY[0];if(S.mgr.lvl<C.lvl){toast(`${C.n} : gérant niveau ${C.lvl} requis`);return}
@@ -3919,7 +3920,7 @@ document.addEventListener('click',e=>{
     case'gooff':ui.tab='combats';ui.csub='off';ui.sheet=null;window.scrollTo(0,0);break;
     case'offok':{const f=acceptOffer(id);if(f){ui.sheet='camp:'+f.id;ui.ctab='camp'}break}
     case'offno':S.offers=S.offers.filter(o=>o.id!==id);break;
-    case'proposeN':dealStart(id,'N');break;
+    case'proposeN':dealStart(id,'N');break;case'tvok':{const g=(S.galas||[]).find(x=>x.id===id);if(g&&!g.done&&g.tvOff){g.tvDeal=g.tvOff;log(`Contrat télé signé pour ${g.name} : ${$(g.tvDeal)} garantis.`,'good');toast('📺 Contrat télé signé')}break}case'tvco':{const g=(S.galas||[]).find(x=>x.id===id);if(g&&!g.tvCo&&g.tvOff){g.tvCo=1;const r=tvCounter(g.tvOff,R);g.tvOff=r.offer;toast(r.ok?'🤝 Le diffuseur accepte +15 %':'❌ Le diffuseur garde son offre')}break}
     case'bsc':ui.bsc=k;break;
     case'rsub':ui.rsub=k;break;
     case'rnat':ui.rnat=k;break;
@@ -4254,6 +4255,12 @@ async function sharePoster(id){const g=(S.galas||[]).find(x=>x.id===id);if(!g)re
     try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:g.name});return}}catch(e){if(e&&e.name==='AbortError')return}
     try{const d=window.claude&&window.claude.use?await window.claude.use('downloads'):null;if(d){await d.save({filename:file.name,data:bl});return}}catch(e){if(e&&e.code&&e.code!=='unavailable'){return}}
     const u=URL.createObjectURL(bl),a=document.createElement('a');a.href=u;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Affiche enregistrée')},'image/png')}
+function vTvDeal(g,e,fs){if(g.done||!fs.length||!['loc','str','big'].includes(e.tvm))return'';
+  if(g.tvDeal)return`<div class="panel"><span class="lab">📺 Contrat télé</span><p class="small" style="margin:6px 0 0">Signé : <b>${$(g.tvDeal)}</b> garantis, quoi qu’il arrive le soir du gala.</p></div>`;
+  if(!e.tvRaw)return`<div class="panel"><span class="lab">📺 Contrat télé</span><p class="small" style="margin:6px 0 0">Aucun diffuseur intéressé : ajoute des combats plus populaires.</p></div>`;
+  if(!g.tvOff||g.tvN!==fs.length){g.tvOff=tvOffer(e.tvRaw,fs.length,R);g.tvN=fs.length}
+  return`<div class="panel"><span class="lab">📺 Contrat télé</span><p class="small" style="margin:6px 0 8px">Le diffuseur offre <b>${$(g.tvOff)}</b> garantis pour les droits (estimation sans contrat : ${$(e.tvRaw)}, selon la soirée).</p>
+    <div class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn gold" style="flex:2" data-a="tvok" data-id="${g.id}">✍️ Signer</button><button class="btn" style="flex:1" data-a="tvco" data-id="${g.id}" ${g.tvCo?'disabled':''}>+15 %</button></div></div>`}
 function vGala(g){
   const e=galaEst(g),fs=galaFights(g),line=(l,v,neg)=>`<div class="row" style="justify-content:space-between"><span>${l}</span><b class="num ${neg?'neg':''}">${neg?'−':'+'}${$(v)}</b></div>`;
   return`<div class="in"><button class="back" data-a="close">← Retour</button>
@@ -4261,6 +4268,7 @@ function vGala(g){
     <div class="panel"><span class="lab">${e.ar.n} · ${when(g.week)}</span><div class="nm" style="font-size:26px;margin-top:4px">${esc(g.name)}</div>
       <div class="row" style="justify-content:space-between;margin-top:10px"><span class="small">Spectateurs estimés</span><b>${e.att.toLocaleString('fr-CA')} / ${e.cap.toLocaleString('fr-CA')}</b></div><div class="trk gold" style="height:8px;margin-top:4px"><i style="width:${pct(e.att/e.cap*100)}%"></i></div>
       <p class="small" style="margin:6px 0 0">${e.city.nat?flag(e.city.nat)+' '+e.city.n+' · ':''}${e.loc?`${e.loc} boxeur${e.loc>1?'s':''} du pays sur la carte (+${Math.min(45,e.loc*12)} % de public) · `:''}Popularité de la carte : ${e.pop}. Les combats de titre, les rivalités et les boxeurs populaires remplissent la salle.</p></div>
+    ${vTvDeal(g,e,fs)}
     <div class="panel"><span class="lab">Estimation financière</span><div style="display:grid;gap:5px;margin-top:8px;font-size:14px">
       ${line('Billets',e.tickets)}${line('Commanditaires',e.spons)}${e.tv?line('Droits télé',e.tv):''}${e.ppvOn?(e.ppvOk?line(`PPV (${e.ppvBuys.toLocaleString('fr-CA')} achats à ${g.ppvp||60} $, ta part 50 %)`,e.ppvRev):'<div class="small" style="color:var(--warn)">PPV : combat principal pas assez populaire, pas d’achats.</div>'):''}
       ${line('Location',e.rent,1)}${e.promo?line('Promotion',e.promo,1):''}${line('Production',e.prod,1)}${e.pay?line('Bourses des adversaires',e.pay,1):''}${e.ppvCost?line('Production PPV',e.ppvCost,1):''}${e.fee?line('Frais de ville hôte ('+e.city.n+')',e.fee,1):''}${e.xc?line('Extras',e.xc,1):''}

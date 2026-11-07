@@ -151,3 +151,14 @@ export function dealCounter(d, r = Math.random) {
   const fee = ok ? Math.round((d.fee * 0.85) / 100) * 100 : Math.round((d.fee * 1.05) / 100) * 100;
   return { ...d, fee, counters: d.counters + 1, last: ok ? 'ok' : 'non', avoid: ok ? false : d.avoid };
 }
+
+/* ---------- Contrat télé d'un gala ----------
+   Le diffuseur offre un montant GARANTI (moins risqué que l'estimation variable). Une contre-offre à +15 %. */
+export function tvOffer(estTv, n, r = Math.random) {
+  if (!estTv || n < 1) return 0;
+  return Math.round((estTv * (0.85 + r() * 0.15) + n * 1500) / 100) * 100;
+}
+export function tvCounter(offer, r = Math.random) {
+  const ok = r() < 0.5;
+  return { ok, offer: ok ? Math.round((offer * 1.15) / 100) * 100 : offer };
+}

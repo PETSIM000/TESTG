@@ -150,3 +150,13 @@ describe('écran de négociation dans le jeu', () => {
     expect(S.money).toBe(m0 - fee);
   });
 });
+
+import { tvOffer, tvCounter } from '../../src/game/career.js';
+describe('contrat télé de gala', () => {
+  it('offre garantie selon l’estimation et le nombre de combats ; +15 % si accepté', () => {
+    expect(tvOffer(0, 3)).toBe(0);
+    expect(tvOffer(20000, 2, () => 1)).toBe(23000);
+    expect(tvCounter(10000, () => 0.1)).toEqual({ ok: true, offer: 11500 });
+    expect(tvCounter(10000, () => 0.9)).toEqual({ ok: false, offer: 10000 });
+  });
+});
