@@ -43,6 +43,7 @@ export function legacyScore(c, { t = 1, hof = 0 } = {}) {
     annees: (yearOf(t) - 1) * 40,
     argent: Math.floor(c.earned / 10000),
     temple: hof * 150,
+    combats: (c.fotyN || 0) * 400,
   };
   return { total: Object.values(parts).reduce((a, b) => a + b, 0), parts };
 }
@@ -162,3 +163,36 @@ export function tvCounter(offer, r = Math.random) {
   const ok = r() < 0.5;
   return { ok, offer: ok ? Math.round((offer * 1.15) / 100) * 100 : offer };
 }
+
+/* ---------- Défis de scénario (choisis à la création) ---------- */
+export const SCENARIOS = {
+  faillite: { n: 'Promotion en faillite', d: 'Tu reprends une promotion endettée (−20 000 $).', goal: 'Avoir 100 000 $ en caisse', limit: 104, check: (S) => S.money >= 100000 },
+  inconnu: { n: 'De zéro à champion', d: 'Un seul boxeur : un inconnu de 18 ans.', goal: 'En faire un champion', limit: 260, check: (S, x) => x.hasChamp },
+  releve: { n: 'La relève', d: 'Ton meilleur boxeur a 34 ans. Le temps presse.', goal: 'Un boxeur de moins de 25 ans dans le top 10', limit: 156, check: (S, x) => x.youngTop10 },
+};
+/** État du défi : en cours, réussi ('win') ou raté ('lose'). Le résultat est figé une fois connu. */
+export function scenarioState(S, ctx) {
+  const sc = S.scen && SCENARIOS[S.scen.id];
+  if (!sc) return null;
+  if (!S.scen.done) {
+    if (sc.check(S, ctx)) S.scen.done = 'win';
+    else if (S.t > sc.limit) S.scen.done = 'lose';
+  }
+  return { id: S.scen.id, ...sc, done: S.scen.done || null, left: Math.max(0, sc.limit - S.t) };
+}
+
+/* ---------- Combat de l'année : le public réclame un combat précis ---------- */
+export const FOTY_WEEK = 10; // annoncé à la 10e semaine de chaque année
+export const FOTY_LEGACY = 400;
+/** Choisit l'affiche : ton meilleur boxeur contre le champion de sa catégorie (ou le n° 1 si c'est lui le champion). */
+export function fotyPick(mine, champOf, topOf) {
+  const best = [...mine].filter((b) => !b.inj).sort((a, b) => (b.fame || 0) - (a.fame || 0))[0];
+  if (!best) return null;
+  const c = champOf(best);
+  const opp = c && c.id !== best.id ? c : topOf(best);
+  return opp && opp.id !== best.id ? { a: best.id, b: opp.id } : null;
+}
+
+/* ---------- Agents des boxeurs vedettes ---------- */
+export const AGENT_FEE = 0.4; // +40 % sur la prime de signature
+export const hasAgent = (b, ovr) => (b.fame || 0) >= 55 || ovr >= 70;

@@ -40,7 +40,7 @@ describe('ères et héritage (logique pure)', () => {
   });
   it('le score d’héritage additionne titres, champions, années, argent, Temple', () => {
     const L = legacyScore({ belts: ['a:WBC', 'a:IBF'], champs: ['a'], earned: 1e6 }, { t: 52 * 3 + 1, hof: 1 });
-    expect(L.parts).toEqual({ titres: 240, champions: 250, annees: 120, argent: 100, temple: 150 });
+    expect(L.parts).toEqual({ titres: 240, champions: 250, annees: 120, argent: 100, temple: 150, combats: 0 });
     expect(L.total).toBe(860);
   });
   it('rival qui apprend : +1 adaptation par combat déjà livré, max 3', () => {
@@ -168,5 +168,24 @@ describe('records du gérant', () => {
     expect(h).toContain('Records du gérant');
     expect(h).toContain('Argent gagné');
     ui.chap = false;
+  });
+});
+
+import { SCENARIOS, scenarioState, fotyPick, hasAgent } from '../../src/game/career.js';
+describe('modes et idées', () => {
+  it('défi « faillite » : réussi à 100 000 $, raté après la limite', () => {
+    const S1 = { t: 10, money: 120000, scen: { id: 'faillite' } };
+    expect(scenarioState(S1, {}).done).toBe('win');
+    const S2 = { t: SCENARIOS.faillite.limit + 1, money: 0, scen: { id: 'faillite' } };
+    expect(scenarioState(S2, {}).done).toBe('lose');
+  });
+  it('combat de l’année : ton boxeur le plus populaire contre le champion de sa catégorie', () => {
+    const me = [{ id: 'a', fame: 40 }, { id: 'b', fame: 70 }];
+    const pk = fotyPick(me, () => ({ id: 'champ' }), () => ({ id: 'n1' }));
+    expect(pk).toEqual({ a: 'b', b: 'champ' });
+  });
+  it('les vedettes ont un agent', () => {
+    expect(hasAgent({ fame: 60 }, 50)).toBe(true);
+    expect(hasAgent({ fame: 10 }, 60)).toBe(false);
   });
 });

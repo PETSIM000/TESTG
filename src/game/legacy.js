@@ -5,7 +5,7 @@ import { drawCrest, logoReady } from '../ui/logo.js';
 import { RANKS, badgeHTML, frameHTML, collectionHTML } from '../ui/ranks.js';
 import { ownedFrames, frameId, resolveSlot, frameLabel } from '../ui/frames.js';
 import { RK_STYLES, RK_ABIL, rkStats, rkValid, botRk } from '../ui/ranked.js';
-import { careerInit, careerWeek, legacyScore, eraOf, eraPurse, chapterState, chapterAdd, chapterSet, adaptOf, meet, dealTerms, dealCounter, COUNTERS_MAX, tvOffer, tvCounter } from './career.js';
+import { careerInit, careerWeek, legacyScore, eraOf, eraPurse, chapterState, chapterAdd, chapterSet, adaptOf, meet, dealTerms, dealCounter, COUNTERS_MAX, tvOffer, tvCounter, SCENARIOS, scenarioState, fotyPick, FOTY_WEEK, AGENT_FEE, hasAgent, yearOf } from './career.js';
 
 // Boutons de langue et d'avis rendus en HTML (ex-onclick inline).
 document.addEventListener('click', (e) => {
@@ -204,7 +204,7 @@ const NAMES={
  ma:[['Youssef','Mehdi','Hamza','Anas','Ayoub','Omar','Yassine'],['El Amrani','Benali','Alaoui','Bennani','Tazi','Idrissi','Chraibi']]};
 const NATW={US:14,MX:9,GB:8,CA:5,PH:5,JP:4,CU:4,UA:4,FR:4,PR:3,KZ:3,GH:3,NG:3,AU:3,AR:3,IE:2,PL:2,DE:2,IT:2,BR:2,SN:2,MA:2};
 const CITYNAT={};for(const[k,v]of Object.entries(NAT))for(const c of v.c)CITYNAT[c]=k;
-const DIFF={facile:{n:'Facile',d:'50 000 $ en caisse et un entraîneur 2 étoiles.'},normal:{n:'Normal',d:'25 000 $ et un vieil entraîneur bénévole. L’expérience prévue.'},difficile:{n:'Difficile',d:'10 000 $ et aucun staff. Chaque dollar compte.'}};
+const DIFF={facile:{n:'Facile',d:'50 000 $ en caisse et un entraîneur 2 étoiles.'},normal:{n:'Normal',d:'25 000 $ et un vieil entraîneur bénévole. L’expérience prévue.'},difficile:{n:'Difficile',d:'10 000 $ et aucun staff. Chaque dollar compte.'},legende:{n:'Légende',d:'2 000 $, aucun staff, aucune aide.'}};
 const PROMOS=['Nord Boxing','Titan Fight Night','Productions du Ring','Red Line Promotions','Empire Boxe','Iron Bell Boxing','Crown & Glove'];
 /* ================= v19 : PROMOTIONS ================= */
 const PRN=[['Nord Boxing','CA'],['Productions du Ring','CA'],['Maple Leaf Fights','CA'],['Titan Fight Night','US'],['Red Line Promotions','US'],['Southside Fight Co.','US'],['Iron Bell Boxing','US'],['Sol Azteca Promociones','MX'],['Crown & Glove','GB'],['Royal Fist Promotions','GB'],['Celtic Warrior Promotions','IE'],['Lions de Paris Boxe','FR'],['Empire Boxe','FR'],['Samurai Fist Promotions','JP'],['Black Star Promotions','GH'],['Lagos Kings Boxing','NG'],['Manila Thunder','PH'],['Steel Bear Boxing','UA'],['Kaiser Box-Promotion','DE'],['Andes Boxeo','AR'],['Atlas Boxing Group','MA'],['Blue Corner Group',''],['Phoenix Rising Boxing',''],['Thunder Ring Promotions','']];
@@ -416,7 +416,7 @@ function genGyms(){
     return b})}));
 }
 function worldGen(o){
-  S={v:2,uid:1,t:1,money:{facile:50000,normal:25000,difficile:10000}[o.diff]||25000,gym:1,boxers:[],fa:[],fights:[],queue:[],log:[],fin:null,
+  S={v:2,uid:1,t:1,money:{facile:50000,normal:25000,difficile:10000,legende:2000}[o.diff]||25000,gym:1,boxers:[],fa:[],fights:[],queue:[],log:[],fin:null,
      staff:{coach:null,phys:null,cut:null,spar:[]},market:[],mgr:{lvl:1,xp:0,pts:0,perks:{neg:0,mot:0,rec:0,res:0,ges:0}},
      gyms:[],ach:{},stats:{wins:0,kos:0,titles:0,badges:0},set:Object.assign({...DEFSET},S&&S.set||{}),event:null,
      club:o.club,mgrName:o.mgr,home:o.home,diff:o.diff,slot:o.slot,offers:[],champHist:[],belts:{},fac:{vest:0,ring:0,cardio:0,med:0,video:0,dorm:0,acad:0},branches:[],galas:[],tcd:{},tour:null};
@@ -426,7 +426,7 @@ function worldGen(o){
     ensureChamp(d.id);
   }
   ensureAllNat();
-  if(o.diff!=='difficile')S.staff.coach={id:'s0',role:'coach',name:natName(o.home),stars:o.diff==='facile'?2:1,salary:o.diff==='facile'?160:120};
+  if(o.diff!=='difficile'&&o.diff!=='legende')S.staff.coach={id:'s0',role:'coach',name:natName(o.home),stars:o.diff==='facile'?2:1,salary:o.diff==='facile'?160:120};
   S.fa=genFA();S.market=genStaff();S.gyms=genGyms();S.promos=null;ensurePromos();S.am=null;ensureAm();
 }
 function genPool(){
@@ -439,6 +439,10 @@ function genPool(){
 function finishNew(){
   const pk=ui.ng.picks.map(i=>ui.ng.pool[i]);if(pk.length!==2)return;
   for(const b of pk){delete b.fa;Object.assign(b,{mine:true,morale:80,loy:72,plan:'normal',lastFight:S.t-2,hist:[],lvl:1,xp:0,sp:0,contract:52,booked:false});S.boxers.push(b)}
+  {const sc=ui.ng.scen;if(sc&&SCENARIOS[sc]){S.scen={id:sc};
+    if(sc==='faillite')S.money-=20000;
+    if(sc==='inconnu'){const k0=pk[0],k1=pk[1];k1.mine=false;k1.fa=true;S.boxers=S.boxers.filter(x=>x!==k1);S.fa.unshift(k1);Object.assign(k0,{age:18,fame:1});for(const s of['pow','spd','def','sta','chin'])k0[s]=cl(k0[s]-8,1,99)}
+    if(sc==='releve'){const k0=pk[0];k0.age=34;for(const s of['pow','spd','def','sta','chin'])k0[s]=cl(k0[s]+8,1,99)}}}
   ensureAllNat();
   log(`${S.mgrName} fonde ${S.club} (${flag(S.home)} ${NAT[S.home].n}). Premiers boxeurs : ${pk.map(b=>b.name).join(' et ')}. Tout se gagne sur le ring.`,'gold');
   const s=S;ui.ng=null;enterGame(s);toast(`Bienvenue chez ${S.club} !`);
@@ -633,6 +637,9 @@ function applyResult(F,f){
   else{
     W=res.w==='A'?A:B;L=res.w==='A'?B:A;
     W.w++;L.l++;if(stop)W.ko++;if(W.mine){chapterAdd(S,'wins');if(stop)chapterAdd(S,'kos')}
+    {const cc=c=>Number(c)||0,cutA=cc(F.A.cut),cutB=cc(F.B.cut);for(const[X,c]of[[A,cutA],[B,cutB]])if(c>=2&&X.mine){const w=2+c+ri(0,2);X.inj=Math.max(X.inj||0,w);log(`🩸 ${X.name} : coupure profonde, ${w} semaines d’arrêt sur ordre du médecin.`,'bad')}
+     if(stop&&L.mine&&cc(L===A?cutA:cutB)>=2){L.rival=W.id;log(`${L.name} veut sa revanche contre ${W.name} : le combat a été arrêté sur coupure.`)}
+     const c0=careerInit(S),fy=c0.foty;if(fy&&!fy.done&&((A.id===fy.a&&B.id===fy.b)||(A.id===fy.b&&B.id===fy.a))){fy.done=true;c0.fotyN=(c0.fotyN||0)+1;S.money+=50000;log(`🏆 Combat de l’année livré ! +50 000 $ de bonus et +400 d’héritage.`,'gold');toast('🏆 Combat de l’année !')}}
     W.pts+=Math.round(18+Math.max(0,L.pts-W.pts)*.25+(stop?4:0));
     L.pts=Math.max(0,Math.round(L.pts-(10+Math.max(0,L.pts-W.pts)*.15)));
     W.fame=cl(W.fame+(2+L.fame*.08+(stop?1:0)+(title?12:0))*(has(W,'showman')?1.5:1),1,100);L.fame=cl(L.fame-1.5,1,100);
@@ -730,6 +737,12 @@ function nextWeek(quiet){
   S.money+=spo-sal-upk;S.fin={spo,sal,upk};
   {const c=careerWeek(S,mine(),beltsOf);if(mine().some(b=>rankIdx(b)<10))chapterSet(S,'top10',1);if(mine().some(b=>beltsOf(b).length))chapterSet(S,'title',1);
     for(const id of c.exes){if(c.told.includes(id))continue;const x=getB(id);if(x&&!x.mine&&!x.retired&&(x.champ||rankIdx(x)<5)){c.told.push(id);log(`👻 ${x.name}, que tu as laissé partir, est maintenant ${x.champ?'champion':'#'+(rankIdx(x)+1)} ailleurs.`,'bad')}}
+    const wk=((S.t-1)%52)+1,yy=yearOf(S.t);
+    if(wk>=FOTY_WEEK&&(!c.foty||c.foty.y!==yy)){const champOf=x=>S.boxers.find(o=>o.champ&&o.div===x.div&&!o.mine),topOf=x=>rankList(x.div).find(o=>!o.mine&&o.id!==x.id);
+      const pk=fotyPick(mine(),champOf,topOf);if(pk){c.foty={...pk,y:yy,until:(yy-1)*52+50,done:false};const A1=getB(pk.a),B1=getB(pk.b);log(`📣 Le public réclame le combat de l’année : ${A1.name} contre ${B1.name}. Signe-le avant la semaine 50.`,'gold')}}
+    if(c.foty&&!c.foty.done&&S.t>c.foty.until&&!c.foty.miss){c.foty.miss=1;log('Le combat de l’année n’a pas eu lieu. Le public est déçu.','bad')}
+    {const sc=scenarioState(S,{hasChamp:mine().some(x=>beltsOf(x).length),youngTop10:mine().some(x=>x.age<25&&rankIdx(x)<10)});if(sc&&sc.done&&!S.scen.told){S.scen.told=1;log(sc.done==='win'?`🏅 Défi réussi : ${sc.n} !`:`Défi raté : ${sc.n}.`,sc.done==='win'?'gold':'bad');toast(sc.done==='win'?'🏅 Défi réussi !':'Défi raté')}}
+    if(S.t%4===0)c.mag=ringMag();
     const st=chapterState(S);c.rw=c.rw||[];if(st.all&&!c.rw.includes(st.season)){c.rw.push(st.season);log(`🏆 Objectifs de l’année ${st.season} réussis ! Plaque « Année ${st.season} » ajoutée à ton héritage.`,'gold');toast('🏆 Objectifs de l’année réussis')}}
   for(const b of mine()){
     if(b.spDue&&S.t>b.spDue){if(b.lastFight<b.spFrom){S.money-=8000;log(`${b.name} ne s’est pas battu à temps : pénalité de 8 000 $ du commanditaire.`,'bad')}b.spDue=0}
@@ -932,7 +945,7 @@ function propose(meId,opId,o={}){
 }
 function sign(id){
   const b=S.fa.find(x=>x.id===id);if(!b)return;
-  const cost=b.salary*10;if(club().length>=rosterCap()||S.money<cost)return;
+  const ag=hasAgent(b,ovr(b)),cost=Math.round(b.salary*10*(ag?1+AGENT_FEE:1));if(club().length>=rosterCap()||S.money<cost){if(S.money<cost)toast(`Il faut ${$(cost)}${ag?' (commission de l’agent incluse)':''}`);return}if(ag)log(`L’agent de ${b.name} prend sa commission : +${Math.round(AGENT_FEE*100)} % sur la prime.`);
   S.money-=cost;S.fa=S.fa.filter(x=>x!==b);delete b.fa;mcAdd('sign');chapterAdd(S,'sign');
   Object.assign(b,{mine:true,morale:75,loy:60,plan:'normal',lastFight:S.t,hist:[],lvl:1,xp:0,sp:0,contract:52});
   S.boxers.push(b);log(`${b.name} signe avec le club (prime de ${$(cost)}, ${$(b.salary)} par semaine).`,'good');toast(`${b.name} rejoint le club !`);
@@ -1060,7 +1073,7 @@ const PRICES=[20,35,50,75,120,200],PROMOB=[0,3000,10000,30000,80000];
 const galaFights=g=>S.fights.filter(f=>f.ev===g.id);
 function galaEst(g,rnd){
   const fs=galaFights(g),ar=arenaList().find(a=>a.id===g.arena)||ARENAS[0];let pop=0,mainP=0;
-  let mainF=0;for(const f of fs){const a=getB(f.a),b=getB(f.b);if(!a||!b)continue;const fl=fol(a)+fol(b);const p=a.fame+b.fame+Math.sqrt(fl)/12+(f.title?25*(Array.isArray(f.title)?f.title.length:1):0)+(f.ntitle?12:0)+(a.rival===b.id?10:0);if(p>mainP){mainP=p;mainF=fl}pop+=p}
+  let mainF=0;for(const f of fs){const a=getB(f.a),b=getB(f.b);if(!a||!b)continue;const fl=fol(a)+fol(b);const p=a.fame+b.fame+(f.press==='prov'?15:f.press==='ko'?10:0)+Math.sqrt(fl)/12+(f.title?25*(Array.isArray(f.title)?f.title.length:1):0)+(f.ntitle?12:0)+(a.rival===b.id?10:0);if(p>mainP){mainP=p;mainF=fl}pop+=p}
   const X=g.x||{},C=GCITY.find(c=>c.id===(g.city||'home'))||GCITY[0],cn=C.nat||S.home;let loc=0;for(const f of fs){for(const id of[f.a,f.b]){const x=getB(id);if(x&&x.nat===cn)loc++}}
   pop=Math.round((pop+mainP*.6)*(X.presse?1.1:1));
   const promoF=1+Math.min(1.4,g.promo/25000),priceF=Math.pow(45*C.price/g.price,.85),pro=1+.1*(S.mgr.perks.rec||0),k=rnd?(.88+R()*.24):1;
@@ -1226,7 +1239,7 @@ const RIVN=['Titan Boxing Club','Gold Fist Promotions','Iron Ring Gym','Phoenix 
 function genRivals(){return RIVN.slice(0,4).map((n,i)=>({id:'r'+i,n,nat:pick(Object.keys(NATW)),rep:ri(35,75),money:ri(2,20)*100000,signed:0}))}
 function rivalsWeek(){S.rivals=S.rivals||genRivals();
   for(const r of S.rivals){r.rep=cl(r.rep+(R()-.48)*2,10,99);r.money+=ri(5,25)*1000}
-  if(S.t%4===1&&S.fa.length>4)for(const r of S.rivals){if(R()>.5)continue;const best=[...S.fa].filter(b=>!b.scout).sort((a,b)=>ovr(b)-ovr(a))[0];if(best){S.fa=S.fa.filter(x=>x!==best);r.signed++;log(`${r.n} signe l’agent libre ${best.name} (${ovr(best)}).`)}}
+  if(S.t%4===1&&S.fa.length>4)for(const r of S.rivals){if(R()>(r.grudge?.25:.5))continue;const best=[...S.fa].filter(b=>!b.scout).sort((a,b)=>ovr(b)-ovr(a))[0];if(best){S.fa=S.fa.filter(x=>x!==best);r.signed++;log(`${r.n} signe l’agent libre ${best.name} (${ovr(best)}).`)}}
   if(!S.event&&R()<.07){const c=mine().filter(b=>!b.booked&&ovr(b)>=55);if(c.length){const b=pick(c),r=pick(S.rivals);S.event={k:'bid',b:b.id,v:Math.round(buyPrice(b)*(.9+R()*.7)/1000)*1000,r:r.id}}}}
 const rivN=id=>((S.rivals||[]).find(r=>r.id===id)||{n:'Un club rival'}).n;
 /* --- défis personnels & épreuves --- */
@@ -1285,7 +1298,7 @@ function advise(F){
 function openFight(fid){
   const f=S.fights.find(x=>x.id===fid);if(!f){S.queue=S.queue.filter(x=>x!==fid);return}
   {const a0=getB(f.a);if(a0&&a0.mine&&a0.inj>0){S.queue=S.queue.filter(x=>x!==fid);if((f.post||0)<2){postpone(fid);toast(`🩹 ${sur(a0)} est blessé : combat reporté de 3 semaines`)}else{const b0=getB(f.b);S.fights=S.fights.filter(x=>x!==f);a0.booked=false;if(b0)b0.booked=false;log(`Combat de ${a0.name} annulé : il est encore blessé.`,'bad');toast(`🩹 ${sur(a0)} toujours blessé : combat annulé`)}save();render();return}}
-  const a=getB(f.a),F=newFight(a,getB(f.b),f.rounds,f.title);F.f=f;F.ntitle=!!f.ntitle;F.rival=a.rival===f.b;applyCamp(F,f);if(f.press==='prov')F.B.motiv=1;F.wi=weighIn(f,a);if(!F.wi.ok)F.A.hp=92;beginFight(F);
+  const a=getB(f.a),F=newFight(a,getB(f.b),f.rounds,f.title);F.f=f;F.ntitle=!!f.ntitle;F.rival=a.rival===f.b;applyCamp(F,f);if(f.press==='prov'){F.B.motiv=1;if(R()<.3){F.A.cntd=1;log(`${a.name} a perdu son sang-froid après la conférence de presse.`,'bad')}}F.wi=weighIn(f,a);if(!F.wi.ok)F.A.hp=92;beginFight(F);
 }
 function startChallenge(){
   const g=S.gyms[ui.gym],me=getB(ui.gymBoxer);if(!g||!me||!canChallenge(me)||g.beaten>=3)return;
@@ -2981,9 +2994,9 @@ const EVENTS={
  moveup:{b:1,need:()=>false,t:'Monter de catégorie ?',x:b=>`${b.name} a tout gagné en ${divN(b.div)}. Il veut monter d’une catégorie pour devenir champion dans plusieurs divisions et entrer dans l’histoire.`,
   c:[['Monter de catégorie',b=>{changeDiv(b,1);b.morale=cl(b.morale+8,0,100);return`${b.name} monte en ${divN(b.div)} ! Ses ceintures sont libérées. Objectif : un titre dans une 2e division (+150 points GOAT).`}],['Rester et défendre',b=>{b.loy=cl(b.loy-4,0,100);return`${b.name} reste, un peu déçu.`}]]},
  press:{b:1,need:()=>false,t:'Conférence de presse',x:b=>{const f=upF(b),o=f&&getB(f.b);return`Avant ${f&&f.title?'son combat de championnat':'son grand combat'} contre ${o?o.name:'son adversaire'}, ${b.name} fait face aux médias. Quel ton adopter ?`},
-  c:[['Respectueux',b=>{b.loy=cl(b.loy+3,0,100);b.morale=cl(b.morale+6,0,100);const f=upF(b);if(f)f.press='resp';return`${b.name} reste classe : moral et loyauté en hausse.`}],['Provocateur',b=>{b.fame=cl(b.fame+4,1,100);const f=upF(b);if(f){f.press='prov';f.purse=Math.round(f.purse*1.1)}return`Le buzz explose : +4 popularité et bourse +10 %, mais l’adversaire est piqué au vif.`}],['Promettre un KO',b=>{b.fame=cl(b.fame+6,1,100);const f=upF(b);if(f)f.press='ko';return`${b.name} promet un KO ! S’il ne le fait pas, les médias vont s’en souvenir.`}]]},
+  c:[['Respectueux',b=>{b.loy=cl(b.loy+3,0,100);b.morale=cl(b.morale+6,0,100);const f=upF(b);if(f)f.press='resp';return`${b.name} reste classe : moral et loyauté en hausse.`}],['Provocateur',b=>{b.fame=cl(b.fame+4,1,100);const f=upF(b);if(f){f.press='prov';f.purse=Math.round(f.purse*1.1)}return`Le buzz explose : +4 popularité et bourse +10 %, mais l’adversaire est piqué au vif.`}],['Promettre un KO',b=>{b.fame=cl(b.fame+6,1,100);const f=upF(b);if(f)f.press='ko';return`${b.name} promet un KO ! S’il ne le fait pas, les médias vont s’en souvenir.`}],['Rester silencieux',b=>{b.fame=cl(b.fame+1,1,100);const f=upF(b);if(f)f.press='sil';return`${b.name} ne dit rien. Le mystère intrigue, sans faire de vagues.`}]]},
  bid:{b:1,need:()=>false,t:'Offre de transfert',x:b=>`${rivN(S.event.r)} offre ${$(S.event.v)} pour racheter le contrat de ${b.name}.`,
-  c:[['Accepter l’offre',b=>{const v=S.event.v,r=(S.rivals||[]).find(x=>x.id===S.event.r);const f=upF(b);if(f)cancelFight(f.id);for(const k of beltsOf(b))S.belts[b.div][k]=null;S.money+=v;b.mine=false;b.salary=0;if(r){r.signed++;r.rep=cl(r.rep+3,10,99)}ensureBelts(b.div);return`${b.name} part chez ${r?r.n:'un rival'}. +${$(v)}.`}],['Refuser',b=>{if(b.loy<50&&R()<.4){b.loy=cl(b.loy-8,0,100);return`${b.name} voulait partir… loyauté en baisse.`}b.loy=cl(b.loy+2,0,100);return`${b.name} apprécie ta confiance.`}]]},
+  c:[['Accepter l’offre',b=>{const v=S.event.v,r=(S.rivals||[]).find(x=>x.id===S.event.r);const f=upF(b);if(f)cancelFight(f.id);for(const k of beltsOf(b))S.belts[b.div][k]=null;S.money+=v;b.mine=false;b.salary=0;if(r){r.signed++;r.rep=cl(r.rep+3,10,99)}ensureBelts(b.div);return`${b.name} part chez ${r?r.n:'un rival'}. +${$(v)}.`}],['Refuser',b=>{{const r=(S.rivals||[]).find(x=>x.id===S.event.r);if(r)r.grudge=(r.grudge||0)+1}if(b.loy<50&&R()<.4){b.loy=cl(b.loy-8,0,100);return`${b.name} voulait partir… loyauté en baisse.`}b.loy=cl(b.loy+2,0,100);return`${b.name} apprécie ta confiance.`}]]},
  interview:{b:1,need:b=>true,t:'Interview',x:b=>`Un journaliste veut parler à ${b.name} avant la semaine d’entraînement.`,
   c:[['Rester humble',b=>{b.morale=cl(b.morale+5,0,100);b.loy=cl(b.loy+3,0,100);return`${b.name} reste classe : moral et loyauté en hausse.`}],
      ['Provoquer tout le monde',b=>{b.fame=cl(b.fame+5,1,100);if(R()<.3){S.money-=1500;return`Le buzz monte (+5 notoriété), mais la commission inflige 1 500 $ d’amende.`}return`Le buzz monte : +5 notoriété pour ${b.name}.`}]]},
@@ -3493,12 +3506,23 @@ const ALK=[[/commanditer/,'🤝','Commanditaires'],[/obligatoire/,'📜','Combat
 const alKind=a=>ALK.find(k=>k[0].test(a.t.replace(/<[^>]+>/g,'')))||[null,'•','Autres'];
 function todoBar(al){if(!al.length)return'';const g={};for(const a of al){const k=alKind(a);g[k[1]]=(g[k[1]]||0)+1}const urg=al.filter(a=>a.bad).length,sp=club().filter(canSpend).length;
   return`<div class="tbar"><button class="tmain ${urg?'urg':''}" data-a="todolist"><span class="tn">${al.length}</span><span class="tl">${urg?'urgent'+(urg>1?'s':'')+' · ':''}à faire</span><span class="tic">${Object.entries(g).map(([ic,n])=>`${ic}${n>1?n:''}`).join(' ')}</span><span class="tgo">›</span></button>${sp?`<button class="btn gold tqa" data-a="spall">⚡ Points auto</button>`:''}</div>`}
+/* Magazine du mois : boxeur du mois, champions, rumeur, tes résultats */
+function ringMag(){const L=[],M=mine();
+  const hot=S.boxers.filter(x=>x.hist&&x.hist[0]&&x.hist[0].t>S.t-4&&x.hist[0].res==='V').sort((a,b)=>ovr(b)-ovr(a))[0];
+  if(hot)L.push(`⭐ Boxeur du mois : ${hot.name} (${hot.w}-${hot.l}-${hot.d}, ${divN(hot.div)})`);
+  const ch=S.boxers.filter(x=>x.champ).sort((a,b)=>(b.fame||0)-(a.fame||0)).slice(0,2);for(const x of ch)L.push(`👑 ${x.name} règne chez les ${divN(x.div)} (${beltsOf(x).join(', ')})`);
+  const RV=S.rivals||[],r=RV[Math.floor(R()*(RV.length||1))],star=[...M].sort((a,b)=>(b.fame||0)-(a.fame||0))[0];
+  if(r&&star)L.push(`🗞️ Rumeur : ${r.n} s’intéresse à ${star.name}${r.grudge?' (et il n’a pas oublié ton refus)':''}`);
+  const w=M.reduce((s,x)=>s+(x.hist||[]).filter(h=>h.t>S.t-4&&h.res==='V').length,0);L.push(`🥊 Ton écurie ce mois-ci : ${w} victoire${w>1?'s':''}`);
+  return{t:S.t,lines:L}}
 function vCampaign(){const e=eraOf(S.t),c=careerInit(S),L=legacyScore(c,{t:S.t,hof:(S.hof||[]).length}),ch=chapterState(S);
   const eraN=e.n.replace(/^Ère des /,'');
   return`<section class="camp" data-era="${e.id}"><button class="camp-top" data-a="chap"><span class="camp-k"><span class="camp-s">Année ${ch.season} · Ère des</span><b class="camp-era">${eraN}</b><span class="camp-tx">${e.txt} Bourse +15 % pour ce style.</span></span>
       <span class="camp-leg"><b>${L.total.toLocaleString('fr-CA')}</b><span>Héritage</span></span></button>
     <button class="camp-ch" data-a="chap"><span class="camp-pips">${ch.goals.map(g=>`<i class="${g.ok?'on':''}"></i>`).join('')}</span><span>Objectifs de l’année · ${ch.done}/${ch.goals.length} ${ui.chap?'▲':'▼'}</span></button>
-    ${ui.chap?`<div class="camp-g">${ch.goals.map(g=>`<div class="cg ${g.ok?'ok':''}"><span>${g.n}</span><b>${g.got}/${g.need}</b><i style="--p:${Math.round(g.got/g.need*100)}%"></i></div>`).join('')}</div>
+    ${(()=>{const c=careerInit(S),fy=c.foty,A1=fy&&getB(fy.a),B1=fy&&getB(fy.b);return fy&&A1&&B1?`<div class="camp-foty ${fy.done?'ok':fy.miss?'miss':''}"><span>📣 Combat de l’année</span><b>${esc(sur(A1))} vs ${esc(sur(B1))}</b><em>${fy.done?'✅ Livré':fy.miss?'Raté':'Avant la semaine 50'}</em></div>`:''})()}
+    ${(()=>{const sc=S.scen&&SCENARIOS[S.scen.id];return sc?`<div class="camp-foty ${S.scen.done==='win'?'ok':S.scen.done==='lose'?'miss':''}"><span>🎯 Défi : ${sc.n}</span><b>${sc.goal}</b><em>${S.scen.done==='win'?'✅ Réussi':S.scen.done==='lose'?'Raté':`${Math.max(0,sc.limit-S.t)} sem. restantes`}</em></div>`:''})()}
+    ${ui.chap?`${careerInit(S).mag?`<div class="camp-mag"><span class="lab">📰 Le magazine du mois</span>${careerInit(S).mag.lines.map(l=>`<p>${esc(l)}</p>`).join('')}</div>`:''}<div class="camp-g">${ch.goals.map(g=>`<div class="cg ${g.ok?'ok':''}"><span>${g.n}</span><b>${g.got}/${g.need}</b><i style="--p:${Math.round(g.got/g.need*100)}%"></i></div>`).join('')}</div>
       <p class="small camp-p">Héritage : titres ${L.parts.titres} · champions formés ${L.parts.champions} · années ${L.parts.annees} · argent ${L.parts.argent} · Temple ${L.parts.temple}</p>${vRecords(c)}`:''}</section>`}
 function vRecords(c){const H=(S.hof||[]).slice().sort((a,b)=>b.g-a.g).slice(0,5),Y=Math.floor((S.t-1)/52);
   const it=(n,v)=>`<div><b>${v}</b><span>${n}</span></div>`;
@@ -4123,10 +4147,11 @@ function renderMenu(){
       <div class="bflags">${TOPNAT.map(c=>`<button class="bfl" data-a="m_nat" data-k="${c}" aria-pressed="${g.home===c}"><span>${flag(c)}</span>${NAT[c].n}</button>`).join('')}</div>
       <label class="fld"><span>Autres pays</span><select class="selx" data-sa="m_nat" style="margin:0">${!TOPNAT.includes(g.home)?'':'<option value="" selected>Choisir un autre pays…</option>'}${oth.map(c=>`<option value="${c}" ${g.home===c?'selected':''}>${flag(c)} ${NAT[c].n}</option>`).join('')}</select></label>
       ${ngBar('m_ng1','m_ngd','Suivant →')}</div>`}
-  else if(st==='ngd'){const g=ui.ng,IC={facile:'🟢',normal:'🟡',difficile:'🔴'},BL={facile:['50 000 $ pour commencer','Entraîneur-chef 2 étoiles','Pour découvrir le jeu tranquille'],normal:['25 000 $ pour commencer','Un vieil entraîneur bénévole (1 étoile)','L’expérience prévue : chaque choix compte'],difficile:['10 000 $ seulement','Aucun staff au départ','Pour les vrais gérants : chaque dollar compte']};
+  else if(st==='ngd'){const g=ui.ng,IC={facile:'🟢',normal:'🟡',difficile:'🔴',legende:'💀'},BL={facile:['50 000 $ pour commencer','Entraîneur-chef 2 étoiles','Pour découvrir le jeu tranquille'],normal:['25 000 $ pour commencer','Un vieil entraîneur bénévole (1 étoile)','L’expérience prévue : chaque choix compte'],difficile:['10 000 $ seulement','Aucun staff au départ','Pour les vrais gérants : chaque dollar compte'],legende:['2 000 $ seulement, aucun staff','Le mode le plus dur du jeu','Ton héritage dit si tu es une légende']};
     h=`<div class="mwrap gut" style="padding-top:16px">${back}${ngSteps(2)}<h2>Ton niveau</h2>
       ${ngCard(g)}
       <div class="stack" style="gap:8px">${Object.entries(DIFF).map(([k,d])=>`<button class="difc" data-a="m_diff" data-k="${k}" aria-pressed="${g.diff===k}"><i>${IC[k]||'⚪'}</i><b>${d.n}${k==='normal'?' <span class="chip gold" style="font-size:10px">Conseillé</span>':''}</b><ul>${(BL[k]||[d.d]).map(x=>`<li>${x}</li>`).join('')}</ul></button>`).join('')}</div>
+      <span class="lab" style="display:block;margin:14px 0 6px">🎯 Défi (facultatif)</span><div class="stack" style="gap:6px">${Object.entries(SCENARIOS).map(([k,s])=>`<button class="difc" data-a="m_scen" data-k="${k}" aria-pressed="${g.scen===k}"><i>🎯</i><b>${s.n}</b><ul><li>${s.d}</li><li>Objectif : ${s.goal}</li></ul></button>`).join('')}</div>
       ${ngBar('m_ngc','m_ng2','Choisir mes boxeurs →')}</div>`}
   else if(st==='ng2'){const g=ui.ng,flt=g.flt||'all',idx=g.pool.map((b,i)=>i).filter(i=>flt==='all'||g.pool[i].grp===flt),pk=g.picks.map(i=>g.pool[i]);
     h=`<div class="mwrap gut" style="padding-top:16px"><button class="back" data-a="m_ngd2">← Ton niveau</button>${ngSteps(3)}<h2>Tes 2 premiers boxeurs</h2>
@@ -4209,7 +4234,7 @@ function menuAct(a,t){
     case'm_info':ui.ng.info=+k;break;
     case'm_infox':ui.ng.info=null;break;
     case'm_pickx':{const i=+k,p=ui.ng.picks;if(p.includes(i))ui.ng.picks=p.filter(x=>x!==i);else{if(p.length>=2)p.shift();p.push(i)}ui.ng.info=null;break}
-    case'm_diff':ui.ng.diff=k;break;
+    case'm_diff':ui.ng.diff=k;break;case'm_scen':ui.ng.scen=ui.ng.scen===k?null:k;break;
     case'm_ng2':{const g=ui.ng;g.club=(g.club||'').trim()||'Ma promotion';g.mgr=(g.mgr||'').trim()||'Gérant';worldGen(g);keepOnly(g.slot);genPool();ui.menu='ng2';document.getElementById('menu').scrollTop=0;break}
     case'm_pick':{const i=+k,p=ui.ng.picks;if(p.includes(i))ui.ng.picks=p.filter(x=>x!==i);else{if(p.length>=2)p.shift();p.push(i)}break}
     case'm_rr':if(ui.ng.rr>0){ui.ng.rr--;genPool()}break;
