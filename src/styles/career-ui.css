@@ -67,3 +67,44 @@
 .set-b { width: 100%; margin-bottom: 10px; }
 
 body:not(.onmode) #view { padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+
+/* =====================================================================
+   Refonte complète des écrans de carrière (Combats, Classements, Tournois, Équipe, Bureau)
+   Composants communs, seulement hors mode en ligne.
+   ===================================================================== */
+body:not(.onmode) #view .in > h2, body:not(.onmode) #view > h2, body:not(.onmode) #view h2:first-child {
+  position: relative; font: 900 32px/1 var(--f-disp); text-transform: uppercase; letter-spacing: .03em; padding: 4px 0 10px 14px; margin: 4px 0 12px; }
+body:not(.onmode) #view h2:first-child::before { content: ""; position: absolute; left: 0; top: 4px; bottom: 12px; width: 5px; border-radius: 3px; background: linear-gradient(180deg, #ff5a6e, #b3122b); }
+
+/* Sous-onglets : soulignés, lettres condensées */
+body:not(.onmode) .seg { background: none; border: 0; border-bottom: 1px solid rgba(255, 255, 255, .08); border-radius: 0; padding: 0; gap: 0; }
+body:not(.onmode) .seg button { border-radius: 0; padding: 11px 10px 10px; font: 800 12.5px var(--f-cond, sans-serif); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); position: relative; }
+body:not(.onmode) .seg button[aria-pressed="true"] { background: none; box-shadow: none; color: #fff; }
+body:not(.onmode) .seg button[aria-pressed="true"]::after { content: ""; position: absolute; left: 10%; right: 10%; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: linear-gradient(90deg, #b8860b, var(--gold)); box-shadow: 0 0 10px rgba(245, 197, 66, .4); }
+body:not(.onmode) .segg { display: grid; grid-template-columns: repeat(var(--c, 4), 1fr); }
+body:not(.onmode) .segg button { padding-left: 4px; padding-right: 4px; font-size: 11.5px; }
+
+/* Panneaux : filet doré en haut, étiquette dorée */
+body:not(.onmode) #view .panel { position: relative; border-radius: 16px; border: 1px solid rgba(255, 255, 255, .07);
+  background: linear-gradient(180deg, #171b26, #0f1219); box-shadow: 0 8px 20px rgba(0, 0, 0, .35); overflow: hidden; }
+body:not(.onmode) #view .panel::before { content: ""; position: absolute; left: 14px; right: 14px; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(245, 197, 66, .5), transparent); }
+body:not(.onmode) #view .panel .lab { color: var(--gold); font: 800 11px var(--f-cond, sans-serif); letter-spacing: .18em; }
+
+/* Boutons */
+body:not(.onmode) #view .btn { border-radius: 12px; font-family: var(--f-cond, sans-serif); letter-spacing: .04em; }
+body:not(.onmode) #view .btn.pri, body:not(.onmode) #view .btn.big.pri { text-transform: uppercase; font-weight: 900; }
+
+/* Tableaux de classement : gros numéros, podium or / argent / bronze */
+body:not(.onmode) #view table { border-collapse: separate; border-spacing: 0 4px; }
+body:not(.onmode) #view table td:first-child, body:not(.onmode) #view table th:first-child { font: 900 20px var(--f-disp); color: rgba(255, 255, 255, .55); width: 34px; text-align: center; }
+body:not(.onmode) #view table tbody tr:nth-child(1) td:first-child { color: #f5c542; }
+body:not(.onmode) #view table tbody tr:nth-child(2) td:first-child { color: #d6dde8; }
+body:not(.onmode) #view table tbody tr:nth-child(3) td:first-child { color: #e0905a; }
+body:not(.onmode) #view table tbody tr { background: rgba(255, 255, 255, .025); }
+body:not(.onmode) #view table th { font: 800 10.5px var(--f-cond, sans-serif); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+
+/* Champs de sélection */
+body:not(.onmode) #view select { border-radius: 12px; background: #141823; border: 1px solid rgba(245, 197, 66, .3); font: 800 14px var(--f-cond, sans-serif); letter-spacing: .04em; }
+
+/* Liste vide / messages */
+body:not(.onmode) #view .panel > p:only-child, body:not(.onmode) #view .panel > .small:only-child { color: rgba(255, 255, 255, .7); }
