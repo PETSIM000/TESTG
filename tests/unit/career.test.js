@@ -160,3 +160,13 @@ describe('contrat télé de gala', () => {
     expect(tvCounter(10000, () => 0.9)).toEqual({ ok: false, offer: 10000 });
   });
 });
+
+describe('records du gérant', () => {
+  it('la carte ouverte montre les records', () => {
+    ui.chap = true;
+    const h = vCampaign();
+    expect(h).toContain('Records du gérant');
+    expect(h).toContain('Argent gagné');
+    ui.chap = false;
+  });
+});

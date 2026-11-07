@@ -322,3 +322,11 @@ nav.tabs button[aria-current="true"]::before {
 .deal-t b { font: 900 16px var(--f-disp); }
 .deal-t b.neg { color: #ff7b8b; }
 .al.good { border-color: rgba(63, 216, 138, .4); background: rgba(63, 216, 138, .08); }
+
+/* Records du gérant */
+.rec-g { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.rec-g > div { display: flex; flex-direction: column; align-items: center; padding: 8px 4px; border-radius: 10px; background: rgba(255, 255, 255, .04); text-align: center; }
+.rec-g b { font: 900 16px var(--f-disp); color: var(--gold); }
+.rec-g span { font-size: 11px; color: var(--muted); }
+.rec-h { display: grid; gap: 4px; margin-top: 8px; }
+.rec-h > div { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; padding: 6px 8px; border-radius: 8px; background: rgba(255, 255, 255, .03); }
