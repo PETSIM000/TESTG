@@ -5,6 +5,7 @@ import { drawCrest, logoReady } from '../ui/logo.js';
 import { RANKS, badgeHTML, frameHTML, collectionHTML } from '../ui/ranks.js';
 import { ownedFrames, frameId, resolveSlot, frameLabel } from '../ui/frames.js';
 import { RK_STYLES, RK_ABIL, rkStats, rkValid, botRk } from '../ui/ranked.js';
+import { careerInit, careerWeek, legacyScore, eraOf, eraPurse, chapterState, chapterAdd, chapterSet, adaptOf, meet } from './career.js';
 
 // Boutons de langue et d'avis rendus en HTML (ex-onclick inline).
 document.addEventListener('click', (e) => {
@@ -478,7 +479,7 @@ function weeklyLoyalty(b){
   b.loy=cl(b.loy+d,0,100);
   if(b.loy<25&&!b.raiseAsk&&(b.raiseCd||0)<=S.t){b.raiseAsk=Math.round(b.salary*1.3/10)*10;log(`${b.name} est mécontent et réclame une augmentation.`,'bad')}
 }
-function leave(b,why){b.mine=false;b.salary=0;b.raiseAsk=0;log(`${b.name} quitte le club : ${why}.`,'bad');toast(`${b.name} quitte le club`)}
+function leave(b,why){careerInit(S).exes.push(b.id);b.mine=false;b.salary=0;b.raiseAsk=0;log(`${b.name} quitte le club : ${why}.`,'bad');toast(`${b.name} quitte le club`)}
 
 /* ================= COMBAT ================= */
 let FORM=.2,KOD=.75,KOP=.62;
@@ -491,12 +492,12 @@ const REFS=[{id:'n',n:'Marc « Le Juste » Gagnon',t:'Normal',d:'Arbitre classiq
  {id:'m',n:'Dre Sophie « Protectrice » Côté',t:'Protecteur',d:'Très attentive aux coupures : arrêts médicaux plus rapides.',hp:24,p:.18,kh:25,kr:3,ct:2,cp:.4,ic:'🩺'},
  {id:'v',n:'Tony « Le Vétéran » Russo',t:'Vétéran',d:'Laisse un peu plus de chances au boxeur ébranlé.',hp:18,p:.12,kh:22,kr:3,ct:3,cp:.3,ic:'🎖️'}];
 const refOf=F=>F.ref||REFS[0];
-function newFight(a,b,rounds,title,camp){const F={ref:REFS[Math.floor(R()*REFS.length)],A:fighter(a),B:fighter(b),r:0,ph:0,rd:null,rs:[],rst:[],cs:null,rounds,title,cards:[[0,0],[0,0],[0,0]],log:[],done:false,res:null,strat:'eq',adv:null,cut:a.mine&&S.staff.cut?S.staff.cut.stars:0};F.A.camp=camp||'';return F}
+function newFight(a,b,rounds,title,camp){const F={ref:REFS[Math.floor(R()*REFS.length)],A:fighter(a),B:fighter(b),r:0,ph:0,rd:null,rs:[],rst:[],cs:null,rounds,title,cards:[[0,0],[0,0],[0,0]],log:[],done:false,res:null,strat:'eq',adv:null,cut:a.mine&&S.staff.cut?S.staff.cut.stars:0};F.A.camp=camp||'';if(a.mine&&!b.mine){F.B.adp=adaptOf(b,a.id);meet(b,a.id)}return F}
 const prepM=p=>.95+(p==null?60:p)*.0009;
 function exchange(A,B,sa,sb,k=1){
   const ef=.55+.45*A.en/100;
   const att=(28+A.spd*.32)*sa.o*ef*(has(A.b,'eclair')?1.1:1)*(has(A.b,'jab')?1.05:1)*(1+abS(A.b,'att'))*k*prepM(A.prep);
-  const acc=cl(.2+(A.spd-B.def*sb.d*(B.guard?1.06:1)*(1+(B.bt||0)*.03)*(1-(B.cut||0)*.03))/260+(R()-.5)*.08+(has(A.b,'contre')&&sb===STRAT.agr?.05:0)+(A.camp==='video'?.015:0)+(A.gpb?.02:0)-(B.gpb?.01:0)+(A.boost?.025:0)+(A.cnt?.05:0)-(A.cntd?.03:0)+(A.motiv?.015:0)+(A.bs||0)*.012+(A.gpb?(A.vid||0)*.006:0)+(has(A.b,'sniper')?.03:0)-(has(B.b,'mur')?.03:0)-(has(B.b,'esquive')?.02:0)-(has(B.b,'fantome')?.04:0)+(has(A.b,'goat')?.04:0)+abS(A.b,'acc')-abS(B.b,'dacc')+(A.rxA||0)+(A.fol||0),.07,.6);
+  const acc=cl(.2+(A.spd-B.def*sb.d*(B.guard?1.06:1)*(1+(B.bt||0)*.03)*(1-(B.cut||0)*.03))/260+(R()-.5)*.08+(has(A.b,'contre')&&sb===STRAT.agr?.05:0)+(A.camp==='video'?.015:0)+(A.gpb?.02:0)-(B.gpb?.01:0)+(A.boost?.025:0)+(A.cnt?.05:0)-(A.cntd?.03:0)+(A.motiv?.015:0)+(A.bs||0)*.012+(A.gpb?(A.vid||0)*.006:0)+(has(A.b,'sniper')?.03:0)-(has(B.b,'mur')?.03:0)-(has(B.b,'esquive')?.02:0)-(has(B.b,'fantome')?.04:0)+(has(A.b,'goat')?.04:0)+abS(A.b,'acc')-abS(B.b,'dacc')+(A.rxA||0)+(A.fol||0)-(B.adp||0)*.012,.07,.6);
   const lx=att*acc,landed=Math.floor(lx)+(R()<lx%1?1:0);
   const js=sa.j||.5,thr=Math.round(att),jT=Math.round(thr*js),jL=Math.min(landed,Math.round(landed*js*1.15/(js*1.15+(1-js)*.85)));
   A.thr+=thr;A.land+=landed;A.jT=(A.jT||0)+jT;A.jL=(A.jL||0)+jL;A.pT=(A.pT||0)+thr-jT;A.pL=(A.pL||0)+landed-jL;
@@ -631,7 +632,7 @@ function applyResult(F,f){
   if(!res.w){A.d++;B.d++;A.pts+=5;B.pts+=5;addFol(A,fol(A)*.01);addFol(B,fol(B)*.01)}
   else{
     W=res.w==='A'?A:B;L=res.w==='A'?B:A;
-    W.w++;L.l++;if(stop)W.ko++;
+    W.w++;L.l++;if(stop)W.ko++;if(W.mine){chapterAdd(S,'wins');if(stop)chapterAdd(S,'kos')}
     W.pts+=Math.round(18+Math.max(0,L.pts-W.pts)*.25+(stop?4:0));
     L.pts=Math.max(0,Math.round(L.pts-(10+Math.max(0,L.pts-W.pts)*.15)));
     W.fame=cl(W.fame+(2+L.fame*.08+(stop?1:0)+(title?12:0))*(has(W,'showman')?1.5:1),1,100);L.fame=cl(L.fame-1.5,1,100);
@@ -711,10 +712,10 @@ function newYear(){
   for(const d of DIVS){
     const n=S.boxers.filter(b=>b.div===d.id&&!b.mine).length;
     for(let i=n;i<64;i++){const nb=makeBoxer({div:d.id,ovr:ri(46,62),age:ri(19,23),pot:ri(6,24)});seedRecord(nb);nb.pts=Math.round(nb.pts*.5);S.boxers.push(nb)}
-    for(let i=0,c=n;i<4&&c<78;i++,c++){const nb=makeBoxer({div:d.id,ovr:ri(44,56),age:ri(18,21),pot:ri(18,38)});seedRecord(nb);nb.pts=Math.round(nb.pts*.3);nb.fame=cl(Math.round(nb.fame*.5),1,100);S.boxers.push(nb);prOf(nb)}
+    for(let i=0,c=n;i<4&&c<78;i++,c++){const nb=makeBoxer({div:d.id,ovr:ri(44,56),age:ri(18,21),pot:ri(18,38)});seedRecord(nb);nb.pts=Math.round(nb.pts*.3);nb.fame=cl(Math.round(nb.fame*.5),1,100);{const st=eraOf(S.t).stat;nb[st]=cl(nb[st]+4,1,99)}S.boxers.push(nb);prOf(nb)}
     ensureBelts(d.id);
   }
-  log(`Début de l’an ${Math.floor((S.t-1)/52)+1}. Tout le monde prend un an.`);
+  log(`Début de l’an ${Math.floor((S.t-1)/52)+1}. Tout le monde prend un an. ${eraOf(S.t).n} : ${eraOf(S.t).txt}`);
 }
 function nextWeek(quiet){
   if(S.event){renderEvent();return}
@@ -727,6 +728,9 @@ function nextWeek(quiet){
   const g=1-.07*S.mgr.perks.ges;
   const sal=Math.round((mine().reduce((s,b)=>s+b.salary,0)+staffSalary())*g),upk=Math.round((150*S.gym+facLv()*90+(S.branches||[]).length*300)*g),spo=mine().reduce((s,b)=>s+Math.round(b.fame*8),0)+brIncome()+merchInc()+(S.arena?ARENA_LV[S.arena].inc:0);
   S.money+=spo-sal-upk;S.fin={spo,sal,upk};
+  {const c=careerWeek(S,mine(),beltsOf);if(mine().some(b=>rankIdx(b)<10))chapterSet(S,'top10',1);if(mine().some(b=>beltsOf(b).length))chapterSet(S,'title',1);
+    for(const id of c.exes){if(c.told.includes(id))continue;const x=getB(id);if(x&&!x.mine&&!x.retired&&(x.champ||rankIdx(x)<5)){c.told.push(id);log(`👻 ${x.name}, que tu as laissé partir, est maintenant ${x.champ?'champion':'#'+(rankIdx(x)+1)} ailleurs.`,'bad')}}
+    const st=chapterState(S);c.rw=c.rw||[];if(st.all&&!c.rw.includes(st.season)){c.rw.push(st.season);log(`🏆 Chapitre de la saison ${st.season} terminé ! Plaque « Saison ${st.season} » ajoutée à ton héritage.`,'gold');toast('🏆 Chapitre de saison terminé')}}
   for(const b of mine()){
     if(b.spDue&&S.t>b.spDue){if(b.lastFight<b.spFrom){S.money-=8000;log(`${b.name} ne s’est pas battu à temps : pénalité de 8 000 $ du commanditaire.`,'bad')}b.spDue=0}
     if(b.brand)continue;
@@ -757,7 +761,7 @@ function nextWeek(quiet){
 function roundsFor(a,b,title){return title?12:(rankIdx(a)<15&&rankIdx(b)<15)?10:8}
 /* bourses réalistes : selon le rang, les ceintures et la popularité (vedette = gros chèque) */
 function drawOf(b){const r=rankIdx(b),bl=beltsOf(b).length;let v=b.champ?700000*(1+.5*(bl-1))*(isUndisp(b)?1.5:1):r<5?220000:r<15?70000:r<30?22000:r<50?9000:ovr(b)<50?3500:5000;
-  return v+Math.min(12e6,fol(b)*.05)+(b.nchamp?10000:0)}
+  return (v+Math.min(12e6,fol(b)*.05)+(b.nchamp?10000:0))*eraPurse(b,S.t)}
 // Règle n° 8 (Max, 2026-11-05) : la crédibilité (notoriété) du boxeur pèse sur sa bourse ;
 // rester actif la fait monter (règle n° 10).
 const credF=b=>.85+cl(b.fame||1,1,100)/100*.6;
@@ -929,7 +933,7 @@ function propose(meId,opId,o={}){
 function sign(id){
   const b=S.fa.find(x=>x.id===id);if(!b)return;
   const cost=b.salary*10;if(club().length>=rosterCap()||S.money<cost)return;
-  S.money-=cost;S.fa=S.fa.filter(x=>x!==b);delete b.fa;mcAdd('sign');
+  S.money-=cost;S.fa=S.fa.filter(x=>x!==b);delete b.fa;mcAdd('sign');chapterAdd(S,'sign');
   Object.assign(b,{mine:true,morale:75,loy:60,plan:'normal',lastFight:S.t,hist:[],lvl:1,xp:0,sp:0,contract:52});
   S.boxers.push(b);log(`${b.name} signe avec le club (prime de ${$(cost)}, ${$(b.salary)} par semaine).`,'good');toast(`${b.name} rejoint le club !`);
 }
@@ -3477,6 +3481,10 @@ const ALK=[[/commanditer/,'🤝','Commanditaires'],[/obligatoire/,'📜','Combat
 const alKind=a=>ALK.find(k=>k[0].test(a.t.replace(/<[^>]+>/g,'')))||[null,'•','Autres'];
 function todoBar(al){if(!al.length)return'';const g={};for(const a of al){const k=alKind(a);g[k[1]]=(g[k[1]]||0)+1}const urg=al.filter(a=>a.bad).length,sp=club().filter(canSpend).length;
   return`<div class="tbar"><button class="tmain ${urg?'urg':''}" data-a="todolist"><span class="tn">${al.length}</span><span class="tl">${urg?'urgent'+(urg>1?'s':'')+' · ':''}à faire</span><span class="tic">${Object.entries(g).map(([ic,n])=>`${ic}${n>1?n:''}`).join(' ')}</span><span class="tgo">›</span></button>${sp?`<button class="btn gold tqa" data-a="spall">⚡ Points auto</button>`:''}</div>`}
+function vCampaign(){const e=eraOf(S.t),c=careerInit(S),L=legacyScore(c,{t:S.t,hof:(S.hof||[]).length}),ch=chapterState(S),pc=Math.round(ch.done/ch.goals.length*100);
+  return`<div class="panel camp-c"><button class="camp-h" data-a="chap"><span class="camp-t"><b>Saison ${ch.season} · ${e.n}</b><span class="small">${e.txt} Bourse +15 % pour ce style.</span></span><span class="camp-l"><b>${L.total.toLocaleString('fr-CA')}</b><i>Héritage</i></span></button>
+    <div class="camp-bar"><i style="width:${pc}%"></i></div><button class="camp-s small" data-a="chap">Chapitre ${ch.season} · ${ch.done}/${ch.goals.length} objectifs ${ui.chap?'▲':'▼'}</button>
+    ${ui.chap?`<ul class="camp-g">${ch.goals.map(g=>`<li class="${g.ok?'ok':''}"><span>${g.ok?'✅':'⬜'} ${g.n}</span><b>${g.got}/${g.need}</b></li>`).join('')}</ul><p class="small camp-p">Héritage : titres ${L.parts.titres} · champions formés ${L.parts.champions} · années ${L.parts.annees} · argent ${L.parts.argent} · Temple ${L.parts.temple}</p>`:''}</div>`}
 function vTodo(){const al=alerts();const by={};for(const a of al){const k=alKind(a);(by[k[2]]=by[k[2]]||{ic:k[1],L:[]}).L.push(a)}
   return`<div class="in"><button class="back" data-a="close">← Retour</button><h2>À faire</h2>${al.length?'':'<div class="panel">Rien à faire. Bravo, gérant ! 👊</div>'}
   ${club().some(canSpend)?`<button class="btn gold big" data-a="spall">⚡ Dépenser tous les points de stats automatiquement</button>`:''}
@@ -3485,7 +3493,7 @@ function vEcurie(){
   const MP=myPromos(),bp=MP.find(p=>p.id===ui.ebrand)||null;if(!bp)ui.ebrand=null;
   const m=bp?mine().filter(b=>b.brand===bp.id):club(),al=bp?[]:alerts(),full=club().length>=rosterCap();
   const bsw=MP.length?`<div style="margin:6px 0 2px">${selH('ebrand',[['',`🥊 ${esc(S.club)} · ${club().length}/${rosterCap()}`],...MP.map(p=>[p.id,`🏢 ${esc(p.n)} · ${mine().filter(b=>b.brand===p.id).length} boxeurs`])],ui.ebrand||'')}</div>`:'';
-  const head=`<h2>Écurie</h2>${bp?'':`<button class="recl" data-a="openclub">🥊 Fiche du club <b>${recTxt()}</b> ›</button>`}${bsw}${bp?'':vLadder()}<div style="margin:8px 0 12px">${segH('esub',[['mine',bp?`Boxeurs ${m.length}`:`Mes boxeurs ${m.length}/${rosterCap()}`],['fa',`Agents libres ${S.fa.length}`],['am','🥇 Amateurs']],ui.esub)}</div>`
+  const head=`<h2>Écurie</h2>${bp?'':`<button class="recl" data-a="openclub">🥊 Fiche du club <b>${recTxt()}</b> ›</button>`}${bsw}${bp?'':vLadder()+vCampaign()}<div style="margin:8px 0 12px">${segH('esub',[['mine',bp?`Boxeurs ${m.length}`:`Mes boxeurs ${m.length}/${rosterCap()}`],['fa',`Agents libres ${S.fa.length}`],['am','🥇 Amateurs']],ui.esub)}</div>`
     +(bp&&ui.esub!=='fa'?`<div class="panel" style="border-color:${bp.c};margin-bottom:10px"><div class="row" style="justify-content:space-between;gap:8px"><div style="min-width:0"><b>🏢 ${esc(bp.n)}</b><div class="small">Profit ${(()=>{const v=prNet(bp);return(v>=0?'+':'−')+$(Math.abs(v))})()}/sem. · salaires réduits (contrats de promotion)</div></div><button class="btn sm" data-a="openpromo" data-id="${bp.id}">Fiche</button></div>
       <div class="perk" style="margin-top:10px"><div><b>Gestion automatique</b><div class="small">${bp.auto?'La promotion réserve elle-même des combats pour ses boxeurs libres. Tu peux quand même réserver ceux que tu veux.':'Tu réserves toi-même tous les combats de cette promotion.'}</div></div><button class="sw" data-a="prauto" data-id="${bp.id}" aria-pressed="${!!bp.auto}" aria-label="Gestion automatique"><i></i></button></div></div>`:'');
   if(ui.esub==='am')return head+vAm();
@@ -3813,7 +3821,7 @@ document.addEventListener('click',e=>{
     case'raiseno':b.raiseAsk=0;b.raiseCd=S.t+8;b.loy=cl(b.loy-10,0,100);log(`Tu refuses l’augmentation de ${b.name}. Il n’est pas content.`,'bad');break;
     case'release':if(ui.confirm==='rel'+id){release(id);ui.confirm=null;ui.sheet=null}else ui.confirm='rel'+id;break;
     case'book':ui.bookFor=id;ui.tab='combats';ui.csub='book';ui.sheet=null;window.scrollTo(0,0);break;
-    case'pickbook':ui.bookFor=id;break;case'poster':sharePoster(id);return;case'officesel':ui.offSel=k;break;case'ssok':ssAccept(id);break;case'ssno':ssRefuse(id);break;case'bet':{const[sd,amt]=(k||'').split(':');placeBet(id,sd,+amt);break}case'mand':mandSign(k);return render();case'cvcok':cvcAccept();break;case'cvcno':if(S.cvc){S.cvc.until=S.t-1}break;case'theme':S.theme=k;applyTheme();break;case'acadin':acadRecruit();break;case'tvbuy':if(!S.tv&&S.money>=TV_COST){S.money-=TV_COST;S.tv={subs:0,since:S.t};log(`📺 ${S.club} TV est lancée !`,'gold');toast('📺 Ta chaîne est lancée')}break;case'office':{if(S.offices&&S.offices.includes(k))break;S.offices=S.offices||[];if(S.offices.length>=OFF_MAX){toast('Maximum '+OFF_MAX+' bureaux');break}if(S.money<OFF_COST){toast('Pas assez d’argent');break}S.money-=OFF_COST;S.offices.push(k);log(`🏢 Bureau ouvert : ${flag(k)} ${NAT[k].n}.`,'good');toast(`Bureau ouvert : ${NAT[k].n}`)}break;case'openclub':ui.sheet='myclub';document.getElementById('sheet').scrollTop=0;break;case'todolist':ui.sheet='todo';document.getElementById('sheet').scrollTop=0;break;case'spall':{let n=0;for(const b of club())if(canSpend(b)){autoSpend(b);n++}toast(`⚡ Points dépensés pour ${n} boxeur${n>1?'s':''}`);break}case'opengym':ui.sheet='gym:'+id;document.getElementById('sheet').scrollTop=0;break;case'gymup':{const g=(S.branches||[]).find(x=>x.id===id);if(g&&S.money>=gymUpCost(g)){S.money-=gymUpCost(g);g.cap=(g.cap||2)+2;toast('Gym agrandi : +2 places')}break}case'gymcoach':{const g=gymOf(id),c=g&&coachCost(g);if(g&&S.money>=c&&(g.coach.stars||1)<4){S.money-=c;const nc={name:natName(g.nat),nat:g.nat,stars:(g.coach.stars||1)+1};if(g.hq)S.hq.coach=nc;else{const r=S.branches.find(x=>x.id===id);r.coach=nc}toast(`Nouvel entraîneur : ${nc.name}`)}break}case'setgym':{const b=getB(ui.sheet),g=gymOf(k);if(b&&g){if(gymBoxers(k).filter(x=>x!==b).length>=g.cap){toast('Ce gym est plein.');break}b.gym=k;toast(`${sur(b)} s’entraîne maintenant à ${g.hq?'ton gym principal':g.city}`)}break}case'amf':ui.amf=k;break;case'amopen':ui.sheet='am:'+id;document.getElementById('sheet').scrollTop=0;break;case'amscout':scoutAm(id);break;case'amsign':signAm(id);if(!(S.am||[]).some(x=>x.id===id)){ui.sheet=null;ui.esub='mine'}break;case'amtrip':if(S.money>=40000){S.money-=40000;S.amScout=k;toast('✈️ Recruteurs réservés')}break;case'gpall':{let n=0;for(const f of S.fights){const a=getB(f.a),o=getB(f.b);if(a&&a.mine&&!f.gp&&o){f.gp=bestGP(o.style)||'distance';if(f.auto===undefined)f.auto=true;n++}}ui.oc={};toast(`🤖 ${n} plan${n>1?'s':''} de match choisi${n>1?'s':''} · camps en auto`);break}case'todoall':ui.todoAll=!ui.todoAll;break;case'ebrand':ui.ebrand=k||null;ui.esub='mine';break;case'borg':ui.ebrand=k||null;ui.bookFor=null;break;case'gobrand':ui.sheet=null;ui.tab='ecurie';ui.esub='mine';ui.ebrand=id;break;case'prauto':{const p=(S.promos||[]).find(x=>x.id===id);if(p)p.auto=!p.auto;break}case'openpromo':ui.sheet='promo:'+id;document.getElementById('sheet').scrollTop=0;break;case'buypromo':buyPromo(id);break;case'sellpromo':if(ui.confirm==='sp'+id){sellPromo(id);ui.confirm=null}else{ui.confirm='sp'+id;render();return}break;case'prmove':prMove(id);break;case'pickstep':{const m=sortB(orgB().filter(b=>!b.booked&&!b.inj)),i=m.findIndex(b=>b.id===ui.bookFor);if(m.length)ui.bookFor=m[(i+(+k)+m.length)%m.length].id;break}
+    case'pickbook':ui.bookFor=id;break;case'poster':sharePoster(id);return;case'officesel':ui.offSel=k;break;case'ssok':ssAccept(id);break;case'ssno':ssRefuse(id);break;case'bet':{const[sd,amt]=(k||'').split(':');placeBet(id,sd,+amt);break}case'mand':mandSign(k);return render();case'cvcok':cvcAccept();break;case'cvcno':if(S.cvc){S.cvc.until=S.t-1}break;case'theme':S.theme=k;applyTheme();break;case'acadin':acadRecruit();break;case'tvbuy':if(!S.tv&&S.money>=TV_COST){S.money-=TV_COST;S.tv={subs:0,since:S.t};log(`📺 ${S.club} TV est lancée !`,'gold');toast('📺 Ta chaîne est lancée')}break;case'office':{if(S.offices&&S.offices.includes(k))break;S.offices=S.offices||[];if(S.offices.length>=OFF_MAX){toast('Maximum '+OFF_MAX+' bureaux');break}if(S.money<OFF_COST){toast('Pas assez d’argent');break}S.money-=OFF_COST;S.offices.push(k);log(`🏢 Bureau ouvert : ${flag(k)} ${NAT[k].n}.`,'good');toast(`Bureau ouvert : ${NAT[k].n}`)}break;case'openclub':ui.sheet='myclub';document.getElementById('sheet').scrollTop=0;break;case'todolist':ui.sheet='todo';document.getElementById('sheet').scrollTop=0;break;case'chap':ui.chap=!ui.chap;break;case'spall':{let n=0;for(const b of club())if(canSpend(b)){autoSpend(b);n++}toast(`⚡ Points dépensés pour ${n} boxeur${n>1?'s':''}`);break}case'opengym':ui.sheet='gym:'+id;document.getElementById('sheet').scrollTop=0;break;case'gymup':{const g=(S.branches||[]).find(x=>x.id===id);if(g&&S.money>=gymUpCost(g)){S.money-=gymUpCost(g);g.cap=(g.cap||2)+2;toast('Gym agrandi : +2 places')}break}case'gymcoach':{const g=gymOf(id),c=g&&coachCost(g);if(g&&S.money>=c&&(g.coach.stars||1)<4){S.money-=c;const nc={name:natName(g.nat),nat:g.nat,stars:(g.coach.stars||1)+1};if(g.hq)S.hq.coach=nc;else{const r=S.branches.find(x=>x.id===id);r.coach=nc}toast(`Nouvel entraîneur : ${nc.name}`)}break}case'setgym':{const b=getB(ui.sheet),g=gymOf(k);if(b&&g){if(gymBoxers(k).filter(x=>x!==b).length>=g.cap){toast('Ce gym est plein.');break}b.gym=k;toast(`${sur(b)} s’entraîne maintenant à ${g.hq?'ton gym principal':g.city}`)}break}case'amf':ui.amf=k;break;case'amopen':ui.sheet='am:'+id;document.getElementById('sheet').scrollTop=0;break;case'amscout':scoutAm(id);break;case'amsign':signAm(id);if(!(S.am||[]).some(x=>x.id===id)){ui.sheet=null;ui.esub='mine'}break;case'amtrip':if(S.money>=40000){S.money-=40000;S.amScout=k;toast('✈️ Recruteurs réservés')}break;case'gpall':{let n=0;for(const f of S.fights){const a=getB(f.a),o=getB(f.b);if(a&&a.mine&&!f.gp&&o){f.gp=bestGP(o.style)||'distance';if(f.auto===undefined)f.auto=true;n++}}ui.oc={};toast(`🤖 ${n} plan${n>1?'s':''} de match choisi${n>1?'s':''} · camps en auto`);break}case'todoall':ui.todoAll=!ui.todoAll;break;case'ebrand':ui.ebrand=k||null;ui.esub='mine';break;case'borg':ui.ebrand=k||null;ui.bookFor=null;break;case'gobrand':ui.sheet=null;ui.tab='ecurie';ui.esub='mine';ui.ebrand=id;break;case'prauto':{const p=(S.promos||[]).find(x=>x.id===id);if(p)p.auto=!p.auto;break}case'openpromo':ui.sheet='promo:'+id;document.getElementById('sheet').scrollTop=0;break;case'buypromo':buyPromo(id);break;case'sellpromo':if(ui.confirm==='sp'+id){sellPromo(id);ui.confirm=null}else{ui.confirm='sp'+id;render();return}break;case'prmove':prMove(id);break;case'pickstep':{const m=sortB(orgB().filter(b=>!b.booked&&!b.inj)),i=m.findIndex(b=>b.id===ui.bookFor);if(m.length)ui.bookFor=m[(i+(+k)+m.length)%m.length].id;break}
     case'propose':{const f=propose(ui.bookFor,id,bookOpt());if(f)afterBook(f);break}
     case'div':ui.div=k;break;
     case'sign':sign(id);ui.sheet=null;break;
@@ -4039,7 +4047,7 @@ function renderMenu(){
           ${m?item('data-a="m_cont"','Continuer',`${flag(m.home)} ${esc(m.club)} · ${$(m.money)}`,'','main'):''}
           ${item('data-a="m_new"','Carrière','Nouvelle carrière','',m?'':'main')}
           ${item('data-a="m_online"','En ligne',`Classé · Saison ${ss}`)}
-          ${item('data-a="m_load"','Charger',cnt?`${cnt} sauvegarde${cnt>1?'s':''}`:'Aucune sauvegarde',cnt?'':' disabled')}
+          ${item('data-a="m_load"','Charger',cnt?'Ta carrière':'Aucune sauvegarde',cnt?'':' disabled')}
           ${item('data-gfb','Avis','Dis-nous ce que tu penses')}
         </nav>
         <div class="fn-foot">${vCloudCard()}<p><b>10 COUNT GAMES</b> · Aucun avantage à acheter · Aucune pub · v${GAME_V}</p></div>
@@ -4047,7 +4055,8 @@ function renderMenu(){
   else if(st==='onslot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>🌐 En ligne</h2><p class="lede">Choisis une partie pour entrer en ligne (ton écurie en ligne est séparée de ta carrière, elle ne change rien).</p>
       <div class="stack">${[1,2,3].filter(n=>slotMeta(n)).map(n=>{const m=slotMeta(n);return`<button class="mbtn" data-a="m_onld" data-k="${n}"><b>${flag(m.home)} ${esc(m.club)}</b><span>${when(m.t)} · ${$(m.money)}</span></button>`}).join('')}</div></div>`}
   else if(st==='load'||st==='slot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>${st==='load'?'Charger une partie':'Choisis un emplacement'}</h2>
-      ${st==='slot'?'<p class="lede">Les 3 emplacements sont pris. Choisis celui à remplacer.</p>':''}<div class="stack">${[1,2,3].map(n=>slotRow(n,st)).join('')}</div></div>`}
+      ${st==='slot'?'<p class="lede">Les 3 emplacements sont pris. Choisis celui à remplacer.</p>':''}<div class="stack">${(st==='load'?[lastSlot()].filter(Boolean):[1,2,3]).map(n=>slotRow(n,st)).join('')}</div></div>`}
+  else if(st==='ow'){const m=slotMeta(lastSlot());h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>Écraser la carrière actuelle ?</h2><p class="lede">Une seule carrière à la fois. ${m?`<b>${flag(m.home)} ${esc(m.club)}</b> · ${when(m.t)} · ${$(m.money)} sera remplacée.`:''}</p><div class="stack"><button class="btn danger big" data-a="m_ow">Oui, nouvelle carrière</button><button class="btn big" data-a="m_home">Non, garder ma carrière</button></div></div>`}
   else if(st==='ng1'){const g=ui.ng;h=`<div class="mwrap gut" style="padding-top:16px">${back}${ngSteps(0)}<span class="lab">Nouvelle carrière · emplacement ${g.slot}</span><h2>Fonde ton club</h2>
       ${ngCard(g)}
       <div class="panel stack"><label class="fld"><span>Nom du club</span><div class="inrow"><input id="ng-club" maxlength="24" placeholder="Coin Rouge" value="${esc(g.club)}" autocomplete="off"><button class="btn" data-a="m_rclub" aria-label="Nom au hasard">🎲</button></div></label>
@@ -4133,7 +4142,8 @@ function menuAct(a,t){
     case'm_load':ui.menu='load';break;
     case'm_ld':{const s=loadSlot(+k);if(s){s.slot=+k;ui.menu=null;enterGame(s);return}break}
     case'm_del':if(ui.mconf==='del'+k){try{localStorage.removeItem(SK(k));localStorage.removeItem(MK(k))}catch(e){}if(ON)rpc('cr_save_put',{p_token:ON.token,p_slot:+k,p_data:null,p_meta:null}).catch(()=>{});ui.mconf=null}else ui.mconf='del'+k;break;
-    case'm_new':{setTimeout(()=>tutStart('car'),300);const e=[1,2,3].find(n=>!slotMeta(n));if(e){ui.ng=newNG(e);ui.menu='ng1'}else ui.menu='slot';break}
+    case'm_new':{const n=lastSlot();if(n&&slotMeta(n)){ui.menu='ow';break}setTimeout(()=>tutStart('car'),300);ui.ng=newNG(1);ui.menu='ng1';break}
+    case'm_ow':{setTimeout(()=>tutStart('car'),300);ui.ng=newNG(lastSlot()||1);ui.menu='ng1';break}
     case'm_slot':{const n=+k;if(slotMeta(n)&&ui.mconf!=='ow'+n){ui.mconf='ow'+n;break}ui.mconf=null;ui.ng=newNG(n);ui.menu='ng1';break}
     case'm_nat':if(k)ui.ng.home=k;break;
     case'm_ngc':{const g=ui.ng;g.club=(g.club||'').trim();g.mgr=(g.mgr||'').trim();ui.menu='ngc';document.getElementById('menu').scrollTop=0;break}
@@ -4319,5 +4329,5 @@ addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
 export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList, train, campWeekCost, campTotal, inactivityTick, inactiveWeeks, INACTIVE_MAX, purse, moneyS };
-export { rpOf, onRk, seasonNow, vOnHead, rankLadder };
+export { rpOf, onRk, seasonNow, vOnHead, rankLadder, nextWeek, drawOf, vCampaign };
 export const getState = () => S;
