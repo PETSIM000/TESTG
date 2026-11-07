@@ -2965,14 +2965,14 @@ const _ns_ctl=ctlHTML;ctlHTML=function(F){let h=_ns_ctl(F);
 /* --- événements aléatoires --- */
 const wStreak=b=>{let n=0;for(const h of b.hist||[]){if(h.res!=='V')break;n++}return n};
 const EVENTS={
- raise:{b:1,need:b=>!b.brand&&wStreak(b)>=3&&b.contract>8&&!(b.raiseT&&S.t-b.raiseT<26),t:'💼 Il veut plus d’argent',x:b=>`${b.name} enchaîne ${wStreak(b)} victoires. Son agent appelle : il veut passer de ${$(b.salary)} à ${$(Math.round(b.salary*1.35/10)*10)} par semaine, sinon il écoutera les autres promoteurs.`,
-  c:[['Accepter (+35 %)',b=>{b.raiseT=S.t;b.salary=Math.round(b.salary*1.35/10)*10;b.loy=cl(b.loy+15,0,100);b.morale=cl(b.morale+8,0,100);return`${b.name} est content : salaire à ${$(b.salary)} par semaine.`}],
-     ['Offrir +15 %',b=>{b.raiseT=S.t;if(R()<.55){b.salary=Math.round(b.salary*1.15/10)*10;b.loy=cl(b.loy+5,0,100);return`Marché conclu à ${$(b.salary)} par semaine.`}b.loy=cl(b.loy-12,0,100);b.morale=cl(b.morale-6,0,100);return`Son agent refuse. ${b.name} est déçu (loyauté en baisse).`}],
-     ['Refuser',b=>{b.raiseT=S.t;b.loy=cl(b.loy-22,0,100);b.morale=cl(b.morale-10,0,100);return`${b.name} est furieux. Sa loyauté chute : il pourrait partir à la fin de son contrat.`}]]},
+ raise:{b:1,need:b=>!b.brand&&wStreak(b)>=3&&b.contract>8&&!(b.raiseT&&S.t-b.raiseT<26),t:'💼 Il veut plus d’argent',x:b=>`${esc(b.name)} enchaîne ${wStreak(b)} victoires. Son agent appelle : il veut passer de ${$(b.salary)} à ${$(Math.round(b.salary*1.35/10)*10)} par semaine, sinon il écoutera les autres promoteurs.`,
+  c:[['Accepter (+35 %)',b=>{b.raiseT=S.t;b.salary=Math.round(b.salary*1.35/10)*10;b.loy=cl(b.loy+15,0,100);b.morale=cl(b.morale+8,0,100);return`${esc(b.name)} est content : salaire à ${$(b.salary)} par semaine.`}],
+     ['Offrir +15 %',b=>{b.raiseT=S.t;if(R()<.55){b.salary=Math.round(b.salary*1.15/10)*10;b.loy=cl(b.loy+5,0,100);return`Marché conclu à ${$(b.salary)} par semaine.`}b.loy=cl(b.loy-12,0,100);b.morale=cl(b.morale-6,0,100);return`Son agent refuse. ${esc(b.name)} est déçu (loyauté en baisse).`}],
+     ['Refuser',b=>{b.raiseT=S.t;b.loy=cl(b.loy-22,0,100);b.morale=cl(b.morale-10,0,100);return`${esc(b.name)} est furieux. Sa loyauté chute : il pourrait partir à la fin de son contrat.`}]]},
  duck:{b:1,need:b=>{const c=S.boxers.find(x=>x.champ&&x.div===b.div&&!x.mine);return!!c&&rankIdx(b)>=0&&rankIdx(b)<5&&ovr(b)>=ovr(c)-2&&!(b.duckT&&S.t-b.duckT<20)},t:'🐔 Le champion t’évite',
-  x:b=>{const c=S.boxers.find(x=>x.champ&&x.div===b.div&&!x.mine);return`${c.name} refuse d’affronter ${b.name}. Son camp préfère un adversaire plus facile. La presse en parle.`},
-  c:[['Lancer une campagne de presse',b=>{b.duckT=S.t;S.money-=5000;b.fame=cl(b.fame+5,1,100);return`5 000 $ en publicité : ${b.name} gagne en popularité et la pression monte sur le champion.`}],
-     ['Attendre ton tour',b=>{b.duckT=S.t;b.morale=cl(b.morale-5,0,100);return`${b.name} attend, frustré. La négociation d’un combat de titre coûtera une prime.`}]]},
+  x:b=>{const c=S.boxers.find(x=>x.champ&&x.div===b.div&&!x.mine);return`${esc(c.name)} refuse d’affronter ${esc(b.name)}. Son camp préfère un adversaire plus facile. La presse en parle.`},
+  c:[['Lancer une campagne de presse',b=>{b.duckT=S.t;S.money-=5000;b.fame=cl(b.fame+5,1,100);return`5 000 $ en publicité : ${esc(b.name)} gagne en popularité et la pression monte sur le champion.`}],
+     ['Attendre ton tour',b=>{b.duckT=S.t;b.morale=cl(b.morale-5,0,100);return`${esc(b.name)} attend, frustré. La négociation d’un combat de titre coûtera une prime.`}]]},
  ssinv:{b:1,need:()=>false,t:'📩 Invitation : Super Série',x:b=>{const o=getB(ssOpp(b.id)),st=o?ssStake(b,o):[];return`${b.name} est invité à la ${S.ss?S.ss.n:'Super Série'} ! Quart de finale contre ${o?o.name+' ('+ovr(o)+')':'?'}, ${S.ss?when(S.ss.wk[0]):''}${st.length?`, avec ${st.join(', ')} en jeu`:''}. Jusqu’à ${moneyS(SSP[3])} et le trophée au vainqueur. Il participe ?`},
   c:[['✅ Accepter',b=>{ssAccept(b.id);return`${b.name} participe à la Super Série !`}],['Refuser',b=>{ssRefuse(b.id);return`${b.name} décline l’invitation. Un autre boxeur prend sa place.`}]]},
  oldchamp:{b:1,need:()=>false,t:'Le vieux lion',x:b=>`${b.name} a ${b.age} ans et porte encore ${beltsOf(b).join(', ')}. Son corps ralentit. Il te demande ton avis : continuer ou partir en champion ?`,
