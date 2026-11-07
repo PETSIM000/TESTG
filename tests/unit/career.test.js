@@ -133,14 +133,14 @@ describe('négociation de combat', () => {
   });
 });
 
-import { vBook, dealStart, dealOk, ui } from '../../src/game/legacy.js';
+import { vBook, vDeal, dealStart, dealOk, ui } from '../../src/game/legacy.js';
 describe('écran de négociation dans le jeu', () => {
   it('réserver ouvre la négociation (face-à-face, demande du camp), signer paie les frais', () => {
     const me = signFA({ age: 24, lastFight: S.t - 20 });
     const op = S.boxers.filter((x) => x.div === me.div && !x.mine && !x.booked && !x.inj && !x.champ).sort((a, b) => rankIdx(b) - rankIdx(a))[0];
     ui.bookFor = me.id;
     dealStart(op.id, '');
-    const h = vBook();
+    const h = vDeal();
     expect(h).toContain('Négociation');
     expect(h).toContain('Le camp adverse demande');
     const fee = ui.deal.fee, m0 = S.money;

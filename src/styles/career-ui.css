@@ -116,3 +116,26 @@ body:not(.onmode) #view .panel > p:only-child, body:not(.onmode) #view .panel > 
 
 /* Téléphone : glisser vers le bas ne recharge plus la page */
 html, body { overscroll-behavior-y: contain; }
+
+/* Négociation : fenêtre par-dessus l'écran */
+#dealov { position: fixed; inset: 0; z-index: 90; display: grid; place-items: end center; background: rgba(3, 4, 8, .72); backdrop-filter: blur(3px); padding: 10px; }
+#dealov[hidden] { display: none; }
+#dealov .deal-box { width: 100%; max-width: 520px; max-height: 92vh; overflow: auto; animation: deal-up .22s ease-out both; }
+#dealov .panel { margin: 0; }
+@keyframes deal-up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* Combat regardé */
+.watch-skip { width: 100%; margin-top: 8px; }
+p.watch { text-align: center; margin: 6px 0; }
+
+/* Avant le combat : choisir Regarder ou Résultat */
+.watch-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.watch-pick .btn { width: 100%; }
+/* Résultat du combat : impossible de le manquer */
+.result.fres { text-align: center; padding: 18px 14px; border-radius: 16px; }
+.result.fres h3 { font: 900 44px/1 var(--f-disp); letter-spacing: .04em; margin: 4px 0 2px; }
+.result.fres.win { background: radial-gradient(90% 90% at 50% 0%, rgba(63, 216, 138, .28), transparent 70%), #0f1a14; border: 1px solid rgba(63, 216, 138, .5); }
+.result.fres.win h3 { color: #3fd88a; text-shadow: 0 0 24px rgba(63, 216, 138, .45); }
+.result.fres.loss { background: radial-gradient(90% 90% at 50% 0%, rgba(255, 61, 82, .28), transparent 70%), #1a0f12; border: 1px solid rgba(255, 61, 82, .5); }
+.result.fres.loss h3 { color: #ff5a6e; text-shadow: 0 0 24px rgba(255, 61, 82, .45); }
+.result.fres.draw h3 { color: var(--gold); }
+.fres-k { font: 800 11px var(--f-cond, sans-serif); letter-spacing: .18em; text-transform: uppercase; color: rgba(255, 255, 255, .7); }

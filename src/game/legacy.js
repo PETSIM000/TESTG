@@ -3581,10 +3581,10 @@ function oppRow(me,o){const t=o.champ?titleOpts(me,o):null,err=canBook(me,o),nat
 function dealOpts(d){const me=getB(ui.bookFor),op=getB(d.op);return d.kind==='D'?{belts:titleDef(me,op),...bookOpt()}:d.kind==='N'?{n:1,...bookOpt()}:bookOpt()}
 function dealStart(id,kind){const me=getB(ui.bookFor),op=getB(id);if(!me||!op)return;
   if(op.mine){const f=propose(me.id,op.id,dealOpts({op:id,kind}));if(f)afterBook(f);return}
-  const base=purse(me,op,null);ui.deal=Object.assign(dealTerms({base,myOvr:ovr(me),opOvr:ovr(op),myRank:rankIdx(me),opRank:rankIdx(op),opChamp:!!op.champ},R),{op:id,kind});window.scrollTo(0,0)}
+  const base=purse(me,op,null);ui.deal=Object.assign(dealTerms({base,myOvr:ovr(me),opOvr:ovr(op),myRank:rankIdx(me),opRank:rankIdx(op),opChamp:!!op.champ},R),{op:id,kind})}
 function dealOk(){const d=ui.deal,me=getB(ui.bookFor),op=d&&getB(d.op);if(!d||!me||!op){ui.deal=null;return}
   if(S.money<d.fee){toast(`Il te manque ${$(d.fee-S.money)} pour payer le camp adverse`);return}
-  const f=propose(me.id,op.id,dealOpts(d));ui.deal=null;if(!f)return;S.money-=d.fee;f.fee=d.fee;
+  const f=propose(me.id,op.id,dealOpts(d));ui.deal=null;if(!f)return;ui.sheet=null;S.money-=d.fee;f.fee=d.fee;
   if(d.fee)log(`Contrat : ${$(d.fee)} versés au camp de ${op.name} pour qu’il signe.`);afterBook(f)}
 function vDeal(){const d=ui.deal,me=getB(ui.bookFor),op=getB(d.op);if(!me||!op){ui.deal=null;return''}
   const p=purse(me,op,null),mood={ouvert:'Le camp est ouvert à la discussion.',exigeant:'Son camp sait qu’il est mieux classé : il exige plus.','évite':`Le champion évite ${esc(sur(me))}. Il faut une grosse prime pour l’attirer.`}[d.mood];
@@ -3594,7 +3594,6 @@ function vDeal(){const d=ui.deal,me=getB(ui.bookFor),op=getB(d.op);if(!me||!op){
     ${d.last==='non'?'<p class="small" style="color:#ff7b8b;margin:6px 0 0">Refusé. Ils ont monté leur prix.</p>':d.last==='ok'?'<p class="small" style="color:var(--green);margin:6px 0 0">Contre-offre acceptée.</p>':''}
     <div class="row" style="gap:6px;margin-top:10px;flex-wrap:nowrap"><button class="btn gold" style="flex:2" data-a="dealok">✍️ Signer (${$(d.fee)})</button><button class="btn" style="flex:1" data-a="dealco" ${d.counters>=COUNTERS_MAX?'disabled':''}>−15 % (${COUNTERS_MAX-d.counters})</button></div></div>`}
 function vBook(){
-  if(ui.deal)return vDeal();
   const m=sortB(orgB().filter(b=>!b.booked&&!b.inj));
   if(!ui.bookFor||!m.find(b=>b.id===ui.bookFor))ui.bookFor=(m.find(b=>!b.inj)||m[0])?.id||null;
   const me=getB(ui.bookFor);
@@ -3744,6 +3743,8 @@ function render(){
   document.body.classList.remove('onmode');
   checkAch();try{ladCheck()}catch(e){}
   renderChrome();
+  {let dv=document.getElementById('dealov');if(!dv){dv=document.createElement('div');dv.id='dealov';document.body.appendChild(dv)}
+    const h=ui.deal&&!ui.fight?vDeal():'';dv.hidden=!h;dv.innerHTML=h?`<div class="deal-box" role="dialog">${h}</div>`:''}
   const v={ecurie:vEcurie,combats:vCombats,rank:()=>`<h2>Classements</h2><div style="height:8px"></div>${vRank()}`,defis:vDefis,staff:vStaff,club:()=>{const h=vClub(),btn=`<button class="btn ghost set-b" data-a="settings">⚙️ Réglages · sauvegarde · menu</button>`,i=h.indexOf('</h2>');return i<0?btn+h:h.slice(0,h.indexOf('>',h.indexOf('</div>',i))+1)+btn+h.slice(h.indexOf('>',h.indexOf('</div>',i))+1)},online:vOnline}[ui.tab]();document.body.classList.toggle('onmode',ui.tab==='online');
   const vw=document.getElementById('view'),tk=ui.tab+(ui.csub||'')+(ui.esub||'');if(ui._pt!==tk&&!RM){vw.classList.remove('anim');void vw.offsetWidth;vw.classList.add('anim')}ui._pt=tk;
   document.getElementById('view').innerHTML=(S.money<-15000?'<div class="al bad" style="margin-bottom:12px"><p><b>Le club est lourdement endetté.</b> Libère des salaires ou décroche une grosse bourse.</p></div>':'')+v;
@@ -3801,21 +3802,24 @@ function ctlHTML(F){
   if(F.stage==='intro')return`${faceOff(F.A.b,F.B.b,F.f,F)}<p class="small" style="margin:-4px 0 8px;text-align:center">Le % tient compte de la forme du soir de chacun : un boxeur en feu peut créer la surprise.</p>${F.wi?`<div class="rstat ${F.wi.ok?'':'bad'}"><span>⚖ Pesée</span><span>${F.wi.ok?'✓':'✗'} ${F.wi.txt}</span></div>`:''}
     ${A.prep!=null&&!F.ex&&!F.trial&&!F.tour?`<div class="rstat"><span>Préparation ${A.prep} %${A.gpb?' · plan de match efficace':''}</span><span>${A.camp&&A.camp!=='std'?CAMPS[A.camp].n:''}</span></div>`:''}
     ${onIntro(F)}${coach}${F.online?`<div><div class="lab" style="margin-bottom:6px">Plan de départ</div>${segStrat(F)}</div>`:'<p class="small watch">👀 Combat regardé : tout se joue avant (adversaire, camp, forme). Ton coin applique son plan.</p>'}
-    <div class="row" style="flex-wrap:nowrap"><button class="btn pri big" style="flex:2" data-a="fround">Combattre !</button><button class="btn" style="flex:1" data-a="fsim">Simuler</button></div>${tapeBox(F.A.b,F.B.b)}`;
-  if(F.stage==='live')return coach+`${F.online?`<div><div class="lab" style="margin-bottom:6px">Consigne en direct</div>${segStrat(F)}</div>`:''}<div class="row" style="flex-wrap:nowrap"><button class="btn" style="flex:1" data-a="fskip">Finir le round ▸▸</button><button class="btn ghost" style="flex:1" data-a="fsim">Simuler la fin</button></div>`;
+    ${F.online?`<div class="row" style="flex-wrap:nowrap"><button class="btn pri big" style="flex:2" data-a="fround">Combattre !</button><button class="btn" style="flex:1" data-a="fsim">Simuler</button></div>`:`<div class="watch-pick"><button class="btn pri big" data-a="fround">▶ Regarder le combat</button><button class="btn gold big" data-a="fsim">⏩ Voir le résultat</button></div>`}${tapeBox(F.A.b,F.B.b)}`;
+  if(F.stage==='live')return coach+`${F.online?`<div><div class="lab" style="margin-bottom:6px">Consigne en direct</div>${segStrat(F)}</div>`:''}${F.online?`<div class="row" style="flex-wrap:nowrap"><button class="btn" style="flex:1" data-a="fskip">Finir le round ▸▸</button><button class="btn ghost" style="flex:1" data-a="fsim">Simuler la fin</button></div>`:'<button class="btn ghost sm watch-skip" data-a="fsim">⏩ Voir le résultat</button>'}`;
   if(F.stage==='between'){const s=F.rs[F.rs.length-1]||[0,0],j=F.cards[0],st=F.rst[F.rst.length-1]||{},sel=F.cs||autoCorner(A),c2=S.staff.coach&&S.staff.coach.stars>=2;
     return`<div class="rstat"><span><b>Round ${F.r}</b> · Toi ${st.al||0}/${st.at||0} (${st.ap||0} puissance) · Lui ${st.bl||0}/${st.bt||0}</span><span>Juge ${s[0]}-${s[1]} · Total ${j[0]}-${j[1]}</span></div>
     ${F.online?`<div><div class="lab" style="margin-bottom:6px">Dans le coin (1 minute)</div><div class="cgrid">${Object.entries(CORNER).map(([k,c])=>{const dis=(k==='coupure'&&!A.cut)||(k==='plan'&&!c2);return`<button class="cbtn" data-a="fcs" data-k="${k}" aria-pressed="${sel===k}" ${dis?'disabled':''}><b>${c.n}</b><span>${k==='coupure'?(A.cut?`Coupure ${A.cut}/3`:'Aucune coupure'):k==='plan'&&!c2?'Entraîneur 2★ requis':c.d}</span></button>`}).join('')}</div></div>
     `:'<p class="small watch">🧴 Ton coin s’occupe de tout dans la minute de repos.</p>'}${coach}${F.online?`<div><div class="lab" style="margin-bottom:6px">Plan pour le ${ord(F.r+1)} round</div>${segStrat(F)}</div>`:''}
-    <div class="row" style="flex-wrap:nowrap"><button class="btn pri big" style="flex:2" data-a="fround">Round ${F.r+1}</button><button class="btn" style="flex:1" data-a="fskip">Passer</button><button class="btn ghost" data-a="fsim">Fin</button></div>`}
+    ${F.online?`<div class="row" style="flex-wrap:nowrap"><button class="btn pri big" style="flex:2" data-a="fround">Round ${F.r+1}</button><button class="btn" style="flex:1" data-a="fskip">Passer</button><button class="btn ghost" data-a="fsim">Fin</button></div>`:`<p class="small watch">🔔 Round ${F.r+1} dans un instant…</p><button class="btn ghost sm watch-skip" data-a="fsim">⏩ Voir le résultat</button>`}`}
   const won=F.res.w?F.res.w==='A':null;
-  return`<div class="result ${won?'win':''}"><h3>${won===null?'Match nul':won?'Victoire !':'Défaite'}</h3><p style="margin:6px 0 0">${esc(F.res.txt)}.</p></div><button class="btn pri big" data-a="fdone">Continuer</button>${statsHTML(F)}`;
+  const me=F.A.b;return`<div class="result fres ${won===null?'draw':won?'win':'loss'}"><span class="fres-k">${esc(sur(me))} · ${F.res.m==='DEC'?'aux points':F.res.m+' au '+F.res.r+'e round'}</span><h3>${won===null?'MATCH NUL':won?'VICTOIRE':'DÉFAITE'}</h3><p style="margin:6px 0 0">${esc(F.res.txt)}.</p></div><button class="btn pri big" data-a="fdone">Continuer</button>${statsHTML(F)}`;
 }
 function updateFight(){
   const F=ui.fight,hud=document.getElementById('fxhud');if(!F||!hud)return;
+  {const nb=document.getElementById('nextbar');if(nb)nb.hidden=true}
   document.querySelector('#fx .stage').hidden=!S.set.anim;
   hud.innerHTML=hudHTML(F);
   document.getElementById('fxctl').innerHTML=ctlHTML(F);
+  if(!F.online&&!F.replay&&!F.done&&F.stage==='between'&&!F._aT){const wait=2600;
+    F._aT=setTimeout(()=>{F._aT=0;if(ui.fight!==F||F.done)return;if(F.stage==='intro'&&F.entDone===false){updateFight();return}if(F.stage==='between'||F.stage==='intro')goRound()},wait)}
   const lg=document.getElementById('fxlog');lg.hidden=!ui.flog;
   if(ui.flog)lg.innerHTML=`<div class="ph"><span class="lab">Déroulé du combat</span><button class="btn sm" data-a="flog">Fermer</button></div><ol class="pbp">${F.log.map(e=>`<li><b>Round ${e.r}</b>${e.s?` <span class="small">Juge 1 : ${e.s[0]}-${e.s[1]}</span>`:''}${e.L.map(l=>`<p class="${l.k?'kd':''}">${esc(l.t)}</p>`).join('')}</li>`).join('')||'<li class="small">Le combat n’a pas commencé.</li>'}</ol>`;
 }
@@ -4386,5 +4390,5 @@ addEventListener('load',()=>{setTimeout(()=>checkUpd(false),1500);setInterval(()
 
 // Points d'entrée du moteur, utilisés par les tests unitaires.
 export { worldGen, newFight, stepRound, aiStrat, quickFight, makeBoxer, has3D, kdScored, propose, sponsorTerms, p4pList, p4pShown, rankLabel, rankIdx, palmHow, ui, createGala, galaUpfront, galaNight, arenaList, train, campWeekCost, campTotal, inactivityTick, inactiveWeeks, INACTIVE_MAX, purse, moneyS };
-export { rpOf, onRk, seasonNow, vOnHead, rankLadder, nextWeek, drawOf, vCampaign, vBook, dealStart, dealOk };
+export { rpOf, onRk, seasonNow, vOnHead, rankLadder, nextWeek, drawOf, vCampaign, vBook, vDeal, dealStart, dealOk };
 export const getState = () => S;
