@@ -3389,7 +3389,9 @@ function renderChrome(){
   document.getElementById('hdr').innerHTML=`<div class="hrow cv2"><div class="club"><b>${esc(S.club)}</b><span>${flag(S.home)} Année ${Math.floor((S.t-1)/52)+1} · Semaine ${((S.t-1)%52)+1}</span></div>
     <div class="cash"><b class="${S.money<0?'neg':''}">${moneyS(S.money)}</b></div></div>`;
   const nA=alerts().length;
-  document.getElementById('tabs').innerHTML=`<button class="nextbar ${q||S.event?'fight':''}" data-a="next"><span>${S.event?'Événement à régler':q?'Soir de combat':'Année '+(Math.floor((S.t-1)/52)+1)+' · Semaine '+(((S.t-1)%52)+1)}</span><b>${S.event?'Voir ▸':q?'Combat ! ▸':'Semaine suivante ▸'}</b></button><div class="in">${[['ecurie','Écurie'],['combats','Combats'],['rank','Classements'],['defis','Tournois'],['staff','Équipe'],['club','Bureau']].map(([k,n])=>
+  {let nb=document.getElementById('nextbar');if(!nb){nb=document.createElement('div');nb.id='nextbar';document.body.appendChild(nb)}
+    nb.hidden=ui.tab!=='ecurie'||!!ui.fight;nb.innerHTML=`<button class="nextbar ${q||S.event?'fight':''}" data-a="next"><span>${S.event?'Événement à régler':q?'Soir de combat':'Année '+(Math.floor((S.t-1)/52)+1)+' · Semaine '+(((S.t-1)%52)+1)}</span><b>${S.event?'Voir ▸':q?'Combat ! ▸':'Semaine suivante ▸'}</b></button>`}
+  document.getElementById('tabs').innerHTML=`<div class="in">${[['ecurie','Écurie'],['combats','Combats'],['rank','Classements'],['defis','Tournois'],['staff','Équipe'],['club','Bureau']].map(([k,n])=>
     `<button data-a="tab" data-k="${k}" aria-current="${ui.tab===k}"><svg viewBox="0 0 24 24">${ICONS[k]}</svg>${n}${k==='ecurie'&&nA?`<span class="badge">${nA}</span>`:''}${k==='combats'&&S.offers&&S.offers.length?`<span class="badge">${S.offers.length}</span>`:''}</button>`).join('')}</div>`;
 }
 const FOLCAP=5e8;
@@ -3942,6 +3944,14 @@ function save(){if(!S||!S.slot||ui.menu)return;try{localStorage.setItem(SK(S.slo
 function slotMeta(n){try{return JSON.parse(localStorage.getItem(MK(n)))}catch(e){return null}}
 function loadSlot(n){try{const s=JSON.parse(localStorage.getItem(SK(n)));return s&&s.v===2?s:null}catch(e){return null}}
 /* Une seule carrière : quand une nouvelle carrière démarre, les autres emplacements sont effacés (téléphone + cloud). */
+/* Geste retour : glisser depuis le bord gauche vers la droite = bouton « ← Retour » visible (fiche, sous-écran, menu). */
+(()=>{let x0=0,y0=0,t0=0,on=false;
+  addEventListener('touchstart',e=>{const t=e.touches[0];on=t.clientX<32;x0=t.clientX;y0=t.clientY;t0=Date.now()},{passive:true});
+  addEventListener('touchend',e=>{if(!on)return;on=false;const t=e.changedTouches[0],dx=t.clientX-x0,dy=Math.abs(t.clientY-y0);
+    if(dx<70||dy>60||Date.now()-t0>700)return;
+    const pick=sel=>[...document.querySelectorAll(sel)].find(el=>el.offsetParent!==null);
+    const b=pick('#sheet:not([hidden]) .back')||pick('#menu:not([hidden]) .back')||pick('#view .back');if(b)b.click()},{passive:true});
+})();
 function keepOnly(n){for(const x of[1,2,3]){if(x===n)continue;if(!slotMeta(x))continue;try{localStorage.removeItem(SK(x));localStorage.removeItem(MK(x))}catch(e){}
   if(ON)rpc('cr_save_put',{p_token:ON.token,p_slot:x,p_data:null,p_meta:null}).catch(()=>{})}}
 function lastSlot(){let best=0,at=-1;for(const n of[1,2,3]){const m=slotMeta(n);if(m&&m.at>at){at=m.at;best=n}}return best}
