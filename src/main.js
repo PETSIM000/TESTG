@@ -4,4 +4,5 @@ import './styles/game.css';
 import './styles/online.css';
 import './styles/ranks.css';
 import './styles/fd-ui.css';
+import './styles/career-ui.css';
 import './game/legacy.js';

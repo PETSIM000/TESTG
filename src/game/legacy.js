@@ -3494,10 +3494,13 @@ const ALK=[[/commanditer/,'🤝','Commanditaires'],[/obligatoire/,'📜','Combat
 const alKind=a=>ALK.find(k=>k[0].test(a.t.replace(/<[^>]+>/g,'')))||[null,'•','Autres'];
 function todoBar(al){if(!al.length)return'';const g={};for(const a of al){const k=alKind(a);g[k[1]]=(g[k[1]]||0)+1}const urg=al.filter(a=>a.bad).length,sp=club().filter(canSpend).length;
   return`<div class="tbar"><button class="tmain ${urg?'urg':''}" data-a="todolist"><span class="tn">${al.length}</span><span class="tl">${urg?'urgent'+(urg>1?'s':'')+' · ':''}à faire</span><span class="tic">${Object.entries(g).map(([ic,n])=>`${ic}${n>1?n:''}`).join(' ')}</span><span class="tgo">›</span></button>${sp?`<button class="btn gold tqa" data-a="spall">⚡ Points auto</button>`:''}</div>`}
-function vCampaign(){const e=eraOf(S.t),c=careerInit(S),L=legacyScore(c,{t:S.t,hof:(S.hof||[]).length}),ch=chapterState(S),pc=Math.round(ch.done/ch.goals.length*100);
-  return`<div class="panel camp-c"><button class="camp-h" data-a="chap"><span class="camp-t"><b>Saison ${ch.season} · ${e.n}</b><span class="small">${e.txt} Bourse +15 % pour ce style.</span></span><span class="camp-l"><b>${L.total.toLocaleString('fr-CA')}</b><i>Héritage</i></span></button>
-    <div class="camp-bar"><i style="width:${pc}%"></i></div><button class="camp-s small" data-a="chap">Chapitre ${ch.season} · ${ch.done}/${ch.goals.length} objectifs ${ui.chap?'▲':'▼'}</button>
-    ${ui.chap?`<ul class="camp-g">${ch.goals.map(g=>`<li class="${g.ok?'ok':''}"><span>${g.ok?'✅':'⬜'} ${g.n}</span><b>${g.got}/${g.need}</b></li>`).join('')}</ul><p class="small camp-p">Héritage : titres ${L.parts.titres} · champions formés ${L.parts.champions} · années ${L.parts.annees} · argent ${L.parts.argent} · Temple ${L.parts.temple}</p>${vRecords(c)}`:''}</div>`}
+function vCampaign(){const e=eraOf(S.t),c=careerInit(S),L=legacyScore(c,{t:S.t,hof:(S.hof||[]).length}),ch=chapterState(S);
+  const eraN=e.n.replace(/^Ère des /,'');
+  return`<section class="camp" data-era="${e.id}"><button class="camp-top" data-a="chap"><span class="camp-k"><span class="camp-s">Saison ${ch.season} · Ère des</span><b class="camp-era">${eraN}</b><span class="camp-tx">${e.txt} Bourse +15 % pour ce style.</span></span>
+      <span class="camp-leg"><b>${L.total.toLocaleString('fr-CA')}</b><span>Héritage</span></span></button>
+    <button class="camp-ch" data-a="chap"><span class="camp-pips">${ch.goals.map(g=>`<i class="${g.ok?'on':''}"></i>`).join('')}</span><span>Chapitre ${ch.season} · ${ch.done}/${ch.goals.length} ${ui.chap?'▲':'▼'}</span></button>
+    ${ui.chap?`<div class="camp-g">${ch.goals.map(g=>`<div class="cg ${g.ok?'ok':''}"><span>${g.n}</span><b>${g.got}/${g.need}</b><i style="--p:${Math.round(g.got/g.need*100)}%"></i></div>`).join('')}</div>
+      <p class="small camp-p">Héritage : titres ${L.parts.titres} · champions formés ${L.parts.champions} · années ${L.parts.annees} · argent ${L.parts.argent} · Temple ${L.parts.temple}</p>${vRecords(c)}`:''}</section>`}
 function vRecords(c){const H=(S.hof||[]).slice().sort((a,b)=>b.g-a.g).slice(0,5),Y=Math.floor((S.t-1)/52);
   const it=(n,v)=>`<div><b>${v}</b><span>${n}</span></div>`;
   return`<span class="lab" style="display:block;margin:12px 0 6px">🏛️ Records du gérant</span><div class="rec-g">${it('Argent gagné',$(Number(c.earned)||0))}${it('Ceintures gagnées',(c.belts||[]).length)}${it('Champions formés',(c.champs||[]).length)}${it('Années de carrière',Y)}${it('Chapitres terminés',(c.rw||[]).length)}${it('Au Temple',(S.hof||[]).length)}</div>

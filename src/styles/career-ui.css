@@ -1,0 +1,51 @@
+/* Refonte carrière FIGHT DYNASTY — style « soirée de combat » : nuit, or, rouge cuir, lettres massives.
+   Chargé en dernier : il retouche les écrans de carrière sans toucher aux rangs ni au mode en ligne. */
+
+/* ---------- Campagne : bannière de saison ---------- */
+.camp { --era: #ff3d52; position: relative; margin: 10px 0 8px; border-radius: 18px; overflow: hidden;
+  background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--era) 26%, transparent), transparent 60%), linear-gradient(180deg, #171b26, #0c0e14);
+  border: 1px solid color-mix(in srgb, var(--era) 40%, #2a2f3d); box-shadow: 0 10px 26px rgba(0, 0, 0, .45); }
+.camp[data-era="techniciens"] { --era: #4f9dff; }
+.camp[data-era="vitesse"] { --era: #f4c34f; }
+.camp[data-era="guerriers"] { --era: #3fd88a; }
+.camp::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--era); }
+.camp-top, .camp-ch { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: flex; }
+.camp-top { justify-content: space-between; align-items: flex-end; gap: 12px; padding: 14px 14px 10px 18px; }
+.camp-k { display: flex; flex-direction: column; min-width: 0; }
+.camp-s { font: 800 11px var(--f-cond, sans-serif); letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+.camp-era { font: 900 30px/0.95 var(--f-disp); text-transform: uppercase; letter-spacing: .02em; color: #fff; margin: 2px 0 6px; }
+.camp-tx { font-size: 12.5px; color: rgba(255, 255, 255, .72); }
+.camp-leg { flex: none; display: flex; flex-direction: column; align-items: flex-end; }
+.camp-leg b { font: 900 34px/1 var(--f-disp); color: var(--gold); text-shadow: 0 0 18px rgba(245, 197, 66, .35); }
+.camp-leg span { font: 800 10px var(--f-cond, sans-serif); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.camp-ch { align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px 12px 18px; border-top: 1px solid rgba(255, 255, 255, .06);
+  font: 800 12px var(--f-cond, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 255, 255, .8); }
+.camp-pips { display: flex; gap: 5px; flex: 1; max-width: 190px; }
+.camp-pips i { flex: 1; height: 7px; border-radius: 2px; background: rgba(255, 255, 255, .1); transform: skewX(-18deg); }
+.camp-pips i.on { background: linear-gradient(90deg, #b8860b, var(--gold)); box-shadow: 0 0 8px rgba(245, 197, 66, .4); }
+.camp-g { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 12px 4px 16px; }
+.cg { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 9px 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, .045); font-size: 12.5px; overflow: hidden; }
+.cg b { font: 900 18px var(--f-disp); color: #fff; }
+.cg i { position: absolute; left: 0; bottom: 0; height: 3px; width: var(--p); background: var(--era); }
+.cg.ok { background: rgba(63, 216, 138, .1); }
+.cg.ok b { color: var(--green); }
+.cg:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.camp .camp-p, .camp .lab, .camp .rec-g, .camp .rec-h, .camp > p.small { margin-left: 16px; margin-right: 12px; }
+.camp .rec-h { margin-bottom: 12px; }
+
+/* ---------- Cartes de boxeurs : fiche de combattant ---------- */
+.rowc { border-radius: 16px; padding: 10px 12px 10px 10px; gap: 12px; border: 1px solid color-mix(in srgb, var(--tc, #888) 35%, #23283a);
+  background: linear-gradient(100deg, color-mix(in srgb, var(--tc, #888) 14%, #141823) 0%, #10131b 55%); box-shadow: 0 6px 18px rgba(0, 0, 0, .35); }
+.rowc::after { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 4px; border-radius: 0 3px 3px 0; background: var(--tc, #888); }
+.rowc .av { width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 0 0 2px color-mix(in srgb, var(--tc, #888) 70%, transparent), 0 6px 14px rgba(0, 0, 0, .5); }
+.rowc .nm { font: 900 19px/1.05 var(--f-disp); text-transform: uppercase; letter-spacing: .02em; }
+.rowc .ovr { width: 54px; height: 60px; display: grid; place-items: center; align-content: center; gap: 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tc, #888) 30%, #1a1e29), #0d1017);
+  clip-path: polygon(50% 0, 100% 14%, 100% 72%, 50% 100%, 0 72%, 0 14%); }
+.rowc .ovr b { font: 900 26px/1 var(--f-disp); color: #fff; }
+.rowc .ovr small { font: 800 8px var(--f-cond, sans-serif); letter-spacing: .18em; color: rgba(255, 255, 255, .6); }
+.rowc:active { transform: scale(.985); }
+
+/* ---------- Titres d'écran et sous-onglets ---------- */
+.in > h2 { font: 900 30px/1 var(--f-disp); letter-spacing: .03em; text-transform: uppercase; }
+.seg button[aria-pressed="true"] { box-shadow: inset 0 -3px 0 var(--red, #ff3d52); }
