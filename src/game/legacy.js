@@ -4023,7 +4023,7 @@ function pickCard(b,i){const sel=ui.ng.picks.includes(i);
 const CLUB_A=['Gym','Club de boxe','Académie','Écurie','Boxing Club','Fight Club'],CLUB_B=['Coin Rouge','Saint-Henri','Les Faucons','Titan','La Forge','Main de Fer','Hochelaga','Ring d’Or','Les Cogneurs','Phénix','Lionheart','Le Bastion','Gants d’Acier','Nord-Est','Le Dernier Round'];
 const TOPNAT=['CA','US','MX','GB','FR','JP'];
 function ngSteps(i){return`<div class="ngp">${['Club','Pays','Niveau','Boxeurs'].map((n,j)=>`<div class="${j<=i?'on':''} ${j===i?'cur':''}"><i></i>${n}</div>`).join('')}</div>`}
-function ngCard(g){const nm=(g.club||'').trim()||'Coin Rouge';return`<div class="ngcard"><div class="crest" id="ng-ci">${esc(initials(nm))}</div><div style="min-width:0"><b id="ng-cn">${esc(nm)}</b><span>${flag(g.home)} ${NAT[g.home].n} · Gérant : <span id="ng-cm">${esc((g.mgr||'').trim()||'toi')}</span>${g.diff?` · ${DIFF[g.diff].n}`:''}</span></div></div>`}
+function ngCard(g){const nm=(g.club||'').trim()||'Ta promotion';return`<div class="ngcard"><div class="crest" id="ng-ci">${esc(initials(nm))}</div><div style="min-width:0"><b id="ng-cn">${esc(nm)}</b><span>${flag(g.home)} ${NAT[g.home].n} · Gérant : <span id="ng-cm">${esc((g.mgr||'').trim()||'toi')}</span>${g.diff?` · ${DIFF[g.diff].n}`:''}</span></div></div>`}
 const ngBar=(back,next,label,dis)=>`<div class="mbar ngbar"><div class="row">${back?`<button class="btn" data-a="${back}" style="flex:none">←</button>`:''}<button class="btn pri big" style="flex:1" data-a="${next}" ${dis?'disabled':''}>${label}</button></div></div>`;
 function pickCard2(b,i){const sel=ui.ng.picks.includes(i),gc=b.grp==='Espoir'?'e':b.grp==='Confirmé'?'c':'v';
   return`<div class="pkw"><button class="pkc" data-a="m_pick" data-k="${i}" aria-pressed="${sel}"><div class="av ${tcls(b)}">${avatar(b)}</div>
@@ -4097,9 +4097,9 @@ function renderMenu(){
   else if(st==='load'||st==='slot'){h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>${st==='load'?'Charger une partie':'Choisis un emplacement'}</h2>
       ${st==='slot'?'<p class="lede">Les 3 emplacements sont pris. Choisis celui à remplacer.</p>':''}<div class="stack">${(st==='load'?[lastSlot()].filter(Boolean):[1,2,3]).map(n=>slotRow(n,st)).join('')}</div></div>`}
   else if(st==='ow'){const m=slotMeta(lastSlot());h=`<div class="mwrap gut" style="padding-top:16px">${back}<h2>Écraser la carrière actuelle ?</h2><p class="lede">Une seule carrière à la fois. ${m?`<b>${flag(m.home)} ${esc(m.club)}</b> · ${when(m.t)} · ${$(m.money)} sera remplacée.`:''}</p><div class="stack"><button class="btn danger big" data-a="m_ow">Oui, nouvelle carrière</button><button class="btn big" data-a="m_home">Non, garder ma carrière</button></div></div>`}
-  else if(st==='ng1'){const g=ui.ng;h=`<div class="mwrap gut" style="padding-top:16px">${back}${ngSteps(0)}<span class="lab">Nouvelle carrière · emplacement ${g.slot}</span><h2>Fonde ton club</h2>
+  else if(st==='ng1'){const g=ui.ng;h=`<div class="mwrap gut" style="padding-top:16px">${back}${ngSteps(0)}<span class="lab">Nouvelle carrière · emplacement ${g.slot}</span><h2>Fonde ta promotion</h2>
       ${ngCard(g)}
-      <div class="panel stack"><label class="fld"><span>Nom du club</span><div class="inrow"><input id="ng-club" maxlength="24" placeholder="Coin Rouge" value="${esc(g.club)}" autocomplete="off"><button class="btn" data-a="m_rclub" aria-label="Nom au hasard">🎲</button></div></label>
+      <div class="panel stack"><label class="fld"><span>Nom de ta promotion</span><div class="inrow"><input id="ng-club" maxlength="24" placeholder="Ex. : Dynasty Boxing" value="${esc(g.club)}" autocomplete="off"><button class="btn" data-a="m_rclub" aria-label="Nom au hasard">🎲</button></div></label>
         <label class="fld"><span>Ton nom de gérant</span><div class="inrow"><input id="ng-mgr" maxlength="24" placeholder="Ton nom" value="${esc(g.mgr)}" autocomplete="off"><button class="btn" data-a="m_rmgr" aria-label="Nom au hasard">🎲</button></div></label></div>
       <p class="small" style="margin:0">Pas d’idée ? Touche 🎲 pour un nom au hasard. Tu pourras jouer avec n’importe quel nom.</p>
       ${ngBar('','m_ngc','Suivant →')}</div>`}
@@ -4186,7 +4186,7 @@ function menuAct(a,t){
     case'm_ow':{setTimeout(()=>tutStart('car'),300);ui.ng=newNG(lastSlot()||1);ui.menu='ng1';break}
     case'm_slot':{const n=+k;if(slotMeta(n)&&ui.mconf!=='ow'+n){ui.mconf='ow'+n;break}ui.mconf=null;ui.ng=newNG(n);ui.menu='ng1';break}
     case'm_nat':if(k)ui.ng.home=k;break;
-    case'm_ngc':{const g=ui.ng;g.club=(g.club||'').trim();g.mgr=(g.mgr||'').trim();ui.menu='ngc';document.getElementById('menu').scrollTop=0;break}
+    case'm_ngc':{const g=ui.ng;g.club=(g.club||'').trim();g.mgr=(g.mgr||'').trim();if(!g.club){toast('Choisis le nom de ta promotion (ou touche 🎲)');const el=document.getElementById('ng-club');if(el)el.focus();break}ui.menu='ngc';document.getElementById('menu').scrollTop=0;break}
     case'm_ngd':ui.menu='ngd';document.getElementById('menu').scrollTop=0;break;
     case'm_ngd2':ui.menu='ngd';break;
     case'm_rclub':ui.ng.club=pick(CLUB_A)+' '+pick(CLUB_B);break;
@@ -4196,7 +4196,7 @@ function menuAct(a,t){
     case'm_infox':ui.ng.info=null;break;
     case'm_pickx':{const i=+k,p=ui.ng.picks;if(p.includes(i))ui.ng.picks=p.filter(x=>x!==i);else{if(p.length>=2)p.shift();p.push(i)}ui.ng.info=null;break}
     case'm_diff':ui.ng.diff=k;break;
-    case'm_ng2':{const g=ui.ng;g.club=(g.club||'').trim()||'Coin Rouge';g.mgr=(g.mgr||'').trim()||'Gérant';worldGen(g);keepOnly(g.slot);genPool();ui.menu='ng2';document.getElementById('menu').scrollTop=0;break}
+    case'm_ng2':{const g=ui.ng;g.club=(g.club||'').trim()||'Ma promotion';g.mgr=(g.mgr||'').trim()||'Gérant';worldGen(g);keepOnly(g.slot);genPool();ui.menu='ng2';document.getElementById('menu').scrollTop=0;break}
     case'm_pick':{const i=+k,p=ui.ng.picks;if(p.includes(i))ui.ng.picks=p.filter(x=>x!==i);else{if(p.length>=2)p.shift();p.push(i)}break}
     case'm_rr':if(ui.ng.rr>0){ui.ng.rr--;genPool()}break;
     case'm_back1':case'm_ng1':ui.menu='ng1';break;
@@ -4354,7 +4354,7 @@ function start(data){
   openMenu('home');
 }
 document.addEventListener('change',e=>{if(e.target.id==='pickb'){ui.bookFor=e.target.value;render()}});
-document.addEventListener('input',e=>{const id=e.target.id;if(id==='ng-club'){const v=e.target.value.trim()||'Coin Rouge',n=document.getElementById('ng-cn'),c=document.getElementById('ng-ci');if(n)n.textContent=v;if(c)c.textContent=initials(v)}if(id==='ng-mgr'){const m=document.getElementById('ng-cm');if(m)m.textContent=e.target.value.trim()||'toi'}if(id==='gn-name'&&ui.gn)ui.gn.name=e.target.value;if(id==='ng-club'&&ui.ng)ui.ng.club=e.target.value;else if(id==='ng-mgr'&&ui.ng)ui.ng.mgr=e.target.value;else if(id==='imp-code')ui.imp=e.target.value});
+document.addEventListener('input',e=>{const id=e.target.id;if(id==='ng-club'){const v=e.target.value.trim()||'Ta promotion',n=document.getElementById('ng-cn'),c=document.getElementById('ng-ci');if(n)n.textContent=v;if(c)c.textContent=initials(v)}if(id==='ng-mgr'){const m=document.getElementById('ng-cm');if(m)m.textContent=e.target.value.trim()||'toi'}if(id==='gn-name'&&ui.gn)ui.gn.name=e.target.value;if(id==='ng-club'&&ui.ng)ui.ng.club=e.target.value;else if(id==='ng-mgr'&&ui.ng)ui.ng.mgr=e.target.value;else if(id==='imp-code')ui.imp=e.target.value});
 try{window.claude?.hot?.snapshot?.(()=>({S,menu:!!ui.menu}))}catch(e){}
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
 
