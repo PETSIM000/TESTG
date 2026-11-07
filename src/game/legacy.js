@@ -1399,6 +1399,9 @@ const onR=()=>{if(ui.tab==='online'&&!ui.fight&&!ui.menu)render()};
 const ONTIER=r=>r>=1400?['💎','Élite']:r>=1200?['🥇','Prétendant']:r>=1050?['🥈','Pro']:r>=950?['🥉','Espoir']:['🟤','Débutant'];
 const onFights=b=>b.w+b.l+b.d;
 const onRankTxt=b=>onFights(b)<3?'Non classé':b.rank===1?'👑 Champion':'#'+b.rank;
+/* Monde en direct : classements et accueil en ligne mis à jour tout seuls (pas de bouton Actualiser). */
+setInterval(()=>{try{const u=ui.on;if(!u||!ON||ui.tab!=='online'||ui.fight||ui.menu||document.hidden)return;
+  if(u.sub==='cls'){if(u.rdiv==='clubs')onClubTop();else onTop()}else onLoad(true)}catch(e){}},30000);
 async function onLoad(force){
   const u=onUi();if(!ON||u.busy)return;if(!force&&u.home&&Date.now()-u.last<30000)return;
   u.busy=true;u.err='';onR();
@@ -2661,7 +2664,7 @@ function vOnHead(me,champs){const u=onUi(),k=onRk(me.elo),st=onI(me.ostreak,0,99
     <a href="#" class="ohd-elo" data-a="onrk">${badgeHTML(k.id,{size:64,div:k.div})}<b>${k.rp}</b><i>ELO</i></a></div>
     <a href="#" class="rklink" data-a="onrk"><div class="row small" style="justify-content:space-between;margin-top:10px"><span>${k.ic} <b>${k.n}</b> ›</span><span>${k.nx?`encore ${k.need} pour ${k.nx}`:'Rang max'}</span></div>${onBar(k.pct,100)}</a>
     <div class="ohd-st"><div><b>💰 ${(me.coins||0).toLocaleString('fr-CA')}</b><span>Pièces</span></div><div><b>${onRec(me)}</b><span>Record</span></div><div><b>${me.kos||0}</b><span>KO</span></div><div class="${st>=3?'hot':''}"><b>${st>=3?'🔥 ':''}${st}</b><span>Série</span></div></div>
-    <div class="ohd-act"><button data-a="onme">${ic('tag')}Profil</button><button data-a="ongym">${ic('gym')}Gym</button><button class="gold" data-a="onshop">${ic('cart')}Boutique</button><button data-a="onshare">${ic('share')}Code</button><button data-a="onref" ${u.busy?'disabled':''}>${ic('refresh',u.busy?'spin':'')}Actualiser</button><button data-a="onacct">${ic('gear')}Compte</button></div>
+    <div class="ohd-act"><button data-a="onme">${ic('tag')}Profil</button><button data-a="ongym">${ic('gym')}Gym</button><button class="gold" data-a="onshop">${ic('cart')}Boutique</button><button data-a="onshare">${ic('share')}Code</button><button data-a="onacct">${ic('gear')}Compte</button></div>
     ${u.err?`<p class="small" style="color:#ff7b8b;margin:8px 0 0">${esc(u.err)}</p>`:''}</div>`}
 function vOnMe(){const u=onUi(),H=u.home,me=H.me,P=u.pass,pts=eloSeries(me,H.feed||[]),net=pts[pts.length-1]-pts[0];
   const own=P?P.titles.filter(t=>!t.startsWith('b:')):[],bd=P?P.titles.filter(t=>t.startsWith('b:')).map(t=>t.slice(2)).filter(b=>BADGES.includes(b)):[];
